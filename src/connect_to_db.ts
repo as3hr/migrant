@@ -1,11 +1,8 @@
 import { pool } from "./config/db.config.js";
+import asyncHandler from "./utils/async_handler.js";
 
-export function logSampleData() { 
-    pool.query('SELECT * FROM users', (err, res) => {
-        if (err) {
-            console.error('Error executing query', err);
-        } else {
-            console.log('Sample data:', res.rows);
-        }
-    });
-}
+export const logSampleData = asyncHandler(async (): Promise<any> => { 
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    return result.rows;
+});

@@ -18,7 +18,6 @@ interface AppConfig {
   port: number;
   supabaseUrl: string;
   supabaseKey: string;
-  databaseUrl: string;
   jwtSecret: string;
   cronSecret: string;
   nodeEnv: string;
@@ -28,7 +27,6 @@ export const appConfig: AppConfig = {
   port: parseInt(process.env.PORT || "5000", 10),
   supabaseUrl: process.env.SUPABASE_URL!,
   supabaseKey: process.env.SUPABASE_KEY!,
-  databaseUrl: process.env.DATABASE_URL!,
   jwtSecret: process.env.JWT_SECRET!,
   cronSecret: process.env.CRON_SECRET!,
   nodeEnv: process.env.NODE_ENV!,

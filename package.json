@@ -2,13 +2,13 @@
   "name": "migrant",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts",
-    "start": "node dist/index.js",
-    "dev": "tsc-watch --onSuccess \"node dist/index.js\""
+    "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts"
+  },
+  "bin": {
+    "migrant": "./dist/cli.js"
   },
   "keywords": [],
   "author": "",
@@ -16,10 +16,11 @@
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.110.5",
+    "@types/commander": "^2.12.0",
     "@types/express": "^5.0.6",
     "@types/pg": "^8.20.0",
+    "commander": "^15.0.0",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1",
     "pg": "^8.22.0",
     "supabase": "^2.109.1",
     "tsc-watch": "^7.2.1",

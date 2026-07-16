@@ -3,3 +3,4 @@ dist
 creds.txt
 .env.prod
 .env.dev
+connect_migrant.sh
