@@ -21,6 +21,7 @@ interface AppConfig {
   jwtSecret: string;
   cronSecret: string;
   nodeEnv: string;
+  openRouterApiKey: string;
 }
 
 export const appConfig: AppConfig = {
@@ -30,4 +31,5 @@ export const appConfig: AppConfig = {
   jwtSecret: process.env.JWT_SECRET!,
   cronSecret: process.env.CRON_SECRET!,
   nodeEnv: process.env.NODE_ENV!,
+  openRouterApiKey: process.env.OPENROUTER_API_KEY!,
 };
