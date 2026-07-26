@@ -130,7 +130,8 @@
   // Schema
   // ==============================
   
-  export interface SchemaGraph {
+export interface SchemaGraph {
+    schema: string;
     tables: Record<string, Table>;
     views: Record<string, View>;
     triggers: Trigger[];
