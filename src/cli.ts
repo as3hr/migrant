@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { pool } from './config/db.config.ts';
-import { parseSchema } from './core/schemaParser.ts';
+import { startScan } from './core/schemaParser.ts';
 import { AIService } from './embeddings_vector/ai_service.ts';
 
 export const aiService = new AIService();
@@ -19,7 +19,7 @@ program
         //     console.log('Fetched successfully');
         // });
         // matchDocuments();
-        parseSchema();
+        startScan();
       }
   })
 

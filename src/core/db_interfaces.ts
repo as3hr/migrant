@@ -2,7 +2,7 @@
 // Columns & Constraints
 // ==============================
 
-export interface Column {
+  export interface Column {
     name: string;
     type: string;
     nullable: boolean;
@@ -16,6 +16,7 @@ export interface Column {
   }
   
   export interface ForeignKey {
+    name: string;
     column: string;
     referencesTable: string;
     referencesColumn: string;
@@ -52,6 +53,7 @@ export interface Column {
   // ==============================
   
   export interface Table {
+    schemaName: string;
     name: string;
     columns: Column[];
     primaryKey: PrimaryKey | null;
@@ -67,6 +69,7 @@ export interface Column {
   // ==============================
   
   export interface View {
+    schemaName: string;
     name: string;
     definition: string;
     referencedTables: string[];
@@ -87,6 +90,7 @@ export interface Column {
   }
   
   export interface Trigger {
+    schemaName: string;
     name: string;
     table: string;
     event: string;
@@ -135,4 +139,8 @@ export interface Column {
     sequences: Sequence[];
     extensions: Extension[];
     generatedAt: string;
+  }
+
+export interface Schema {
+  schema_name: string;
   }
