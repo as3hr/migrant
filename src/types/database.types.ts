@@ -39,20 +39,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      documents: {
+        Row: {
+          content: string
+          created_at: string
+          database_id: string
+          document_type: string
+          embedding: string | null
+          embedding_model: string
+          id: number
+          metadata: Json
+          user_id: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          database_id: string
+          document_type: string
+          embedding?: string | null
+          embedding_model: string
+          id?: never
+          metadata?: Json
+          user_id: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          database_id?: string
+          document_type?: string
+          embedding?: string | null
+          embedding_model?: string
+          id?: never
+          metadata?: Json
+          user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           email: string | null
-          id: number | null
+          id: number
           name: string | null
         }
         Insert: {
           email?: string | null
-          id?: number | null
+          id?: number
           name?: string | null
         }
         Update: {
           email?: string | null
-          id?: number | null
+          id?: number
           name?: string | null
         }
         Relationships: []

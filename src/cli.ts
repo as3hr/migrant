@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { pool } from './config/db.config.ts';
 import { logSampleData } from './connect_to_db.ts';
-import { AIUtilities } from './embeddings_vector/ai_utilities.ts';
+import { AIService } from './embeddings_vector/ai_service.ts';
 
-export const aiUtilities = new AIUtilities();
+export const aiService = new AIService();
 const program = new Command()
 
 program.name('migrant').description('CLI for migrant.').version('0.0.1');
@@ -16,7 +16,7 @@ program
       if(options.db) {
         pool.connect(options.db);
         logSampleData().then((result) => {
-            console.log(result);
+            console.log('Fetched successfully');
         });
       }
   })
