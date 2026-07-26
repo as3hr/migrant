@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { pool } from './config/db.config.ts';
-import { logSampleData } from './connect_to_db.ts';
+import { parseSchema } from './core/schemaParser.ts';
 import { AIService } from './embeddings_vector/ai_service.ts';
 
 export const aiService = new AIService();
@@ -15,9 +15,11 @@ program
     .action((options) => {
       if(options.db) {
         pool.connect(options.db);
-        logSampleData().then((result) => {
-            console.log('Fetched successfully');
-        });
+        // logSampleData().then((result) => {
+        //     console.log('Fetched successfully');
+        // });
+        // matchDocuments();
+        parseSchema();
       }
   })
 

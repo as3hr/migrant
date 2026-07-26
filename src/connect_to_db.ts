@@ -27,5 +27,26 @@ export const logSampleData = asyncHandler(async (): Promise<string> => {
     return `Embeddings created for ${data.length} rows, ${embeddings} embeddings created`;
 });
 
+export const matchDocuments = asyncHandler(async () => {
+    const query = "What changes were made to the users table?";
+
+const queryEmbedding =
+    await aiService.createEmbeddings(query);
+
+const { data, error } = await supabase.rpc(
+    "match_documents",
+    {
+        query_embedding: JSON.stringify(queryEmbedding),
+        match_count: 5,
+    }
+);
+
+if (error) {
+    throw new Error(error.message);
+}
+
+console.log(data);
+})
+
 
 

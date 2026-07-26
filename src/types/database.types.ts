@@ -106,7 +106,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_documents: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          distance: number
+          embedding_model: string
+          id: number
+          metadata: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
