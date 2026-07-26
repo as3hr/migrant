@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@src/*": ["./src/*"]
+    },
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "nodenext",
@@ -7,6 +10,7 @@
     "types": [],
     "sourceMap": true,
     "declaration": true,
+    "noEmit": true,
     "allowImportingTsExtensions": true,
     "declarationMap": true,
     "noUncheckedIndexedAccess": true,

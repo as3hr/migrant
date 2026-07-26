@@ -1,26 +1,10 @@
-import { Command } from 'commander';
-import { pool } from './config/db.config.ts';
-import { startScan } from './core/schemaParser.ts';
-import { AIService } from './embeddings_vector/ai_service.ts';
+import { Command } from "commander";
+import { EmbeddingService, registerCommands } from "@src/exports.ts";
 
-export const aiService = new AIService();
-const program = new Command()
+export const aiService = new EmbeddingService();
+const program = new Command();
 
-program.name('migrant').description('CLI for migrant.').version('0.0.1');
+program.name("migrant").description("CLI for migrant.").version("0.0.1");
 
-program
-  .command('migrant')
-  .description('Run your migrant agent!')
-  .option('--db <url>', 'connect to a database')
-    .action((options) => {
-      if(options.db) {
-        pool.connect(options.db);
-        // logSampleData().then((result) => {
-        //     console.log('Fetched successfully');
-        // });
-        // matchDocuments();
-        startScan();
-      }
-  })
-
-program.parse()
+registerCommands(program);
+program.parse();

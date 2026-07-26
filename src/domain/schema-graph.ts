@@ -140,7 +140,3 @@
     extensions: Extension[];
     generatedAt: string;
   }
-
-export interface Schema {
-  schema_name: string;
-  }

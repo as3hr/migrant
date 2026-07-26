@@ -1,6 +1,6 @@
-import { openRouter } from "../config/open_router.ts";
+import { openRouter } from "@src/exports.ts";
 
-export class AIService {
+export class EmbeddingService {
     async createEmbeddings(data: any): Promise<number[]> {
         try {
             console.log('Creating embeddings for data:', data);

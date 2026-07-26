@@ -7,8 +7,8 @@ const __dirname = dirname(__filename);
 
 const envPath =
   process.env.NODE_ENV === "production" ?
-  "../../.env.prod" 
-  : "../../.env.dev";
+  "../../../.env.prod" 
+  : "../../../.env.dev";
 
 dotenv.config({
   path: path.resolve(__dirname, envPath)

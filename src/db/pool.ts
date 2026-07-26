@@ -45,4 +45,4 @@ class PoolConnector {
     }
 }
 
-export default PoolConnector;
+export const pool = new PoolConnector();

@@ -1,9 +1,9 @@
 import { OpenRouter } from '@openrouter/sdk';
-import { OpenAI } from 'openai';
-import { appConfig } from './app.config.ts';
+import { appConfig } from "@src/exports.ts";
+import OpenAI from 'openai';
 
 export const openRouter = new OpenRouter({
-    apiKey: appConfig.openRouterApiKey,
+  apiKey: appConfig.openRouterApiKey,
 });
 
 export const openAI = new OpenAI({
