@@ -56,9 +56,9 @@ export async function getTables(schema: string): Promise<Record<string, Table>> 
     if (tables[key]) {
       tables[key].foreignKeys.push({
         name: row.foreign_key_name,
-        column: row.column_name,
+        columns: row.columns,
         referencesTable: row.references_table,
-        referencesColumn: row.references_column,
+        referencesColumns: row.references_columns,
         onDelete: row.delete_rule,
         onUpdate: row.update_rule,
       });
@@ -137,19 +137,40 @@ function _getFks(): string {
     SELECT
       kcu.constraint_name AS foreign_key_name,
       kcu.table_name,
-      kcu.column_name,
+
+      json_agg(
+        kcu.column_name
+        ORDER BY kcu.ordinal_position
+      ) AS columns,
+
       ccu.table_name AS references_table,
-      ccu.column_name AS references_column,
+
+      json_agg(
+        ccu.column_name
+        ORDER BY kcu.ordinal_position
+      ) AS references_columns,
+
       rc.delete_rule,
       rc.update_rule
+
     FROM information_schema.key_column_usage kcu
+
     JOIN information_schema.referential_constraints rc
       ON kcu.constraint_name = rc.constraint_name
       AND kcu.constraint_schema = rc.constraint_schema
+
     JOIN information_schema.constraint_column_usage ccu
       ON rc.unique_constraint_name = ccu.constraint_name
-      AND rc.constraint_schema = ccu.constraint_schema
+      AND rc.unique_constraint_schema = ccu.constraint_schema
+
     WHERE kcu.table_schema = $1
+
+    GROUP BY
+      kcu.constraint_name,
+      kcu.table_name,
+      ccu.table_name,
+      rc.delete_rule,
+      rc.update_rule
   `;
 }
 

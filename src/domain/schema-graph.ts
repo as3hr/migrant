@@ -17,9 +17,9 @@
   
   export interface ForeignKey {
     name: string;
-    column: string;
+    columns: string[];
     referencesTable: string;
-    referencesColumn: string;
+    referencesColumns: string[];
     onDelete: string;
     onUpdate: string;
   }
@@ -93,7 +93,7 @@
     schemaName: string;
     name: string;
     table: string;
-    event: string;
+    events: string[];
     timing: string;
     functionName: string;
   }
@@ -124,6 +124,13 @@
     name: string;
     version: string;
   }
+
+  export interface Migration {
+    id: string;
+    name: string;
+    appliedAt: string | null;
+    source: "supabase";
+  }
   
   
   // ==============================
@@ -138,6 +145,12 @@ export interface SchemaGraph {
     functions: DatabaseFunction[];
     enums: EnumType[];
     sequences: Sequence[];
-    extensions: Extension[];
     generatedAt: string;
-  }
+}
+
+export interface DatabaseGraph {
+  schemas: SchemaGraph[];
+  extensions: Extension[];
+  migrations: Migration[];
+  generatedAt: string;
+}

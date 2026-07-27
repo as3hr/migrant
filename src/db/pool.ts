@@ -33,7 +33,7 @@ class PoolConnector {
             const result = await this.pool.query<QueryResult>(query, params);
             return result;
         } catch(error) {
-            throw new Error("Failed to query database");
+            throw new Error(`Failed to query database: ${error}`);
         }
     }
 
