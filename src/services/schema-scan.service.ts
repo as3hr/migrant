@@ -1,5 +1,6 @@
 import { getMigrations } from "@src/db/introspection/migration.query.ts";
 import {
+  databaseToKnowledgeDocuments,
   getEnums,
   getExtensions,
   getFunctions,
@@ -9,12 +10,15 @@ import {
   getTriggers,
   getViews,
   type DatabaseGraph,
+  type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
-import fs from "fs";
+import fs from 'fs';
 
-export async function startScan(): Promise<DatabaseGraph | undefined> {
+export async function startScan(): Promise<void> {
   try {
+    const startedAt = Date.now();
+
     const schemaGraphs: SchemaGraph[] = [];
     const schemas = await getSchemas();
     
@@ -36,16 +40,14 @@ export async function startScan(): Promise<DatabaseGraph | undefined> {
       generatedAt: new Date().toISOString(),
     }
 
-    const data = new Uint8Array(Buffer.from(JSON.stringify(result)));
-    fs.writeFile('logs/scanned_db.json', data, (err) => {
-      if (err) throw err;
-      console.log('DB Schema file has been saved!');
-    });
+    const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
+    await writeDataToFile(dbKnowledgeDocuments);
 
-    return result;
+    const diff: number = (Date.now() - startedAt) / 1000;
+    console.log(`Completed db scan in ${diff} seconds`);
+
   } catch (error) {
     console.error("Error scanning database:", error);
-    return undefined;
   }
 }
 
@@ -70,9 +72,17 @@ async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
         sequences,
         generatedAt: new Date().toISOString(),
     };
-    console.log(`${schema} Schema Scanned Successfully!`);
+    
     return result;
   } catch (e) {
       console.log('Error in schema parser', e);
   }
+}
+
+async function writeDataToFile(result: KnowledgeDocument[]): Promise<void> {
+  fs.writeFile(
+    "logs/db_scanned.json",
+    JSON.stringify(result, null, 2),
+    (_) => {}
+  );
 }

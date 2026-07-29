@@ -182,7 +182,7 @@ function _getIdxs(): string {
       ix.indisunique AS is_unique,
       am.amname AS method,
       pg_get_indexdef(ix.indexrelid) AS definition,
-      array_agg(a.attname ORDER BY k.n) AS columns
+      json_agg(a.attname ORDER BY k.n) AS columns
     FROM pg_class t
     JOIN pg_index ix
       ON t.oid = ix.indrelid
@@ -213,7 +213,7 @@ function _getPrimaryKeys(): string {
     SELECT
       c.conname AS constraint_name,
       cls.relname AS table_name,
-      array_agg(
+      json_agg(
         att.attname
         ORDER BY array_position(c.conkey, att.attnum)
       ) AS columns
@@ -238,7 +238,7 @@ function _getUniqueConstraints(): string {
     SELECT
       c.conname AS constraint_name,
       cls.relname AS table_name,
-      array_agg(
+      json_agg(
         att.attname
         ORDER BY array_position(c.conkey, att.attnum)
       ) AS columns
