@@ -1,6 +1,7 @@
 import { getMigrations } from "@src/db/introspection/migration.query.ts";
 import {
   databaseToKnowledgeDocuments,
+  embeddingService,
   getEnums,
   getExtensions,
   getFunctions,
@@ -13,7 +14,7 @@ import {
   type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
-import fs from 'fs';
+import { dbService } from "./database_service.ts";
 
 export async function startScan(): Promise<void> {
   try {
@@ -41,7 +42,7 @@ export async function startScan(): Promise<void> {
     }
 
     const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-    await writeDataToFile(dbKnowledgeDocuments);
+    await createEmbeddingsInTheDb(dbKnowledgeDocuments);
 
     const diff: number = (Date.now() - startedAt) / 1000;
     console.log(`Completed db scan in ${diff} seconds`);
@@ -79,10 +80,32 @@ async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
   }
 }
 
-async function writeDataToFile(result: KnowledgeDocument[]): Promise<void> {
-  fs.writeFile(
-    "logs/db_scanned.json",
-    JSON.stringify(result, null, 2),
-    (_) => {}
-  );
+
+async function createEmbeddingsInTheDb(documents: KnowledgeDocument[]) {
+  try { 
+    const embeddings = await embeddingService.createEmbeddings(
+      documents.map(d => d.content)
+    );
+    if (embeddings.length > 0) {
+      await Promise.all(
+        embeddings.map((embedding, index) =>
+          dbService.createEmbeddingsInDatabase(
+            embedding,
+            documents[index]!
+          )
+        )
+      );
+    }
+  }
+  catch (error) { 
+    console.log('Error in creating embeddings');
+  }
 }
+
+// async function writeDataToFile(result: KnowledgeDocument[]): Promise<void> {
+//   fs.writeFile(
+//     "logs/db_scanned.json",
+//     JSON.stringify(result, null, 2),
+//     (_) => {}
+//   );
+// }
