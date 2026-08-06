@@ -12,7 +12,15 @@ class EmbeddingService {
             throw new Error("Unexpected embedding response");
         }
 
-        return response.data.map(item => item.embedding as number[]);
+        const data = response.data.map((item) => {
+            const embedding = item.embedding;
+            if (typeof embedding === 'string') {
+                return undefined;
+            }
+            return embedding;
+        }).filter(item => item != undefined);
+
+        return data;
     }
 
     async createSingleEmbedding(texts: string[]): Promise<number[]> {

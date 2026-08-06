@@ -1,8 +1,8 @@
 import { appConfig } from "@src/exports.ts";
 import { createClient } from "@supabase/supabase-js";
-import type { GeneratedDatabase } from "../../types/database.types.ts";
+import type { Database } from "../../types/database.types.ts";
 
-export const supabase = createClient<GeneratedDatabase>(
+export const supabase = createClient<Database>(
   appConfig.supabaseUrl,
   appConfig.supabaseKey
 );

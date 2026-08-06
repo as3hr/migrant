@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type GeneratedDatabase = {
+export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
@@ -111,6 +111,7 @@ export type GeneratedDatabase = {
         Returns: {
           content: string
           distance: number
+          document_type: string
           embedding_model: string
           id: number
           metadata: Json
@@ -126,9 +127,9 @@ export type GeneratedDatabase = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<GeneratedDatabase, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof GeneratedDatabase, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends

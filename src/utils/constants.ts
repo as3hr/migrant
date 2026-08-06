@@ -1,0 +1,1 @@
+export const SYS_DEFAULT_MODEL = 'deepseek/deepseek-chat';
