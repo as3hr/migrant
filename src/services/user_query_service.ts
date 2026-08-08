@@ -1,12 +1,16 @@
-import { fileService, llmService, ragService } from "@src/exports.ts";
+import type { ChatContentItems } from "@openrouter/sdk/models";
+import { llmService, ragService, SYS_PROMPT } from "@src/exports.ts";
 
-export async function userQuery(query: string) {
+export async function userQuery(query: string): Promise<{
+    Question: string;
+    Answer: string | ChatContentItems[];
+} | null> {
     try {
         const semanticResult = await ragService.performSemanticSearch(query);
 
         if (!semanticResult) {
             console.log('Null returned in semantic result');
-            return;
+            return null;
         }
 
         const prompt = `
@@ -29,14 +33,27 @@ export async function userQuery(query: string) {
         `;
         
         const response = await llmService.queryLlm(
-            "You are an expert PostgreSQL database engineer.",
+            SYS_PROMPT,
             prompt,
             "deepseek/deepseek-chat"
         );
-        
-        await fileService.writeDataToFile(response, '"logs/query_result.json"');
 
+        if (response && response.choices && response?.choices.length > 0) {
+            const answer = response?.choices[0]?.message.content;
+            if (answer) {
+                const result = {
+                    Question: query,
+                    Answer: answer,
+                }
+                return result;
+            }
+            return null;
+        } else {
+            console.log('No response from llm found or an error', response);
+            return null;
+        }
     } catch (error) {
         console.log('Error in userQuery func', error);     
+        return null;
     }
 }

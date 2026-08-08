@@ -14,7 +14,5 @@ export interface KnowledgeDocument {
   schema: string;
   name: string;
   content: string;
-  metadata: {
-    relatedTables: string[];
-  };
+  metadata: Record<string, any>;
 }

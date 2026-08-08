@@ -1,8 +1,8 @@
-import type { SendChatCompletionRequestResponse } from "@openrouter/sdk/models/operations";
+import type { ChatResult } from "@openrouter/sdk/models";
 import { openRouter, SYS_DEFAULT_MODEL } from "@src/exports.ts";
 
 class LlmService {
-    async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<SendChatCompletionRequestResponse | null> {
+    async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<ChatResult | null> {
         try {
             const response = await openRouter.chat.send({
                 chatRequest: {
@@ -20,7 +20,7 @@ class LlmService {
                     ],
                 },
             });
-            return response;
+            return response as ChatResult;
         }
         catch (llmE) {
             console.log('Error in querying llm', llmE);

@@ -1,14 +1,22 @@
+import { protectedComand } from "@src/exports.ts";
 import { userQuery } from "@src/services/user_query_service.ts";
 import type { Command } from "commander";
 
 export function registerUserQueryCommand(program: Command) {
   program
-    .command("query")
+    .command("ask <questions>")
     .description("Ask about your database!")
-    .option("--query <question>", "ask about your database")
-    .action((options) => {
-      if (options.query) {
-        userQuery(options.query);
-      }
+    .action((questions) => {
+      protectedComand(async () => {
+        const allQuestions = questions
+          .split(",")
+          .map((question: string) => question.trim())
+          .filter(Boolean);
+
+        for (const question of allQuestions) {
+          await userQuery(question);
+        }
+        
+      })
     });
 }

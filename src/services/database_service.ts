@@ -1,12 +1,12 @@
-import { pool, supabase, type KnowledgeDocument } from "@src/exports.ts";
+import { pool, supabase, SYS_DEFAULT_EMBEDDING_MODEL, type KnowledgeDocument } from "@src/exports.ts";
 
 class DatabaseService {
-    async createEmbeddingsInDatabase(embedding: number[], knowledgeDocument: KnowledgeDocument): Promise<boolean> {
+    async createEmbeddingsInDatabase(embedding: number[], knowledgeDocument: KnowledgeDocument, model?: string): Promise<boolean> {
         const { error } = await supabase.from("documents").insert({
             user_id: 1,
             content: knowledgeDocument.content,
             embedding: `[${embedding.join(",")}]`,
-            embedding_model: 'text-embedding-3-small',
+            embedding_model: model ?? SYS_DEFAULT_EMBEDDING_MODEL,
             database_id: pool.dbId ?? '',
             document_type: knowledgeDocument.type,
             metadata: knowledgeDocument.metadata,

@@ -7,6 +7,19 @@ class FileService {
             () => {}
         );
     }
+
+    async appendToFile(data: any, filePath: string): Promise<void> {
+        try {
+            fs.appendFile(
+                filePath,
+                JSON.stringify(data, null, 2),
+                () => { }
+            );
+          console.log('Data successfully appended.');
+        } catch (error) {
+          console.error('Failed to append data:', error);
+        }
+    }
 }
 
 export const fileService = new FileService();

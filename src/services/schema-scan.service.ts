@@ -101,11 +101,3 @@ async function createEmbeddingsInTheDb(documents: KnowledgeDocument[]) {
     console.log('Error in creating embeddings');
   }
 }
-
-// async function writeDataToFile(result: KnowledgeDocument[]): Promise<void> {
-//   fs.writeFile(
-//     "logs/db_scanned.json",
-//     JSON.stringify(result, null, 2),
-//     (_) => {}
-//   );
-// }

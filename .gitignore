@@ -5,3 +5,4 @@ creds.txt
 .env.dev
 scan.sh
 logs/*
+.local

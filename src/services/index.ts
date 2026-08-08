@@ -9,3 +9,5 @@ export * from "./llm_service.ts";
 export * from "./rag_service.ts";
 
 export * from "./file_service.ts";
+
+export * from "./auth_service.ts";

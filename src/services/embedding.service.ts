@@ -1,10 +1,10 @@
-import { openRouter } from "@src/exports.ts";
+import { openRouter, SYS_DEFAULT_EMBEDDING_MODEL } from "@src/exports.ts";
 class EmbeddingService {
-    async createEmbeddings(texts: string[]): Promise<number[][]> {
+    async createEmbeddings(texts: string[], model?: string): Promise<number[][]> {
         const response = await openRouter.embeddings.generate({
             requestBody: {
                 input: texts,
-                model: "text-embedding-3-small",
+                model: model ?? SYS_DEFAULT_EMBEDDING_MODEL,
             },
         });
 
@@ -23,11 +23,11 @@ class EmbeddingService {
         return data;
     }
 
-    async createSingleEmbedding(texts: string[]): Promise<number[]> {
+    async createSingleEmbedding(texts: string[], model?: string): Promise<number[]> {
         const response = await openRouter.embeddings.generate({
             requestBody: {
                 input: texts,
-                model: "text-embedding-3-small",
+                model: model ?? SYS_DEFAULT_EMBEDDING_MODEL,
             },
         });
 

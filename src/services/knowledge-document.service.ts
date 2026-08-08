@@ -13,22 +13,34 @@ export function databaseToKnowledgeDocuments(dbGraph: DatabaseGraph) {
         const functions = schema.functions;
         const views = schema.views;
         const tables = schema.tables;
-
+        
         /// Tables
-        for (const [tableKey, tableValue] of Object.entries(tables)) {
-            const foreignKeys = tableValue.foreignKeys;
-            const content = getTableContent(tableValue);
-
+        for (const [tableKey, table] of Object.entries(tables)) {
+            const foreignKeys = table.foreignKeys;
+            const relatedTables = foreignKeys.map(fk => `${table.schemaName}.${fk.referencesTable}`);
+            const content = getTableContent(table, relatedTables);
+            const primaryKey = table.primaryKey;
+            const checkConstraints = table.checkConstraints;
+            const uniquEConstraints = table.uniqueConstraints;
+            const indexes = table.indexes;
+            
+            const metaData = {
+                primaryKey,
+                relatedTables,
+                foreignKeys,
+                indexes,
+                checkConstraints,
+                uniquEConstraints
+            };
+            
             // columns
             knowledgeDocs.push({
                 id: `Table Key: ${tableKey}`,
-                name: tableValue.name,
-                schema: tableValue.schemaName,
+                name: table.name,
+                schema: table.schemaName,
                 content: content,
                 type: 'table',
-                metadata: {
-                    relatedTables: [...foreignKeys.map(fk => `${tableValue.schemaName}.${fk.referencesTable}`)],
-                }
+                metadata: metaData
             });
         }
 
@@ -121,8 +133,7 @@ export function databaseToKnowledgeDocuments(dbGraph: DatabaseGraph) {
                     relatedTables: [],
                 },
             });
-        }    
-
+        }
     }
 
     for (const extension of extensions) {
