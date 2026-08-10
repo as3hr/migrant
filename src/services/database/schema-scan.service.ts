@@ -1,4 +1,3 @@
-import { getMigrations } from "@src/db/introspection/migration.query.ts";
 import {
   databaseToKnowledgeDocuments,
   embeddingService,
@@ -14,6 +13,7 @@ import {
   type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
+import { getMigrations } from "@src/infrastructure/db/introspection/migration.query.ts";
 import { dbService } from "./database_service.ts";
 
 export async function startScan(): Promise<void> {

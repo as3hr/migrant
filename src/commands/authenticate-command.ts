@@ -1,4 +1,4 @@
-import { authService } from "@src/services/auth_service.ts";
+import { authService } from "@src/services/auth/auth_service.ts";
 import type { Command } from "commander";
 
 export function authenticateUserCommand(program: Command) {

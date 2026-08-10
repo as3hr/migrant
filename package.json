@@ -5,6 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
+    "dev": "tsx watch src/ui/index.tsx",
+    "start": "tsx src/ui/index.tsx",
     "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts"
   },
   "bin": {
@@ -27,15 +29,20 @@
     "@types/pg": "^8.20.0",
     "commander": "^15.0.0",
     "dotenv": "^17.4.2",
+    "get-port": "^7.2.0",
+    "ink": "^7.1.1",
+    "ink-text-input": "^6.0.0",
     "open": "^11.0.0",
     "openai": "^6.49.0",
     "pg": "^8.22.0",
+    "react": "^19.2.8",
     "supabase": "^2.109.1",
     "tsc-watch": "^7.2.1",
     "typecript": "^0.0.1-security"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@types/react": "^19.2.18",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   }

@@ -4,7 +4,7 @@ export * from "./utils/index.ts";
 
 export * from "./infrastructure/index.ts";
 
-export * from "./db/index.ts";
+export * from "./infrastructure/db/index.ts";
 
 export * from "./services/index.ts";
 

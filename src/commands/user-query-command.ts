@@ -1,5 +1,5 @@
 import { protectedComand } from "@src/exports.ts";
-import { userQuery } from "@src/services/user_query_service.ts";
+import { userQuery } from "@src/services/query/user_query_service.ts";
 import type { Command } from "commander";
 
 export function registerUserQueryCommand(program: Command) {
