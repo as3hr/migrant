@@ -24,7 +24,7 @@ interface AppServices {
     embeddingService: EmbeddingService;
 }
 
-export class AppContext {
+class AppContext {
     commandRegistry: CommandRegistry;
     workspace: WorkSpace;
     services: AppServices;

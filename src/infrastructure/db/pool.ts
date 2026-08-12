@@ -5,7 +5,7 @@ class PoolConnector {
     pool: Pool | null = null;
     dbUrl: string | null = null;
     dbId: string | null = null;
-    
+
     async connect(dbUrl: string) {
         if(this.pool) {
             return this.pool;
@@ -13,7 +13,6 @@ class PoolConnector {
         this.dbUrl = dbUrl;
         this.setDbId();
         this.pool = new Pool({ connectionString: dbUrl });
-        console.log('Database connected successfully!');
         await appContext.services.databaseService.createDatabaseEntry();
     }
 

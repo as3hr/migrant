@@ -1,10 +1,10 @@
-import { appContext, type CommandDefinition } from "@src/exports.ts";
+import { appContext, startScan, type CommandDefinition } from "@src/exports.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
 import { errorMessage } from "./command_helpers.ts";
 
 export const connectCommand: CommandDefinition = {
   name: "connect",
-  description: "Connect a PostgreSQL database",
+  description: "Connect and Scan the PostgreSQL database",
   busyLabel: "Connecting...",
   execute: async (_args) => {
     const ctx = appContext.commandCtx!;
@@ -21,8 +21,10 @@ export const connectCommand: CommandDefinition = {
     const database = connectionString.split('/')[3];
 
     try {
-      await pool.query("SELECT 1");
       ctx.success(`Connected to ${database}`);
+      ctx.busy("Scanning database...");
+      await startScan();
+      ctx.success("Scan complete");
     } catch (error) {
       pool.close();
       throw new Error(`Connection failed: ${errorMessage(error)}`);
