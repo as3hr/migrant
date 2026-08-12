@@ -1,4 +1,5 @@
 import { BASE_URL, supabase } from "@src/exports.ts";
+import type { User } from "@supabase/supabase-js";
 import fs from "fs";
 import getPort from "get-port";
 import http from "http";
@@ -8,7 +9,7 @@ import path from "path";
 const LOCAL_DIR = path.join(process.cwd(), ".local");
 const SESSION_FILE = path.join(LOCAL_DIR, "session.json");
 
-class AuthService {
+export class AuthService {
   async authenticateUser() {
     try {
       const port = await getPort({ port: 3000 });
@@ -178,6 +179,21 @@ class AuthService {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async getCurrentUser(): Promise<User | null> {
+    try { 
+      const { data } = await supabase.auth.getSession();
+      if (data.session && data.session.user) {
+        const user = data?.session?.user;
+        return user; 
+      }
+      return null;
+    }
+    catch (e) {
+      console.log(`Error in fetching user`, e);
+      return null;
     }
   }
 }

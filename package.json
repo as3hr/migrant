@@ -5,8 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "tsx watch src/ui/index.tsx",
-    "start": "tsx src/ui/index.tsx",
+    "dev": "tsx src/cli.ts",
+    "start": "tsx src/cli.ts",
     "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts"
   },
   "bin": {

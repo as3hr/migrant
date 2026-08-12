@@ -15,7 +15,7 @@ interface SemanticSearchResponse {
     documentsData: SemanticSearchResult[];
 }
 
-class RagService {
+export class RagService {
     async performSemanticSearch(query: string, match_count?: number): Promise<SemanticSearchResponse | null> {
         try { 
             const embedding = await embeddingService.createSingleEmbedding([query]);

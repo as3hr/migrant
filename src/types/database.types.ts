@@ -39,6 +39,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      Database: {
+        Row: {
+          created_at: string
+          database_identifier: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          database_identifier?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          database_identifier?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string
@@ -49,18 +70,16 @@ export type Database = {
           embedding_model: string
           id: number
           metadata: Json
-          user_id: number
         }
         Insert: {
           content: string
           created_at?: string
-          database_id: string
+          database_id?: string
           document_type: string
           embedding?: string | null
           embedding_model: string
-          id?: never
+          id?: number
           metadata?: Json
-          user_id: number
         }
         Update: {
           content?: string
@@ -69,37 +88,18 @@ export type Database = {
           document_type?: string
           embedding?: string | null
           embedding_model?: string
-          id?: never
+          id?: number
           metadata?: Json
-          user_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "documents_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "documents_database_id_fkey"
+            columns: ["database_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "Database"
             referencedColumns: ["id"]
           },
         ]
-      }
-      users: {
-        Row: {
-          email: string | null
-          id: number
-          name: string | null
-        }
-        Insert: {
-          email?: string | null
-          id?: number
-          name?: string | null
-        }
-        Update: {
-          email?: string | null
-          id?: number
-          name?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {

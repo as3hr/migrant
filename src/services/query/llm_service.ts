@@ -1,7 +1,7 @@
 import type { ChatResult } from "@openrouter/sdk/models";
 import { openRouter, SYS_DEFAULT_MODEL } from "@src/exports.ts";
 
-class LlmService {
+export class LlmService {
     async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<ChatResult | null> {
         try {
             const response = await openRouter.chat.send({

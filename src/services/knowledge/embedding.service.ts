@@ -1,5 +1,5 @@
 import { openRouter, SYS_DEFAULT_EMBEDDING_MODEL } from "@src/exports.ts";
-class EmbeddingService {
+export class EmbeddingService {
     async createEmbeddings(texts: string[], model?: string): Promise<number[][]> {
         const response = await openRouter.embeddings.generate({
             requestBody: {
