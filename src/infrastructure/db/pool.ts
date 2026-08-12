@@ -1,19 +1,18 @@
 import { appContext } from "@src/exports.ts";
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
-class PoolConnector { 
+export class PoolConnector { 
     pool: Pool | null = null;
     dbUrl: string | null = null;
     dbId: string | null = null;
 
     async connect(dbUrl: string) {
         if(this.pool) {
-            return this.pool;
+            this.close();
         }
         this.dbUrl = dbUrl;
-        this.setDbId();
         this.pool = new Pool({ connectionString: dbUrl });
-        await appContext.services.databaseService.createDatabaseEntry();
+        await this.addDbToContext();
     }
 
     close() {
@@ -26,23 +25,25 @@ class PoolConnector {
         this.dbUrl = null;
     }
 
-    async query(query: string, params?: any[]): Promise<QueryResult<QueryResultRow>> {
-        if(!this.pool) {
-            throw new Error("Database is not connected");
-        }
-        try {
-            const result = await this.pool.query<QueryResult>(query, params);
-            return result;
-        } catch(error) {
-            throw new Error(`Failed to query database: ${error}`);
+    async addDbToContext() {
+        if (this.dbUrl) {
+            const dbId = await appContext.services.databaseService.createDatabaseEntry();
+            if (dbId) {
+                this.dbId = dbId;
+                appContext.workspace.addDbToWorkspace(this.dbUrl, this.dbId);
+                appContext.workspace.setActiveDbId(this.dbId);
+            }
         }
     }
 
-    setDbId() {
-        if (!this.dbUrl) return;
-        const url = new URL(this.dbUrl);
-        const dbId = url.pathname.slice(1);
-        this.dbId = dbId;
+    async query<T extends QueryResultRow = QueryResultRow>(
+        query: string, params?: unknown[]
+    ): Promise<QueryResult<T>> {
+        if(!this.pool) {
+            throw new Error("Database is not connected");
+        }
+        const result = await this.pool.query<T>(query, params);
+        return result;
     }
 }
 

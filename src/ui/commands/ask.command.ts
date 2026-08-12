@@ -1,10 +1,10 @@
-import { appContext, type CommandDefinition } from "@src/exports.ts";
+import { type CommandContext, type CommandDefinition } from "@src/exports.ts";
 import { userQuery } from "@src/services/query/user_query_service.ts";
 
 export async function answerQuestion(
-  question: string
+  question: string,
+  ctx: CommandContext,
 ): Promise<void> {
-  const ctx = appContext.commandCtx!; 
   ctx.log("Migrant");
   ctx.log("");
 

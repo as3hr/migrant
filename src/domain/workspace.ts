@@ -1,3 +1,5 @@
+import { getDbName } from "@src/exports.ts";
+
 export type DatabaseType = "postgres" | "my-sql" | "mongodb"
 
 export interface DatabaseCollection { 
@@ -16,7 +18,7 @@ export class WorkSpace {
     addDbToWorkspace(dbUrl: string, dbId: string) {
         this.databases.push({
             id: dbId,
-            name: dbUrl.split('/')[3] ?? '',
+            name: getDbName(dbUrl),
             connectionString: dbUrl,
             type: "postgres",
         });
@@ -52,5 +54,10 @@ export class WorkSpace {
             }
             return db;
         });        
+    }
+
+    dbExists(dbUrl: string): boolean {
+        const db = this.databases.find((db) => db.connectionString == dbUrl);
+        return db != undefined;
     }
 }

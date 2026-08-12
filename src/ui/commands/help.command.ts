@@ -1,4 +1,4 @@
-import { appContext, type CommandDefinition, type CommandRegistry } from "@src/exports.ts";
+import { type CommandDefinition, type CommandRegistry } from "@src/exports.ts";
 
 export function createHelpCommand(
   registry: CommandRegistry
@@ -6,8 +6,7 @@ export function createHelpCommand(
   return {
     name: "help",
     description: "Show available commands",
-    execute: (_args) => {
-      const ctx = appContext.commandCtx!;
+    execute: (_args, ctx) => {
       ctx.log("Available commands");
       ctx.log("");
       for (const command of registry.list()) {

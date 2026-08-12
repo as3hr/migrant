@@ -3,23 +3,21 @@ import type { JSX } from "react";
 
 interface StatusProps {
   user?: string;
-  database?: string;
+  databases?: string[];
+}
+interface StatusProps {
+  user?: string;
+  databases?: string[];
 }
 
-export function Status({ user, database }: StatusProps): JSX.Element | null {
-  const parts: string[] = [];
+export function Status({ user, databases }: StatusProps): JSX.Element {
+  const username = user?.split("@")[0];
 
-  if (user) {
-    parts.push(`logged in as ${user}`);
-  }
-
-  if (database) {
-    parts.push(`connected to ${database}`);
-  }
-
-  if (parts.length === 0) {
-    return null;
-  }
-
-  return <Text dimColor>{parts.join("  •  ")}</Text>;
+  return (
+    <Text dimColor>
+      {username ? `$${username} ` : ""}
+      {databases?.length ? `[${databases.join(", ")}] ` : ""}
+      &gt;
+    </Text>
+  );
 }

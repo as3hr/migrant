@@ -10,7 +10,6 @@ import {
     LlmService,
     loginCommand,
     RagService,
-    scanCommand,
     WorkSpace,
     type CommandContext
 } from "@src/exports.ts";
@@ -45,7 +44,6 @@ class AppContext {
     
       registry.register(loginCommand);
       registry.register(connectCommand);
-      registry.register(scanCommand);
       registry.register(askCommand);
       registry.register(clearCommand);
       registry.register(exitCommand);

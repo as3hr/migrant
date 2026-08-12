@@ -1,27 +1,29 @@
 import {
   appContext,
-  databaseToKnowledgeDocuments,
   getEnums,
-  getExtensions,
   getFunctions,
   getSchemas,
   getSequences,
   getTables,
   getTriggers,
   getViews,
-  type DatabaseGraph,
+  type CommandContext,
   type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
-import { getMigrations } from "@src/infrastructure/db/introspection/migration.query.ts";
 
-export async function startScan(): Promise<void> {
+export async function startScan(ctx: CommandContext): Promise<void> {
   try {
     const startedAt = Date.now();
-
+    
     const schemaGraphs: SchemaGraph[] = [];
     const schemas = await getSchemas();
+    ctx.success(`${schemas.length} Schemas Scanned Successfully!`);
     
+    setTimeout(() => {
+      ctx.busy(`Scanning your database in more depth...`);
+    }, 2000);
+
     for (const schema of schemas) {
       const graph = await parseSchema(schema);
       
@@ -30,21 +32,21 @@ export async function startScan(): Promise<void> {
       }
     }
 
-    const extensions = await getExtensions();
-    const migrations = await getMigrations();
+    // const extensions = await getExtensions();
+    // const migrations = await getMigrations();
 
-    const result: DatabaseGraph = {
-      schemas: schemaGraphs,
-      extensions,
-      migrations,
-      generatedAt: new Date().toISOString(),
-    }
+    // const result: DatabaseGraph = {
+    //   schemas: schemaGraphs,
+    //   extensions,
+    //   migrations,
+    //   generatedAt: new Date().toISOString(),
+    // }
 
-    const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-    await createEmbeddingsInTheDb(dbKnowledgeDocuments);
+    // const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
+    // await createEmbeddingsInTheDb(dbKnowledgeDocuments);
 
     const diff: number = (Date.now() - startedAt) / 1000;
-    console.log(`Completed db scan in ${diff} seconds`);
+    ctx.success(`Completed db scan in ${diff} seconds`);
 
   } catch (error) {
     console.error("Error scanning database:", error);
@@ -86,17 +88,12 @@ async function createEmbeddingsInTheDb(documents: KnowledgeDocument[]) {
       documents.map(d => d.content)
     );
     if (embeddings.length > 0) {
-      await Promise.all(
-        embeddings.map((embedding, index) =>
-          appContext.services.databaseService.createEmbeddingsInDatabase(
-            embedding,
-            documents[index]!
-          )
-        )
-      );
+      await appContext.services.databaseService.createEmbeddingsInDatabase(
+        embeddings,
+        documents!
+      )
     }
-  }
-  catch (error) { 
+  }  catch (error) { 
     console.log('Error in creating embeddings');
   }
 }

@@ -1,6 +1,5 @@
 import { appContext, type AskOptions, type CommandContext } from "@src/exports.ts";
 import { supabase } from "@src/infrastructure/clients/supabase.client.ts";
-import { pool } from "@src/infrastructure/db/pool.ts";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +13,6 @@ import {
 import { Output, type OutputItem } from "./components/output.tsx";
 import { Prompt } from "./components/prompt.tsx";
 import { Spinner } from "./components/spinner.tsx";
-import { Status } from "./components/status.tsx";
 
 type RunState =
   | { kind: "idle" }
@@ -39,7 +37,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   const [run, setRun] = useState<RunState>({ kind: "idle" });
   const [formOptions, setFormOptions] = useState<AskOptions | null>(null);
   const [user, setUser] = useState<string>();
-  const [database, setDatabase] = useState<string>();
+  const [databases, setDatabases] = useState<string[]>();
   const [spinnerVisible, setSpinnerVisible] = useState(false);
 
   const askResolver = useRef<((value: string) => void) | null>(null);
@@ -57,7 +55,8 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   const refreshStatus = async () => {
     const { data } = await supabase.auth.getSession();
     setUser(data?.session?.user.email ?? undefined);
-    setDatabase(pool.dbId ?? undefined);
+    const userDatabases = appContext.workspace.databases.map((db) => db.name);
+    setDatabases(userDatabases);
   };
 
   const createCommandContext = (): CommandContext => ({
@@ -76,7 +75,8 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   });
 
   const executeInput = async (value: string) => {
-    appContext.createCommandContext(createCommandContext());
+    const ctx = createCommandContext();
+    appContext.createCommandContext(ctx);
     const parsed = parseCommandInput(value);
 
     try {
@@ -96,7 +96,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
         }
 
         startRunning(command.busyLabel ?? "Working");
-        await runCommand(command, parsed.args);
+        await runCommand(command, parsed.args, ctx);
 
         if (!(command.name === "clear")) {
           append({ type: "blank" });
@@ -104,7 +104,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
       } else {
         startRunning("Thinking");
         await requireAuth();
-        await answerQuestion(value);
+        await answerQuestion(value, ctx);
         append({ type: "blank" });
       }
     } catch (error) {
@@ -185,24 +185,19 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
         <Spinner label={run.label} />
       ) : null}
 
-      <Status
-        {...(user !== undefined ? { user } : {})}
-        {...(database !== undefined ? { database } : {})}
-      />
-
       {run.kind === "idle" ? (
         <Prompt
-          label=">"
           value={input}
           onChange={setInput}
           onSubmit={handleSubmit}
-        />
-      ) : run.kind === "form" ? (
+          {...(user !== undefined ? { user } : {})}
+          {...(databases !== undefined ? { databases } : {})}
+        /> ) : run.kind === "form" ? (
         <Prompt
-          label={`${run.label}:`}
           value={input}
           onChange={setInput}
           onSubmit={handleSubmit}
+          label={run.label}
           {...(formInputProps.placeholder !== undefined
             ? { placeholder: formInputProps.placeholder }
             : {})}
