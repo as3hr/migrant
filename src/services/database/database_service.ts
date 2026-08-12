@@ -1,8 +1,8 @@
-import { authService, pool, supabase, SYS_DEFAULT_EMBEDDING_MODEL, type KnowledgeDocument } from "@src/exports.ts";
+import { appContext, pool, supabase, SYS_DEFAULT_EMBEDDING_MODEL, type KnowledgeDocument } from "@src/exports.ts";
 
 export class DatabaseService {
     async createDatabaseEntry(): Promise<boolean> {
-        const user = await authService.getCurrentUser();
+        const user = await appContext.services.authService.getCurrentUser();
         if (!user) {
             console.log('User not found in database service');
             return false;
@@ -32,5 +32,3 @@ export class DatabaseService {
         return true;
     }
 }
-
-export const dbService = new DatabaseService();

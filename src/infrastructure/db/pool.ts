@@ -1,4 +1,4 @@
-import { dbService } from "@src/services/database/database_service.ts";
+import { appContext } from "@src/exports.ts";
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
 class PoolConnector { 
@@ -14,7 +14,7 @@ class PoolConnector {
         this.setDbId();
         this.pool = new Pool({ connectionString: dbUrl });
         console.log('Database connected successfully!');
-        await dbService.createDatabaseEntry();
+        await appContext.services.databaseService.createDatabaseEntry();
     }
 
     close() {

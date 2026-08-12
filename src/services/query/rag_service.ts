@@ -1,4 +1,4 @@
-import { embeddingService, supabase } from "@src/exports.ts";
+import { appContext, supabase } from "@src/exports.ts";
 import type { Json } from "@src/types/database.types.ts";
 
 interface SemanticSearchResult {
@@ -18,7 +18,7 @@ interface SemanticSearchResponse {
 export class RagService {
     async performSemanticSearch(query: string, match_count?: number): Promise<SemanticSearchResponse | null> {
         try { 
-            const embedding = await embeddingService.createSingleEmbedding([query]);
+            const embedding = await appContext.services.embeddingService.createSingleEmbedding([query]);
             const queryEmbedding = `[${embedding.join(",")}]`;
 
             const { data, error } = await supabase.rpc("match_documents", {
@@ -53,6 +53,3 @@ export class RagService {
         }
     }
 }
-
-
-export const ragService = new RagService();

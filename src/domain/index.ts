@@ -4,4 +4,6 @@ export * from "./knowledge-document.ts";
 
 export * from "./workspace.ts";
 
-export * from "./command-sheel.ts";
+export * from "./command-shell.ts";
+
+export * from "./app_context.ts";

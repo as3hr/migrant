@@ -1,4 +1,3 @@
-
 export interface CommandDefinition {
     name: string;
     description: string;
@@ -10,8 +9,7 @@ export interface CommandDefinition {
   }
   
   export type CommandExecute = (
-    args: string,
-    ctx: CommandContext
+    args: string
   ) => Promise<void> | void;
   
   export interface AskOptions {

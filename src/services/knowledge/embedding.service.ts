@@ -38,5 +38,3 @@ export class EmbeddingService {
         return response.data[0]?.embedding as number[];
     }
 }
-
-export const embeddingService = new EmbeddingService();

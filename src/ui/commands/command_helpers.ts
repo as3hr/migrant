@@ -1,6 +1,5 @@
-import type { CommandContext, CommandDefinition } from "@src/exports.ts";
+import { appContext, type CommandDefinition } from "@src/exports.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
-import { authService } from "@src/services/auth/auth_service.ts";
 
 export function parseCommandInput(input: string): {
   name: string;
@@ -27,7 +26,7 @@ export function parseCommandInput(input: string): {
 }
 
 export async function requireAuth(): Promise<void> {
-  const isLoggedIn = await authService.checkLoginGuard();
+  const isLoggedIn = await appContext.services.authService.checkLoginGuard();
   if (!isLoggedIn) {
     throw new Error("You must be logged in. Run /login first.");
   }
@@ -35,8 +34,7 @@ export async function requireAuth(): Promise<void> {
 
 export async function runCommand(
   command: CommandDefinition,
-  args: string,
-  ctx: CommandContext
+  args: string
 ): Promise<void> {
   if (command.requiresAuth) {
     await requireAuth();
@@ -45,6 +43,7 @@ export async function runCommand(
   if (command.requiresConnection && !pool.pool) {
     throw new Error("No database connected. Run /connect first.");
   }
+  const ctx = appContext.commandCtx!;
 
   const originalLog = console.log;
   const originalError = console.error;
@@ -60,7 +59,7 @@ export async function runCommand(
   console.error = sink;
 
   try {
-    await command.execute(args, ctx);
+    await command.execute(args);
   } finally {
     console.log = originalLog;
     console.error = originalError;

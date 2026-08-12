@@ -1,12 +1,13 @@
-import type { CommandDefinition } from "@src/exports.ts";
+import { appContext, type CommandDefinition } from "@src/exports.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
-import { errorMessage } from "./registry.ts";
+import { errorMessage } from "./command_helpers.ts";
 
 export const connectCommand: CommandDefinition = {
   name: "connect",
   description: "Connect a PostgreSQL database",
   busyLabel: "Connecting...",
-  execute: async (_args, ctx) => {
+  execute: async (_args) => {
+    const ctx = appContext.commandCtx!;
     ctx.log("PostgreSQL connection");
     ctx.log("");
 

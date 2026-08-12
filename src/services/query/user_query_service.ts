@@ -1,12 +1,12 @@
 import type { ChatContentItems } from "@openrouter/sdk/models";
-import { llmService, ragService, SYS_PROMPT } from "@src/exports.ts";
+import { appContext, SYS_PROMPT } from "@src/exports.ts";
 
 export async function userQuery(query: string): Promise<{
     Question: string;
     Answer: string | ChatContentItems[];
 } | null> {
     try {
-        const semanticResult = await ragService.performSemanticSearch(query);
+        const semanticResult = await appContext.services.ragService.performSemanticSearch(query);
 
         if (!semanticResult) {
             console.log('Null returned in semantic result');
@@ -32,7 +32,7 @@ export async function userQuery(query: string): Promise<{
             ${semanticResult?.context}
         `;
         
-        const response = await llmService.queryLlm(
+        const response = await appContext.services.llmService.queryLlm(
             SYS_PROMPT,
             prompt,
             "deepseek/deepseek-chat"

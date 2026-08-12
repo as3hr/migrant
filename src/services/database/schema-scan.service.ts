@@ -1,6 +1,6 @@
 import {
+  appContext,
   databaseToKnowledgeDocuments,
-  embeddingService,
   getEnums,
   getExtensions,
   getFunctions,
@@ -14,7 +14,6 @@ import {
   type SchemaGraph
 } from "@src/exports.ts";
 import { getMigrations } from "@src/infrastructure/db/introspection/migration.query.ts";
-import { dbService } from "./database_service.ts";
 
 export async function startScan(): Promise<void> {
   try {
@@ -83,13 +82,13 @@ async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
 
 async function createEmbeddingsInTheDb(documents: KnowledgeDocument[]) {
   try { 
-    const embeddings = await embeddingService.createEmbeddings(
+    const embeddings = await appContext.services.embeddingService.createEmbeddings(
       documents.map(d => d.content)
     );
     if (embeddings.length > 0) {
       await Promise.all(
         embeddings.map((embedding, index) =>
-          dbService.createEmbeddingsInDatabase(
+          appContext.services.databaseService.createEmbeddingsInDatabase(
             embedding,
             documents[index]!
           )

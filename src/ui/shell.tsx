@@ -1,18 +1,16 @@
-import type { AskOptions, CommandContext } from "@src/exports.ts";
+import { appContext, type AskOptions, type CommandContext } from "@src/exports.ts";
 import { supabase } from "@src/infrastructure/clients/supabase.client.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
-import { authService } from "@src/services/auth/auth_service.ts";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { answerQuestion } from "./commands/ask.command.ts";
-import { commandRegistry } from "./commands/index.ts";
 import {
   errorMessage,
   parseCommandInput,
   requireAuth,
   runCommand,
-} from "./commands/registry.ts";
+} from "./commands/command_helpers.ts";
 import { Output, type OutputItem } from "./components/output.tsx";
 import { Prompt } from "./components/prompt.tsx";
 import { Spinner } from "./components/spinner.tsx";
@@ -62,7 +60,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     setDatabase(pool.dbId ?? undefined);
   };
 
-  const createContext = (): CommandContext => ({
+  const createCommandContext = (): CommandContext => ({
     ask: (label, options) =>
       new Promise<string>((resolve) => {
         askResolver.current = resolve;
@@ -78,12 +76,12 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   });
 
   const executeInput = async (value: string) => {
-    const ctx = createContext();
+    appContext.createCommandContext(createCommandContext());
     const parsed = parseCommandInput(value);
 
     try {
       if (parsed) {
-        const command = commandRegistry.get(parsed.name);
+        const command = appContext.commandRegistry.get(parsed.name);
 
         if (!command) {
           append({
@@ -98,7 +96,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
         }
 
         startRunning(command.busyLabel ?? "Working");
-        await runCommand(command, parsed.args, ctx);
+        await runCommand(command, parsed.args);
 
         if (!(command.name === "clear")) {
           append({ type: "blank" });
@@ -106,7 +104,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
       } else {
         startRunning("Thinking");
         await requireAuth();
-        await answerQuestion(value, ctx);
+        await answerQuestion(value);
         append({ type: "blank" });
       }
     } catch (error) {
@@ -149,7 +147,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     let active = true;
 
     void (async () => {
-      if (await authService.checkLoginGuard() && active) {
+      if (await appContext.services.authService.checkLoginGuard() && active) {
         void refreshStatus();
       }
     })();

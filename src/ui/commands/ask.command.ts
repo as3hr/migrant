@@ -1,10 +1,10 @@
-import type { CommandContext, CommandDefinition } from "@src/exports.ts";
+import { appContext, type CommandDefinition } from "@src/exports.ts";
 import { userQuery } from "@src/services/query/user_query_service.ts";
 
 export async function answerQuestion(
-  question: string,
-  ctx: CommandContext
+  question: string
 ): Promise<void> {
+  const ctx = appContext.commandCtx!; 
   ctx.log("Migrant");
   ctx.log("");
 
@@ -27,10 +27,10 @@ export const askCommand: CommandDefinition = {
   usage: "/ask <question>",
   requiresAuth: true,
   busyLabel: "Thinking...",
-  execute: async (args, ctx) => {
+  execute: async (args) => {
     if (!args.trim()) {
       throw new Error("Usage: /ask <question>");
     }
-    await answerQuestion(args.trim(), ctx);
+    await answerQuestion(args.trim());
   },
 };

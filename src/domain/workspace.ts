@@ -54,5 +54,3 @@ export class WorkSpace {
         });        
     }
 }
-
-export const userWorkSpace = new WorkSpace();

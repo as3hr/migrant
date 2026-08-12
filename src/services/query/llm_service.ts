@@ -28,5 +28,3 @@ export class LlmService {
         }
     }
 }
-
-export const llmService = new LlmService();
