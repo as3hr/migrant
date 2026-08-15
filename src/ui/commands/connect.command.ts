@@ -16,7 +16,6 @@ async function connectDb(ctx: CommandContext) {
     (await ctx.ask("Connection String", { placeholder: "postgres://username:password@host:port/database" })).trim() ||
     "localhost";
   
-  ctx.log("Connecting...");
   ctx.busy("Connecting...");
 
   const isDbExists = appContext.workspace.dbExists(connectionString);

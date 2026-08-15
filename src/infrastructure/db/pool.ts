@@ -20,6 +20,7 @@ export class PoolConnector {
             return;
         }
         this.pool.end();
+        appContext.workspace.removeDbFromWorkSpace(this.dbId!);
         this.pool = null;
         this.dbId = null;
         this.dbUrl = null;

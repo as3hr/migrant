@@ -15,38 +15,52 @@ interface PromptProps {
   mask?: string;
 }
 
-export function Prompt(props: PromptProps): JSX.Element {
+function buildContext(props: PromptProps): string | null {
+  if (props.label) return null;
   const username = props.user?.split("@")[0];
+  const dbSegment = props.databases?.length
+    ? props.databases.join(", ")
+    : null;
+  if (!username && !dbSegment) return null;
+  return [username, dbSegment ? `[${dbSegment}]` : null].filter(Boolean).join("  ");
+}
 
-  const promptLabel =
-    props.label ??
-    [
-      username ? `$${username}` : null,
-      props.databases?.length
-        ? `[${props.databases.join(", ")}]`
-        : null,
-      ">",
-    ]
-      .filter(Boolean)
-      .join(" ");
+export function Prompt(props: PromptProps): JSX.Element {
+  const context = buildContext(props);
+  const placeholder = props.placeholder ?? "Ask anything about your schema...";
 
   return (
-    <Box>
-      <Text color="cyan">{promptLabel}</Text>
-      <Text> </Text>
+    <Box flexDirection="column" alignContent="center">
 
-      <TextInput
-        value={props.value}
-        focus
-        onChange={props.onChange}
-        onSubmit={props.onSubmit}
-        {...(props.placeholder !== undefined
-          ? { placeholder: props.placeholder }
-          : {})}
-        {...(props.mask !== undefined
-          ? { mask: props.mask }
-          : {})}
-      />
+      {context && (
+        <Box marginBottom={1}>
+          <Text color="#3a3a3a">{context}</Text>
+        </Box>
+      )}
+
+      {props.label && (
+        <Box marginBottom={1}>
+          <Text color="#5a5a5a">{props.label}</Text>
+        </Box>
+      )}
+
+      <Box
+        borderStyle="round"
+        borderColor="#2a2a2a"
+        paddingX={2}
+        paddingY={0}
+      >
+        <Text color="#3d7a5c">{"$ "}</Text>
+        <TextInput
+          value={props.value}
+          focus
+          onChange={props.onChange}
+          onSubmit={props.onSubmit}
+          placeholder={placeholder}
+          {...(props.mask !== undefined ? { mask: props.mask } : {})}
+        />
+      </Box>
+
     </Box>
   );
 }

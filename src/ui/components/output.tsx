@@ -1,4 +1,4 @@
-import { Text } from "ink";
+import { Box, Text } from "ink";
 import type { JSX } from "react";
 
 export type OutputItem =
@@ -11,14 +11,36 @@ export type OutputItem =
 export function Output({ item }: { item: OutputItem }): JSX.Element {
   switch (item.type) {
     case "command":
-      return <Text color="gray">&gt; {item.line}</Text>;
+      return (
+        <Box>
+          <Text color="#3d7a5c" dimColor>{">"}</Text>
+          <Text> </Text>
+          <Text color="#5a5a5a">{item.line}</Text>
+        </Box>
+      );
+
     case "success":
-      return <Text color="green">✓ {item.text}</Text>;
+      return (
+        <Box>
+          <Text color="#3d7a5c">{"✓"}</Text>
+          <Text> </Text>
+          <Text color="#e8e8e8">{item.text}</Text>
+        </Box>
+      );
+
     case "error":
-      return <Text color="red">✗ {item.text}</Text>;
+      return (
+        <Box>
+          <Text color="#c0392b">{"✗"}</Text>
+          <Text> </Text>
+          <Text color="#e8e8e8">{item.text}</Text>
+        </Box>
+      );
+
     case "blank":
       return <Text> </Text>;
+
     case "text":
-      return <Text>{item.text}</Text>;
+      return <Text color="#a0a0a0">{item.text}</Text>;
   }
 }

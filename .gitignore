@@ -7,3 +7,4 @@ scan.sh
 logs/*
 .local
 pointers.txt
+migrant.db*

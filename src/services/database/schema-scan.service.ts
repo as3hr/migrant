@@ -1,13 +1,18 @@
 import {
   appContext,
+  databaseToKnowledgeDocuments,
   getEnums,
+  getExtensions,
   getFunctions,
+  getMigrations,
   getSchemas,
   getSequences,
   getTables,
   getTriggers,
   getViews,
+  pool,
   type CommandContext,
+  type DatabaseGraph,
   type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
@@ -32,22 +37,23 @@ export async function startScan(ctx: CommandContext): Promise<void> {
       }
     }
 
-    // const extensions = await getExtensions();
-    // const migrations = await getMigrations();
+    const extensions = await getExtensions();
+    const migrations = await getMigrations();
 
-    // const result: DatabaseGraph = {
-    //   schemas: schemaGraphs,
-    //   extensions,
-    //   migrations,
-    //   generatedAt: new Date().toISOString(),
-    // }
+    const result: DatabaseGraph = {
+      schemas: schemaGraphs,
+      extensions,
+      migrations,
+      generatedAt: new Date().toISOString(),
+    }
 
-    // const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-    // await createEmbeddingsInTheDb(dbKnowledgeDocuments);
+    const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
+    await createEmbeddingsInTheDb(dbKnowledgeDocuments);
 
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
-
+    appContext.workspace.setLastScanTimeOfDb(pool.dbId ?? '');
+    
   } catch (error) {
     console.error("Error scanning database:", error);
   }

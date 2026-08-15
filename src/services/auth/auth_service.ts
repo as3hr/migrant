@@ -1,15 +1,16 @@
-import { BASE_URL, supabase } from "@src/exports.ts";
+import { BASE_URL, LocalSessionRepository, supabase } from "@src/exports.ts";
 import type { User } from "@supabase/supabase-js";
-import fs from "fs";
 import getPort from "get-port";
 import http from "http";
 import open from "open";
-import path from "path";
-
-const LOCAL_DIR = path.join(process.cwd(), ".local");
-const SESSION_FILE = path.join(LOCAL_DIR, "session.json");
 
 export class AuthService {
+  private repo: LocalSessionRepository;
+
+  constructor() {
+    this.repo = new LocalSessionRepository();
+  }
+
   async authenticateUser() {
     try {
       const port = await getPort({ port: 3000 });
@@ -104,7 +105,7 @@ export class AuthService {
               );
             }
   
-            this.saveSessionToFile(data.session);
+            this.saveSession(data.session);
   
             res.writeHead(200, {
               "Content-Type": "application/json",
@@ -151,20 +152,19 @@ export class AuthService {
     });
   }
 
-  private saveSessionToFile(session: any) {
-    if (!fs.existsSync(LOCAL_DIR)) {
-      fs.mkdirSync(LOCAL_DIR, { recursive: true });
-    }
-    fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2), "utf-8");
+  private saveSession(session: any) {
+    const sessionData = JSON.stringify(session, null, 2);
+    this.repo.setSession(session.user.id, sessionData);
   }
 
   async checkLoginGuard(): Promise<boolean> {
-    if (!fs.existsSync(SESSION_FILE)) {
+    const row = this.repo.getUserSession();
+    if (!row) {
       return false;
     }
 
     try {
-      const sessionData = JSON.parse(fs.readFileSync(SESSION_FILE, "utf-8"));
+      const sessionData = JSON.parse(row.session_data);
       
       const { data, error } = await supabase.auth.setSession({
         access_token: sessionData.access_token,
@@ -175,7 +175,7 @@ export class AuthService {
         return false;
       }
 
-      this.saveSessionToFile(data.session);
+      this.saveSession(data.session);
       return true;
     } catch {
       return false;
@@ -184,15 +184,23 @@ export class AuthService {
 
   async getCurrentUser(): Promise<User | null> {
     try { 
-      const { data } = await supabase.auth.getSession();
+      let { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        const restored = await this.checkLoginGuard();
+        if (restored) {
+          const fallback = await supabase.auth.getSession();
+          data = fallback.data;
+        }
+      }
+
       if (data.session && data.session.user) {
-        const user = data?.session?.user;
-        return user; 
+        return data.session.user; 
       }
       return null;
     }
     catch (e) {
-      console.log(`Error in fetching user`, e);
+      console.error(`Error in fetching user:`, e);
       return null;
     }
   }

@@ -12,6 +12,9 @@ export const loginCommand: CommandDefinition = {
     }
 
     const user = await appContext.services.authService.getCurrentUser();
-    ctx.success(user ? `Logged in as ${user.email}` : "Logged in");
+    if (user) {
+      ctx.success(`Successfully Logged in as ${user.email}!`);
+      // here we store users session locally.
+    }
   },
 };
