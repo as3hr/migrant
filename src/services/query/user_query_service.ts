@@ -1,11 +1,8 @@
-import type { ChatContentItems } from "@openrouter/sdk/models";
-import { appContext, SYS_PROMPT } from "@src/exports.ts";
+import { appContext, SYS_PROMPT, type CommandContext } from "@src/exports.ts";
 
-export async function userQuery(query: string): Promise<{
-    Question: string;
-    Answer: string | ChatContentItems[];
-} | null> {
+export async function userQuery(query: string, ctx: CommandContext) {
     try {
+        let response = '';
         const semanticResult = await appContext.services.ragService.performSemanticSearch(query);
 
         if (!semanticResult) {
@@ -32,26 +29,23 @@ export async function userQuery(query: string): Promise<{
             ${semanticResult?.context}
         `;
         
-        const response = await appContext.services.llmService.queryLlm(
+        const stream = appContext.services.llmService.streamLlm(
             SYS_PROMPT,
             prompt,
-            "deepseek/deepseek-chat"
+            "deepseek/deepseek-chat",
         );
 
-        if (response && response.choices && response?.choices.length > 0) {
-            const answer = response?.choices[0]?.message.content;
-            if (answer) {
-                const result = {
-                    Question: query,
-                    Answer: answer,
-                }
-                return result;
+        let firstChunk = true;
+        for await (const chunk of stream) {
+            response += chunk;
+            if (firstChunk) {
+                ctx.log(response);
+                firstChunk = false;
+            } else {
+                ctx.replaceLast(response);
             }
-            return null;
-        } else {
-            console.log('No response from llm found or an error', response);
-            return null;
         }
+
     } catch (error) {
         console.log('Error in userQuery func', error);     
         return null;

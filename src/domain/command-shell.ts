@@ -21,6 +21,7 @@ export interface CommandDefinition {
   export interface CommandContext {
     ask(label: string, options?: AskOptions): Promise<string>;
     log(text: string): void;
+    replaceLast(text: string): void;
     success(text: string): void;
     error(text: string): void;
     clear(): void;

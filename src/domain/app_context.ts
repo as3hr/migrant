@@ -1,5 +1,4 @@
 import {
-    askCommand,
     AuthService,
     clearCommand,
     CommandRegistry,
@@ -44,7 +43,6 @@ class AppContext {
     
       registry.register(loginCommand);
       registry.register(connectCommand);
-      registry.register(askCommand);
       registry.register(clearCommand);
       registry.register(exitCommand);
       registry.register(createHelpCommand(registry));

@@ -1,9 +1,8 @@
-import { appContext, type AskOptions, type CommandContext } from "@src/exports.ts";
+import { answerQuestion, appContext, type AskOptions, type CommandContext } from "@src/exports.ts";
 import { supabase } from "@src/infrastructure/clients/supabase.client.ts";
-import { Box, Text } from "ink";
+import { Box } from "ink";
 import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
-import { answerQuestion } from "./commands/ask.command.ts";
 import {
   errorMessage,
   parseCommandInput,
@@ -47,6 +46,19 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     setOutputs((previous) => [...previous, item]);
   };
 
+  const replaceLast = (text: string) => {
+    setOutputs((previous) => {
+      if (previous.length === 0) {
+        return [{ type: "text", text }];
+      }
+      const last = previous[previous.length - 1]!;
+      if (last.type === "text") {
+        return [...previous.slice(0, -1), { type: "text", text }];
+      }
+      return [...previous, { type: "text", text }];
+    });
+  };
+
   const startRunning = (label: string) => {
     busyLabel.current = label;
     setRun({ kind: "running", label });
@@ -67,6 +79,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
         setRun({ kind: "form", label });
       }),
     log: (text) => append({ type: "text", text }),
+    replaceLast,
     success: (text) => append({ type: "success", text }),
     error: (text) => append({ type: "error", text }),
     clear: () => setOutputs([]),
@@ -101,6 +114,8 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
         if (!(command.name === "clear")) {
           append({ type: "blank" });
         }
+      } else if(value === 'clear') {
+        ctx.clear();
       } else {
         startRunning("Thinking");
         await requireAuth();
@@ -171,10 +186,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
 
   return (
     <Box flexDirection="column">
-      <Text color="cyan" bold>
-        migrant
-      </Text>
-
       <Box flexDirection="column">
         {outputs.map((item, index) => (
           <Output key={index} item={item} />
