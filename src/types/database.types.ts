@@ -66,9 +66,9 @@ export type Database = {
           created_at: string
           database_id: string
           document_type: string
-          embedding: string | null
+          embedding: string
           embedding_model: string
-          id: number
+          id: string
           metadata: Json
         }
         Insert: {
@@ -76,24 +76,24 @@ export type Database = {
           created_at?: string
           database_id?: string
           document_type: string
-          embedding?: string | null
+          embedding: string
           embedding_model: string
-          id?: number
-          metadata?: Json
+          id?: string
+          metadata: Json
         }
         Update: {
           content?: string
           created_at?: string
           database_id?: string
           document_type?: string
-          embedding?: string | null
+          embedding?: string
           embedding_model?: string
-          id?: number
+          id?: string
           metadata?: Json
         }
         Relationships: [
           {
-            foreignKeyName: "documents_database_id_fkey"
+            foreignKeyName: "documentss_database_id_fkey"
             columns: ["database_id"]
             isOneToOne: false
             referencedRelation: "Database"
@@ -107,13 +107,18 @@ export type Database = {
     }
     Functions: {
       match_documents: {
-        Args: { match_count?: number; query_embedding: string }
+        Args: {
+          match_count: number
+          query_embedding: string
+          target_database_id: string
+        }
         Returns: {
           content: string
+          database_id: string
           distance: number
           document_type: string
           embedding_model: string
-          id: number
+          id: string
           metadata: Json
         }[]
       }

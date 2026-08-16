@@ -23,7 +23,7 @@ export class LocalSessionRepository {
     }
 
     setSession(userId: string, sessionData: string): void { 
-        this.sessionInsertStmt.run(userId, sessionData);
+        this.sessionInsertStmt.run(userId, sessionData); 
     }
 
     getUserSession() { 

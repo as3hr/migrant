@@ -1,14 +1,17 @@
-import { BASE_URL, LocalSessionRepository, supabase } from "@src/exports.ts";
+import { appContext, BASE_URL, LocalSessionRepository, LocalWorkspaceRepository, supabase, type CommandContext } from "@src/exports.ts";
+import { credentialStore } from "@src/infrastructure/security/credential_store.ts";
 import type { User } from "@supabase/supabase-js";
 import getPort from "get-port";
 import http from "http";
 import open from "open";
 
 export class AuthService {
-  private repo: LocalSessionRepository;
+  private sessionRepo: LocalSessionRepository;
+  private workspaceRepo: LocalWorkspaceRepository;
 
   constructor() {
-    this.repo = new LocalSessionRepository();
+    this.sessionRepo = new LocalSessionRepository();
+    this.workspaceRepo = new LocalWorkspaceRepository();
   }
 
   async authenticateUser() {
@@ -154,11 +157,11 @@ export class AuthService {
 
   private saveSession(session: any) {
     const sessionData = JSON.stringify(session, null, 2);
-    this.repo.setSession(session.user.id, sessionData);
+    this.sessionRepo.setSession(session.user.id, sessionData);
   }
 
   async checkLoginGuard(): Promise<boolean> {
-    const row = this.repo.getUserSession();
+    const row = this.sessionRepo.getUserSession();
     if (!row) {
       return false;
     }
@@ -203,5 +206,38 @@ export class AuthService {
       console.error(`Error in fetching user:`, e);
       return null;
     }
+  }
+
+  async logOut(ctx: CommandContext) {
+    const user = await this.getCurrentUser();
+  
+    if (!user) {
+      ctx.exit();
+      return;
+    }
+  
+    ctx.log("Removing saved database credentials...");
+  
+    const connectionKeys =
+      this.workspaceRepo.getDbsConnectionKeys(user.id);
+  
+    await Promise.all(
+      connectionKeys.map((key) => credentialStore.delete(key))
+    );
+  
+    ctx.log("Removing workspaces and session...");
+  
+    for (const db of appContext.workspace.databases) {
+      this.workspaceRepo.deleteWorkspaceDb(db.id);
+    }
+  
+    this.sessionRepo.deleteSession(user.id);
+    await supabase.auth.signOut();
+  
+    appContext.workspace.databases = [];
+    appContext.workspace.activeDbId = "";
+  
+    ctx.success("Logged out successfully.");
+    ctx.exit();
   }
 }

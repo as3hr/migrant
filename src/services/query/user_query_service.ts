@@ -1,9 +1,9 @@
 import { appContext, SYS_PROMPT, type CommandContext } from "@src/exports.ts";
 
-export async function userQuery(query: string, ctx: CommandContext) {
+export async function userQuery(query: string, databaseId: string, ctx: CommandContext) {
     try {
         let response = '';
-        const semanticResult = await appContext.services.ragService.performSemanticSearch(query);
+        const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
 
         if (!semanticResult) {
             console.log('Null returned in semantic result');

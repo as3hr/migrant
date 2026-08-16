@@ -68,6 +68,12 @@ export class LocalWorkspaceRepository {
         return data.filter((row) => row != null);
     }
 
+    getDbsConnectionKeys(user_id: string): string[] {
+        const rows = this.workspaceDbSelectStmt.all(user_id) as WorkspaceRow[];
+        const data = rows.map((row) => row.connection_string_key);
+        return data;
+    }
+
     deleteWorkspaceDb(id: string): boolean {
         const info = this.workspaceDbDeleteStmt.run(id);
         return info.changes > 0;

@@ -8,6 +8,7 @@ import {
     exitCommand,
     LlmService,
     loginCommand,
+    logoutCommand,
     RagService,
     WorkSpace,
     type CommandContext
@@ -45,6 +46,7 @@ class AppContext {
       registry.register(connectCommand);
       registry.register(clearCommand);
       registry.register(exitCommand);
+      registry.register(logoutCommand);
       registry.register(createHelpCommand(registry));
     
       return registry;

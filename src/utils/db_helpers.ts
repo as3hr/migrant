@@ -1,5 +1,5 @@
 export function getDbName(dbUrl: string): string {
     const url = new URL(dbUrl);
-    const dbName = url.pathname.slice(1);
+    const dbName = url.hostname;
     return dbName;
 }
