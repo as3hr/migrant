@@ -1,4 +1,3 @@
-````markdown
 # Migrant
 
 Migrant is a developer tool for understanding databases and the systems built around them.
