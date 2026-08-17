@@ -6,5 +6,4 @@ creds.txt
 scan.sh
 logs/*
 .local
-pointers.txt
 migrant.db*
