@@ -1,10 +1,19 @@
-import { appContext, pool, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
-import { userQuery } from "@src/services/query/user_query_service.ts";
+import { appContext, getSchemaFingerprint, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
+import { userQuery } from "@src/services/query/user_query.service.ts";
 
 export async function answerQuestion(
   question: string,
   ctx: CommandContext,
 ): Promise<void> {
+  const database = await resolveDatabase(ctx);
+  if (!database) {
+    return;
+  }
+  await ensureIndexFresh(database, ctx);
+  await userQuery(question, database.id, ctx);
+}
+
+async function resolveDatabase(ctx: CommandContext): Promise<DatabaseCollection | undefined> {
   const databases = appContext.workspace.databases;
 
   if (databases.length === 0) {
@@ -15,8 +24,7 @@ export async function answerQuestion(
   }
 
   if (databases.length === 1) {
-    await scanAndFetch(question, databases[0]!, ctx);
-    return;
+    return databases[0];
   }
 
   const dbMap = new Map<number, DatabaseCollection>();
@@ -40,31 +48,42 @@ export async function answerQuestion(
     return;
   }
 
-  await scanAndFetch(question, database, ctx);
+  return database;
 }
 
-async function scanAndFetch(
-  question: string,
+async function ensureIndexFresh(
   database: DatabaseCollection,
   ctx: CommandContext
-) {
-  if (!database.lastScannedAt) {
-    // later we have to decide when to scan the whole structure and when not too.
-    // maybe we only fetch the history of db changes and then decide if the structure has to be updated
-    // if it has to be updated we should not update the whole documents, we should replace the relevant ones.
-    ctx.busy("Connecting...");
+): Promise<void> {
+  const liveFingerprint = await getSchemaFingerprint();
 
-    pool.close();
-    await pool.connect(database.connectionString);
+  const isStale =
+    database.indexStatus !== 'ready' ||
+    database.schemaFingerprint !== liveFingerprint;
 
-    ctx.busy("Scanning database...");
+  if (!isStale) return;
+
+  ctx.busy("Schema changed, updating knowledge index...");
+  await reindexDatabase(database, liveFingerprint, ctx);
+}
+
+async function reindexDatabase(
+  database: DatabaseCollection,
+  newFingerprint: string,
+  ctx: CommandContext
+): Promise<void> {
+  appContext.workspace.updateDb(database.id, { indexStatus: 'indexing' });
+
+  try {
     await startScan(ctx);
-
-    appContext.workspace.setLastScanTimeOfDb(database.id);
-
-    ctx.success("Scanned database successfully!");
+    appContext.workspace.updateDb(database.id, {
+      schemaFingerprint: newFingerprint,
+      indexStatus: 'ready',
+      indexVersion: database.indexVersion + 1,
+      lastScannedAt: new Date(),
+    });
+  } catch (err) {
+    appContext.workspace.updateDb(database.id, { indexStatus: 'failed' });
+    throw err;
   }
-
-  ctx.busy("Analyzing query...");
-  await userQuery(question, database.id, ctx);
 }

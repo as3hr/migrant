@@ -8,7 +8,10 @@ interface WorkspaceRow {
     name: string;
     connection_string_key: string;
     type: string;
+    schema_fingerprint: string | null;
     last_scanned_at?: string | null; 
+    index_status: string;
+    index_version: number;
 }
 
 export class LocalWorkspaceRepository {
@@ -18,7 +21,7 @@ export class LocalWorkspaceRepository {
     
     constructor() {
         this.workspaceDbInsertStmt = sqlLite.prepare(
-            'INSERT OR REPLACE INTO databases (db_id, user_id, name, connection_string_key, type, last_scanned_at) VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT OR REPLACE INTO databases (db_id, user_id, name, connection_string_key, schema_fingerprint, type, last_scanned_at, index_status, index_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         this.workspaceDbSelectStmt = sqlLite.prepare(
             'SELECT * FROM databases WHERE user_id = ?'
@@ -40,9 +43,12 @@ export class LocalWorkspaceRepository {
             db.id, 
             userId, 
             db.name, 
-            connectionStringKey, 
+            connectionStringKey,
+            db.schemaFingerprint,
             db.type, 
-            lastScannedStr
+            lastScannedStr,
+            db.indexStatus,
+            db.indexVersion,
         );
     }
 
@@ -59,9 +65,12 @@ export class LocalWorkspaceRepository {
                 name: row.name,
                 connectionString: value,
                 type: row.type as DatabaseType,
+                schemaFingerprint: row.schema_fingerprint,
                 lastScannedAt: row.last_scanned_at
                   ? new Date(row.last_scanned_at)
                   : undefined,
+                indexStatus: row.index_status as 'none' | 'indexing' | 'ready' | 'failed',
+                indexVersion: row.index_version,
               };
             })
         );

@@ -1,4 +1,4 @@
-import { getDbName, LocalSessionRepository } from "@src/exports.ts";
+import { getDbName, getSchemaFingerprint, LocalSessionRepository } from "@src/exports.ts";
 import { LocalWorkspaceRepository } from "@src/local/repositories/local_workspace.repository.ts";
 
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";
@@ -8,11 +8,13 @@ export interface DatabaseCollection {
     name: string;
     connectionString: string;
     type: DatabaseType;
+    schemaFingerprint: string | null;
     lastScannedAt?: Date | undefined;
+    indexStatus: 'none' | 'indexing' | 'ready' | 'failed';
+    indexVersion: number; 
 }
 
 export class WorkSpace { 
-    activeDbId: string = '';
     databases: DatabaseCollection[] = [];
     private repo: LocalWorkspaceRepository;
     private sessionRepo: LocalSessionRepository;
@@ -32,19 +34,22 @@ export class WorkSpace {
 
     async addDbToWorkspace(dbUrl: string, dbId: string) {
         const row = this.sessionRepo.getUserSession();
+        const schemaFingerPrint = await getSchemaFingerprint();
         if (!row) return;
+        if (this.dbExists(dbUrl)) {
+            this.removeDbFromWorkSpace(dbId);
+        }
         const newDb: DatabaseCollection = {
             id: dbId,
             name: getDbName(dbUrl),
             connectionString: dbUrl,
             type: "postgres",
+            schemaFingerprint: schemaFingerPrint,
+            indexStatus: 'none',
+            indexVersion: 1,
         };
         this.databases.push(newDb);    
         await this.repo.setWorkspaceDb(newDb, row.user_id);
-    }
-
-    setActiveDbId(dbId: string): void {
-        this.activeDbId = dbId;
     }
 
     removeDbFromWorkSpace(dbId: string): void {
@@ -52,14 +57,14 @@ export class WorkSpace {
         this.repo.deleteWorkspaceDb(dbId);
     }
 
-    setLastScanTimeOfDb(dbId: string): void {
+    updateDb(dbId: string, dbData?: Partial<DatabaseCollection>): void {
         const row = this.sessionRepo.getUserSession();
         if (!row) return;
         this.databases = this.databases.map((db) => {
             if (db.id === dbId) {
                 const updatedDb = {
                     ...db,
-                    lastScannedAt: new Date()
+                    ...dbData,
                 };
                 
                 this.repo.setWorkspaceDb(updatedDb, row.user_id);

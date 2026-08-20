@@ -235,7 +235,6 @@ export class AuthService {
     await supabase.auth.signOut();
   
     appContext.workspace.databases = [];
-    appContext.workspace.activeDbId = "";
   
     ctx.success("Logged out successfully.");
     ctx.exit();

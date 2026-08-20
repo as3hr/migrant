@@ -5,8 +5,7 @@ export type KnowledgeDocumentType =
     | 'enum'
     | 'trigger'
     | 'sequence'
-    | 'extension'
-    | 'migration';
+    | 'extension';
 
 export interface KnowledgeDocument {
   id: string;

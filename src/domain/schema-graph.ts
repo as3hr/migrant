@@ -124,15 +124,6 @@
     name: string;
     version: string;
   }
-
-  export interface Migration {
-    id: string;
-    name: string;
-    appliedAt: string | null;
-    source: "supabase";
-  }
-  
-  
   // ==============================
   // Schema
   // ==============================
@@ -151,6 +142,5 @@ export interface SchemaGraph {
 export interface DatabaseGraph {
   schemas: SchemaGraph[];
   extensions: Extension[];
-  migrations: Migration[];
   generatedAt: string;
 }

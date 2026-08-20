@@ -17,8 +17,20 @@ sqlLite.exec(`
     user_id TEXT,
     name TEXT,
     connection_string_key TEXT,
+    schema_fingerprint TEXT,
     type TEXT,
     last_scanned_at DATETIME,
+    index_status TEXT,
+    index_version INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+try {
+  sqlLite.exec(`ALTER TABLE databases DROP COLUMN migrations;`);
+  sqlLite.exec(`ALTER TABLE databases ADD COLUMN schema_fingerprint TEXT;`);
+  sqlLite.exec(`ALTER TABLE databases ADD COLUMN index_status TEXT;`);
+  sqlLite.exec(`ALTER TABLE databases ADD COLUMN index_version INT;`);
+} catch (e: any) {
+  if (!e?.message?.includes('duplicate column name')) throw e;
+}

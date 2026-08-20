@@ -16,4 +16,4 @@ export * from "./introspection/sequences.query.ts";
 
 export * from "./introspection/extensions.query.ts";
 
-export * from "./introspection/migration.query.ts";
+export * from "./introspection/schema_fingerprint_query.ts";

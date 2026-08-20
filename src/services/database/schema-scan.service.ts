@@ -4,7 +4,6 @@ import {
   getEnums,
   getExtensions,
   getFunctions,
-  getMigrations,
   getSchemas,
   getSequences,
   getTables,
@@ -38,12 +37,10 @@ export async function startScan(ctx: CommandContext): Promise<void> {
     }
 
     const extensions = await getExtensions();
-    const migrations = await getMigrations();
 
     const result: DatabaseGraph = {
       schemas: schemaGraphs,
       extensions,
-      migrations,
       generatedAt: new Date().toISOString(),
     }
 
@@ -52,8 +49,9 @@ export async function startScan(ctx: CommandContext): Promise<void> {
 
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
-    appContext.workspace.setLastScanTimeOfDb(pool.dbId ?? '');
-    
+    appContext.workspace.updateDb(pool.dbId ?? '', {
+      lastScannedAt: new Date(),
+    });
   } catch (error) {
     console.error("Error scanning database:", error);
   }

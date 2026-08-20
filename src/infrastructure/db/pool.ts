@@ -32,7 +32,6 @@ export class PoolConnector {
             if (dbId) {
                 this.dbId = dbId;
                 appContext.workspace.addDbToWorkspace(this.dbUrl, this.dbId);
-                appContext.workspace.setActiveDbId(this.dbId);
             }
         }
     }

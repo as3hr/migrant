@@ -1,16 +1,18 @@
 import { openRouter, SYS_DEFAULT_MODEL } from "@src/exports.ts";
-import { gateway, generateText, streamText } from 'ai';
+import { generateText, streamText } from 'ai';
 
 export class LlmService {
     async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<String | null> {
         try {
             const { text } = await generateText({
-                model: openRouter(model ?? SYS_DEFAULT_MODEL),
-                messages: [
+                model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
+                instructions: [
                     {
                         role: "system",
                         content: systemPrompt,
                     },
+                ],
+                messages: [
                     {
                         role: "user",
                         content: userPrompt,
@@ -28,26 +30,28 @@ export class LlmService {
     async *streamLlm(systemPrompt: string, userPrompt: string, model?: string) {
         try {
             const result = streamText({
-                model: gateway(model ?? SYS_DEFAULT_MODEL),
-                messages: [
+                model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
+                instructions: [
                     {
                         role: "system",
                         content: systemPrompt,
                     },
+                ],
+                messages: [
                     {
                         role: "user",
                         content: userPrompt,
                     },
                 ],
-              });
-            
+            });
+
             for await (const chunk of result.textStream) {
                 if (chunk) {
                     yield chunk;
                 }
             }
         } catch (llmE) {
-            console.log('Error in streaming llm', llmE);
+            console.error(`Error in streaming llm: ${llmE}`);
         }
     }
 }

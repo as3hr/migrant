@@ -1,5 +1,6 @@
 import {
     appContext,
+    getSchemaFingerprint,
     pool,
     supabase,
     SYS_DEFAULT_EMBEDDING_MODEL,
@@ -60,6 +61,23 @@ export class DatabaseService {
         return inserted.id;
     }
     
+    async updateDatabaseEntry(dbId: string, schemaFingerprint: string): Promise<void> {
+        const { error: error } = await supabase
+            .from("Database")
+            .update({
+                schema_fingerprint: schemaFingerprint,
+            })
+            .eq("id", dbId)
+            .select("*")
+            .single();
+    
+        if (error) {
+            throw new Error(
+                `Failed to update database record for migrations: ${error.message}`,
+            );
+        }
+    }
+
     async createEmbeddingsInDatabase(
         embeddings: number[][],
         knowledgeDocuments: KnowledgeDocument[],
@@ -73,15 +91,19 @@ export class DatabaseService {
           document_type: knowledgeDocuments[index]!.type,
           metadata: knowledgeDocuments[index]!.metadata,
         }));
-      
+        const schemaFingerprint = await getSchemaFingerprint();
+        
+        await this.updateDatabaseEntry(pool.dbId!, schemaFingerprint);
         const { error } = await supabase
-          .from("documents")
-          .insert(rows);
-      
+        .from("documents")
+        .insert(rows);
+        
         if (error) {
-          console.error("Failed to insert embeddings:", error);
-          return false;
+            console.error("Failed to insert embeddings:", error);
+            return false;
         }
+        
+        await supabase.from('documents').delete().eq('database_id', pool.dbId);
       
         return true;
       }

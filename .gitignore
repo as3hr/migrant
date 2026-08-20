@@ -7,3 +7,4 @@ scan.sh
 logs/*
 .local
 migrant.db*
+context.md

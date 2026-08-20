@@ -13,7 +13,7 @@ import {
     WorkSpace,
     type CommandContext
 } from "@src/exports.ts";
-import { DatabaseService } from "@src/services/database/database_service.ts";
+import { DatabaseService } from "@src/services/database/database.service.ts";
 
 interface AppServices {
     authService: AuthService;

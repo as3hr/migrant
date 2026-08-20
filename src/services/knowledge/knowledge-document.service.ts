@@ -3,7 +3,6 @@ import { getTableContent, type DatabaseGraph, type KnowledgeDocument } from "@sr
 export function databaseToKnowledgeDocuments(dbGraph: DatabaseGraph) {
     const schemas = dbGraph.schemas;
     const extensions = dbGraph.extensions;
-    const migrations = dbGraph.migrations;
     let knowledgeDocs: KnowledgeDocument[] = [];
 
     for (const schema of schemas) {
@@ -143,19 +142,6 @@ export function databaseToKnowledgeDocuments(dbGraph: DatabaseGraph) {
             schema: 'N/A',
             content: `Name: ${extension.name}, Version: ${extension.version}`,
             type: 'extension',
-            metadata: {
-                relatedTables: [],
-            },
-        });
-    }
-
-    for (const migration of migrations) {
-        knowledgeDocs.push({
-            id: `Migration: ${migration.id}:${migration.name}`,
-            name: migration.name,
-            schema: 'N/A',
-            content: `Name: ${migration.name}`,
-            type: 'migration',
             metadata: {
                 relatedTables: [],
             },
