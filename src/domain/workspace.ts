@@ -1,4 +1,4 @@
-import { getDbName, getSchemaFingerprint, LocalSessionRepository } from "@src/exports.ts";
+import { LocalSessionRepository } from "@src/exports.ts";
 import { LocalWorkspaceRepository } from "@src/local/repositories/local_workspace.repository.ts";
 
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";
@@ -14,6 +14,15 @@ export interface DatabaseCollection {
     indexVersion: number; 
 }
 
+/**
+ * WorkSpace — pure in-memory runtime state for the connected databases.
+ *
+ * WorkSpace does NOT call Supabase.
+ * WorkSpace does NOT decide when to persist — that is DatabaseRegistryService's job.
+ *
+ * Public persistence API (persistDb) is called explicitly by DatabaseRegistryService
+ * so that all three stores update together.
+ */
 export class WorkSpace { 
     databases: DatabaseCollection[] = [];
     private repo: LocalWorkspaceRepository;
@@ -22,56 +31,59 @@ export class WorkSpace {
     constructor() {
         this.repo = new LocalWorkspaceRepository();
         this.sessionRepo = new LocalSessionRepository();
-        this.getWorkspaceFromCache();
+        this.loadFromCache();
     }
 
-    async getWorkspaceFromCache() {
+    /** Restore workspace databases from SQLite on startup. */
+    async loadFromCache(): Promise<void> {
         const row = this.sessionRepo.getUserSession();
         if (!row) return;
-        const data = await this.repo.getWorkspaceDbs(row.user_id);
-        this.databases = data;
+        this.databases = await this.repo.getWorkspaceDbs(row.user_id);
     }
 
-    async addDbToWorkspace(dbUrl: string, dbId: string) {
+    /** Add a database to the in-memory list. Does NOT persist. */
+    addDb(db: DatabaseCollection): void {
+        this.databases.push(db);
+    }
+
+    /**
+     * Merge a partial patch into an existing database entry in memory.
+     * Also re-persists the updated entry to SQLite.
+     * Does NOT touch Supabase.
+     */
+    async updateDb(dbId: string, patch: Partial<DatabaseCollection>): Promise<void> {
         const row = this.sessionRepo.getUserSession();
-        const schemaFingerPrint = await getSchemaFingerprint();
-        if (!row) return;
-        if (this.dbExists(dbUrl)) {
-            this.removeDbFromWorkSpace(dbId);
-        }
-        const newDb: DatabaseCollection = {
-            id: dbId,
-            name: getDbName(dbUrl),
-            connectionString: dbUrl,
-            type: "postgres",
-            schemaFingerprint: schemaFingerPrint,
-            indexStatus: 'none',
-            indexVersion: 1,
-        };
-        this.databases.push(newDb);    
-        await this.repo.setWorkspaceDb(newDb, row.user_id);
+        const updatedList = await Promise.all(
+            this.databases.map(async (db) => {
+                if (db.id !== dbId) return db;
+                const updated = { ...db, ...patch };
+                if (row) {
+                    await this.repo.setWorkspaceDb(updated, row.user_id);
+                }
+                return updated;
+            })
+        );
+        this.databases = updatedList;
     }
 
-    removeDbFromWorkSpace(dbId: string): void {
+    /**
+     * Persist a database entry to SQLite + keychain.
+     * Called by DatabaseRegistryService after registerConnection.
+     */
+    async persistDb(db: DatabaseCollection): Promise<void> {
+        const row = this.sessionRepo.getUserSession();
+        if (!row) return;
+        await this.repo.setWorkspaceDb(db, row.user_id);
+    }
+
+    /** Remove a database from memory and delete from SQLite. */
+    removeDb(dbId: string): void {
         this.databases = this.databases.filter((db) => db.id !== dbId);
         this.repo.deleteWorkspaceDb(dbId);
     }
 
-    updateDb(dbId: string, dbData?: Partial<DatabaseCollection>): void {
-        const row = this.sessionRepo.getUserSession();
-        if (!row) return;
-        this.databases = this.databases.map((db) => {
-            if (db.id === dbId) {
-                const updatedDb = {
-                    ...db,
-                    ...dbData,
-                };
-                
-                this.repo.setWorkspaceDb(updatedDb, row.user_id);
-                return updatedDb;
-            }
-            return db;
-        });        
+    getDb(dbId: string): DatabaseCollection | undefined {
+        return this.databases.find((db) => db.id === dbId);
     }
 
     dbExists(dbUrl: string): boolean {

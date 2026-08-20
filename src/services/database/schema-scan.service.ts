@@ -4,6 +4,7 @@ import {
   getEnums,
   getExtensions,
   getFunctions,
+  getSchemaFingerprint,
   getSchemas,
   getSequences,
   getTables,
@@ -17,6 +18,12 @@ import {
 } from "@src/exports.ts";
 
 export async function startScan(ctx: CommandContext): Promise<void> {
+  const dbId = pool.dbId;
+  if (!dbId) {
+    ctx.error("No active database connection — cannot scan.");
+    return;
+  }
+
   try {
     const startedAt = Date.now();
     
@@ -30,7 +37,6 @@ export async function startScan(ctx: CommandContext): Promise<void> {
 
     for (const schema of schemas) {
       const graph = await parseSchema(schema);
-      
       if (graph) {
         schemaGraphs.push(graph);
       }
@@ -42,18 +48,37 @@ export async function startScan(ctx: CommandContext): Promise<void> {
       schemas: schemaGraphs,
       extensions,
       generatedAt: new Date().toISOString(),
-    }
+    };
 
     const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-    await createEmbeddingsInTheDb(dbKnowledgeDocuments);
+    const success = await reindexDocuments(dbKnowledgeDocuments);
 
+    if (!success) {
+      ctx.error("Failed to reindex documents — scan results were not persisted.");
+      return;
+    }
+
+    const schemaFingerprint = await getSchemaFingerprint();
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
-    appContext.workspace.updateDb(pool.dbId ?? '', {
-      lastScannedAt: new Date(),
-    });
+
+    // Single call — updates WorkSpace memory, SQLite, and Supabase together.
+    await appContext.services.registryService.updateDatabase(
+      dbId,
+      {
+        schemaFingerprint,
+        indexStatus: "ready",
+        lastScannedAt: new Date(),
+      },
+      {
+        schema_fingerprint: schemaFingerprint,
+      }
+    );
   } catch (error) {
     console.error("Error scanning database:", error);
+    await appContext.services.registryService.updateDatabase(dbId, {
+      indexStatus: "failed",
+    });
   }
 }
 
@@ -68,36 +93,32 @@ async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
       getSequences(schema)
     ]);
 
-    const result = {
-        schema,
-        tables,
-        views,
-        triggers,
-        functions,
-        enums,
-        sequences,
-        generatedAt: new Date().toISOString(),
+    return {
+      schema,
+      tables,
+      views,
+      triggers,
+      functions,
+      enums,
+      sequences,
+      generatedAt: new Date().toISOString(),
     };
-    
-    return result;
   } catch (e) {
-      console.log('Error in schema parser', e);
+    console.log("Error in schema parser", e);
   }
 }
 
-
-async function createEmbeddingsInTheDb(documents: KnowledgeDocument[]) {
+async function reindexDocuments(documents: KnowledgeDocument[]): Promise<boolean> {
   try { 
     const embeddings = await appContext.services.embeddingService.createEmbeddings(
       documents.map(d => d.content)
     );
     if (embeddings.length > 0) {
-      await appContext.services.databaseService.createEmbeddingsInDatabase(
-        embeddings,
-        documents!
-      )
+      return await appContext.services.databaseService.reindexDocuments(embeddings, documents);
     }
-  }  catch (error) { 
-    console.log('Error in creating embeddings');
+    return true;
+  } catch (error) { 
+    console.error("Error creating embeddings:", error);
+    return false;
   }
 }

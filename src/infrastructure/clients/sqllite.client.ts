@@ -26,11 +26,19 @@ sqlLite.exec(`
   );
 `);
 
-try {
-  sqlLite.exec(`ALTER TABLE databases DROP COLUMN migrations;`);
-  sqlLite.exec(`ALTER TABLE databases ADD COLUMN schema_fingerprint TEXT;`);
-  sqlLite.exec(`ALTER TABLE databases ADD COLUMN index_status TEXT;`);
-  sqlLite.exec(`ALTER TABLE databases ADD COLUMN index_version INT;`);
-} catch (e: any) {
-  if (!e?.message?.includes('duplicate column name')) throw e;
+// Idempotent schema migrations — each ALTER is isolated so a
+// "no such column" or "duplicate column" error on one doesn't block others.
+const alterStatements = [
+  `ALTER TABLE databases DROP COLUMN migrations;`,
+  `ALTER TABLE databases ADD COLUMN schema_fingerprint TEXT;`,
+  `ALTER TABLE databases ADD COLUMN index_status TEXT;`,
+  `ALTER TABLE databases ADD COLUMN index_version INT;`,
+];
+
+for (const stmt of alterStatements) {
+  try {
+    sqlLite.exec(stmt);
+  } catch (_e) {
+    // Ignore — column already exists / doesn't exist
+  }
 }

@@ -9,3 +9,5 @@ export * from "./domain/index.ts";
 export * from "./infrastructure/index.ts";
 
 export * from "./utils/index.ts";
+
+export * from "./types/table_types.ts";

@@ -6,9 +6,8 @@ export async function answerQuestion(
   ctx: CommandContext,
 ): Promise<void> {
   const database = await resolveDatabase(ctx);
-  if (!database) {
-    return;
-  }
+  if (!database) return;
+
   await ensureIndexFresh(database, ctx);
   await userQuery(question, database.id, ctx);
 }
@@ -17,9 +16,7 @@ async function resolveDatabase(ctx: CommandContext): Promise<DatabaseCollection 
   const databases = appContext.workspace.databases;
 
   if (databases.length === 0) {
-    ctx.error(
-      "Please connect at least one database using /connect."
-    );
+    ctx.error("Please connect at least one database using /connect.");
     return;
   }
 
@@ -45,7 +42,7 @@ async function resolveDatabase(ctx: CommandContext): Promise<DatabaseCollection 
 
   if (!database) {
     ctx.error("Invalid database selection.");
-    return;
+  return;
   }
 
   return database;
@@ -58,32 +55,19 @@ async function ensureIndexFresh(
   const liveFingerprint = await getSchemaFingerprint();
 
   const isStale =
-    database.indexStatus !== 'ready' ||
+    database.indexStatus !== "ready" ||
     database.schemaFingerprint !== liveFingerprint;
 
   if (!isStale) return;
 
-  ctx.busy("Schema changed, updating knowledge index...");
-  await reindexDatabase(database, liveFingerprint, ctx);
-}
-
-async function reindexDatabase(
-  database: DatabaseCollection,
-  newFingerprint: string,
-  ctx: CommandContext
-): Promise<void> {
-  appContext.workspace.updateDb(database.id, { indexStatus: 'indexing' });
+  ctx.busy("Schema changed — updating knowledge index...");
+  await appContext.services.registryService.updateDatabase(database.id, {
+    indexStatus: "indexing",
+  });
 
   try {
     await startScan(ctx);
-    appContext.workspace.updateDb(database.id, {
-      schemaFingerprint: newFingerprint,
-      indexStatus: 'ready',
-      indexVersion: database.indexVersion + 1,
-      lastScannedAt: new Date(),
-    });
   } catch (err) {
-    appContext.workspace.updateDb(database.id, { indexStatus: 'failed' });
     throw err;
   }
 }

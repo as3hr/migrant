@@ -7,43 +7,35 @@ export class PoolConnector {
     dbId: string | null = null;
 
     async connect(dbUrl: string) {
-        if(this.pool) {
+        if (this.pool) {
             this.close();
         }
         this.dbUrl = dbUrl;
         this.pool = new Pool({ connectionString: dbUrl });
-        await this.addDbToContext();
+        const dbId = await appContext.services.registryService.registerConnection(dbUrl);
+        if (dbId) {
+            this.dbId = dbId;
+        }
     }
 
     close() {
-        if(!this.pool) {
-            return;
-        }
+        if (!this.pool) return;
         this.pool.end();
-        appContext.workspace.removeDbFromWorkSpace(this.dbId!);
+        if (this.dbId) {
+            appContext.workspace.removeDb(this.dbId);
+        }
         this.pool = null;
         this.dbId = null;
         this.dbUrl = null;
     }
 
-    async addDbToContext() {
-        if (this.dbUrl) {
-            const dbId = await appContext.services.databaseService.createDatabaseEntry();
-            if (dbId) {
-                this.dbId = dbId;
-                appContext.workspace.addDbToWorkspace(this.dbUrl, this.dbId);
-            }
-        }
-    }
-
     async query<T extends QueryResultRow = QueryResultRow>(
         query: string, params?: unknown[]
     ): Promise<QueryResult<T>> {
-        if(!this.pool) {
+        if (!this.pool) {
             throw new Error("Database is not connected");
         }
-        const result = await this.pool.query<T>(query, params);
-        return result;
+        return this.pool.query<T>(query, params);
     }
 }
 
