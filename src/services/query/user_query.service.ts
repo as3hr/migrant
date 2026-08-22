@@ -1,40 +1,48 @@
-import { appContext, SYS_PROMPT, type CommandContext } from "@src/exports.ts";
+import { appContext, openRouter, type CommandContext } from "@src/exports.ts";
+import { generateText, Output } from "ai";
+import {
+    buildConversationalPrompt,
+    buildGeneralDbPrompt,
+    buildSchemaRagPrompt,
+    buildSqlGenerationPrompt,
+    CONVERSATIONAL_SYSTEM_PROMPT,
+    GENERAL_DB_SYSTEM_PROMPT,
+    ROUTER_SYSTEM_PROMPT,
+    routerOutputSchema,
+    SCHEMA_RAG_SYSTEM_PROMPT,
+    SQL_GENERATION_SYSTEM_PROMPT,
+    type RouterIntent,
+} from "./prompts/index.ts";
+
+interface AgentPayload {
+    systemPrompt: string;
+    userPrompt: string;
+}
 
 export async function userQuery(query: string, databaseId: string, ctx: CommandContext) {
     try {
-        let response = '';
-        const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
+        const { output } = await generateText({
+            model: openRouter("deepseek/deepseek-chat"),
+            output: Output.object({
+                schema: routerOutputSchema,
+            }),
+            instructions: [
+                {
+                    role: "system",
+                    content: ROUTER_SYSTEM_PROMPT,
+                },
+            ],
+            prompt: query,
+        });
 
-        if (!semanticResult) {
-            console.log('Null returned in semantic result');
-            return null;
-        }
+        const payload = await resolveAgentPayload(output.targetAgent, query, databaseId, ctx);
+        if (!payload) return;
 
-        const prompt = `
-            You are Migrant AI, an expert PostgreSQL database engineer.
-            
-            Your job is to answer ONLY using the supplied database context.
-            
-            Rules:
-            - Do not invent tables or columns.
-            - If the answer is not present, clearly say you don't know.
-            - Mention relationships if relevant.
-            - Be concise and technical.
-            
-            User Question:
-            ${query}
-            
-            Database Context:
-            
-            ${semanticResult?.context}
-        `;
-        
-
-        ctx.log('Working on it...')
+        let response = "";
         const stream = appContext.services.llmService.streamLlm(
-            SYS_PROMPT,
-            prompt,
-            "deepseek/deepseek-chat",
+            payload.systemPrompt,
+            payload.userPrompt,
+            "deepseek/deepseek-chat"
         );
 
         let firstChunk = true;
@@ -47,9 +55,60 @@ export async function userQuery(query: string, databaseId: string, ctx: CommandC
                 ctx.replaceLast(response);
             }
         }
-
     } catch (error) {
-        console.log('Error in userQuery func', error);     
-        return null;
+        console.error("Error in userQuery service:", error);
+        ctx.error("Failed to process your query. Please try again.");
+    }
+}
+
+async function resolveAgentPayload(
+    targetAgent: RouterIntent,
+    query: string,
+    databaseId: string,
+    ctx: CommandContext
+): Promise<AgentPayload | null> {
+    switch (targetAgent) {
+        case "schema-rag": {
+            const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
+            if (!semanticResult?.context) {
+                ctx.log("Could not find relevant schema context for this query. Responding using general knowledge.");
+                return {
+                    systemPrompt: GENERAL_DB_SYSTEM_PROMPT,
+                    userPrompt: buildGeneralDbPrompt(query),
+                };
+            }
+            return {
+                systemPrompt: SCHEMA_RAG_SYSTEM_PROMPT,
+                userPrompt: buildSchemaRagPrompt(query, semanticResult.context),
+            };
+        }
+
+        case "sql-generation": {
+            const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
+            const schemaContext = semanticResult?.context ?? "No specific schema index available.";
+            return {
+                systemPrompt: SQL_GENERATION_SYSTEM_PROMPT,
+                userPrompt: buildSqlGenerationPrompt(query, schemaContext),
+            };
+        }
+
+        case "general-db": {
+            return {
+                systemPrompt: GENERAL_DB_SYSTEM_PROMPT,
+                userPrompt: buildGeneralDbPrompt(query),
+            };
+        }
+
+        case "conversational": {
+            return {
+                systemPrompt: CONVERSATIONAL_SYSTEM_PROMPT,
+                userPrompt: buildConversationalPrompt(query),
+            };
+        }
+
+        default: {
+            ctx.error("Unknown query route encountered.");
+            return null;
+        }
     }
 }

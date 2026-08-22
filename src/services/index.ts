@@ -10,6 +10,11 @@ export * from "./query/llm.service.ts";
 
 export * from "./query/rag.service.ts";
 
+export * from "./query/user_query.service.ts";
+
+export * from "./query/prompts/index.ts";
+
 export * from "./knowledge/file.service.ts";
 
 export * from "./auth/auth.service.ts";
+
