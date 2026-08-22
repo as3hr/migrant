@@ -25,13 +25,3 @@ sqlLite.exec(`
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
-
-// const stmts = [
-  // `ALTER TABLE databases DROP COLUMN indexVersion`,
-// ];
-
-// for (const stmt of stmts) {
-//   try {
-//     sqlLite.exec(stmt);
-//   } catch (_e) {}
-// }

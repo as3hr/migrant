@@ -2,7 +2,7 @@ import { openRouter, SYS_DEFAULT_MODEL } from "@src/exports.ts";
 import { generateText, streamText } from 'ai';
 
 export class LlmService {
-    async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<String | null> {
+    async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<string | null> {
         try {
             const { text } = await generateText({
                 model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),

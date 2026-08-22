@@ -7,14 +7,11 @@ export const loginCommand: CommandDefinition = {
   execute: async (_args, ctx) => {
     await appContext.services.authService.authenticateUser();
 
-    if (!(await appContext.services.authService.checkLoginGuard())) {
-      throw new Error("Authentication failed or was cancelled.");
-    }
-
     const user = await appContext.services.authService.getCurrentUser();
     if (user) {
-      ctx.success(`Successfully Logged in as ${user.email}!`);
-      // here we store users session locally.
+      ctx.success(`Successfully logged in as ${user.email}!`);
+    } else {
+      throw new Error("Authentication failed or was cancelled.");
     }
   },
 };

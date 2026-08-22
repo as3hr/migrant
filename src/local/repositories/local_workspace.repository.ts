@@ -61,12 +61,14 @@ export class LocalWorkspaceRepository {
               };
             })
         );
-        return data.filter((row) => row != null);
+        const uniqueData = Array.from(new Set(data));
+        return uniqueData.filter((row) => row != null);
     }
 
     getLocalDbsConnectionKeys(user_id: string): string[] {
         const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
-        const data = rows.map((row) => row.connectionStringKey);
+        const uniqueData = Array.from(new Set(rows));
+        const data = uniqueData.map((row) => row.connectionStringKey);
         return data;
     }
 

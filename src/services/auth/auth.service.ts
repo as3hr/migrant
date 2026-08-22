@@ -28,7 +28,8 @@ export class AuthService {
 
       await callbackPromise;
     } catch (err: any) {
-        console.error("Login failed:", err.message);
+      console.error("Login failed:", err);
+      throw err;
     }
   }
   
@@ -155,57 +156,53 @@ export class AuthService {
     });
   }
 
-  private saveSession(session: any) {
-    const sessionData = JSON.stringify(session, null, 2);
-    this.sessionRepo.setSession(session.user.id, sessionData);
-  }
-
   async checkLoginGuard(): Promise<boolean> {
-    const row = this.sessionRepo.getUserSession();
-    if (!row) {
-      return false;
-    }
-
     try {
+      const { data: activeData } = await supabase.auth.getSession();
+      if (activeData.session) {
+        return true;
+      }
+
+      const row = this.sessionRepo.getUserSession();
+      if (!row) {
+        return false;
+      }
+
       const sessionData = JSON.parse(row.session_data);
-      
       const { data, error } = await supabase.auth.setSession({
         access_token: sessionData.access_token,
         refresh_token: sessionData.refresh_token,
       });
 
       if (error || !data.session) {
+        this.sessionRepo.deleteSession(row.user_id);
         return false;
       }
 
       this.saveSession(data.session);
       return true;
-    } catch {
+    } catch (e) {
+      console.error("Error in checkLoginGuard:", e);
       return false;
     }
   }
 
   async getCurrentUser(): Promise<User | null> {
-    try { 
-      let { data } = await supabase.auth.getSession();
-      
-      if (!data.session) {
-        const restored = await this.checkLoginGuard();
-        if (restored) {
-          const fallback = await supabase.auth.getSession();
-          data = fallback.data;
-        }
-      }
+    try {
+      const isLoggedIn = await this.checkLoginGuard();
+      if (!isLoggedIn) return null;
 
-      if (data.session && data.session.user) {
-        return data.session.user; 
-      }
+      const { data } = await supabase.auth.getSession();
+      return data.session?.user ?? null;
+    } catch (e) {
+      console.error("Error in fetching current user:", e);
       return null;
     }
-    catch (e) {
-      console.error(`Error in fetching user:`, e);
-      return null;
-    }
+  }
+
+  private saveSession(session: any) {
+    const sessionData = JSON.stringify(session, null, 2);
+    this.sessionRepo.setSession(session.user.id, sessionData);
   }
 
   async logOut(ctx: CommandContext) {

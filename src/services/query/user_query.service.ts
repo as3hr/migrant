@@ -1,16 +1,16 @@
-import { appContext, openRouter, type CommandContext } from "@src/exports.ts";
+import { appContext, getDatabaseContextForUserQuery, openRouter, type CommandContext } from "@src/exports.ts";
 import { generateText, Output } from "ai";
 import {
     buildConversationalPrompt,
+    buildDbOverviewPrompt,
     buildGeneralDbPrompt,
     buildSchemaRagPrompt,
-    buildSqlGenerationPrompt,
     CONVERSATIONAL_SYSTEM_PROMPT,
+    DB_OVERVIEW_PROMPT,
     GENERAL_DB_SYSTEM_PROMPT,
     ROUTER_SYSTEM_PROMPT,
     routerOutputSchema,
     SCHEMA_RAG_SYSTEM_PROMPT,
-    SQL_GENERATION_SYSTEM_PROMPT,
     type RouterIntent,
 } from "./prompts/index.ts";
 
@@ -67,15 +67,13 @@ async function resolveAgentPayload(
     databaseId: string,
     ctx: CommandContext
 ): Promise<AgentPayload | null> {
+    ctx.log(`Routing to target agent: ${targetAgent}`);
     switch (targetAgent) {
         case "schema-rag": {
             const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
             if (!semanticResult?.context) {
-                ctx.log("Could not find relevant schema context for this query. Responding using general knowledge.");
-                return {
-                    systemPrompt: GENERAL_DB_SYSTEM_PROMPT,
-                    userPrompt: buildGeneralDbPrompt(query),
-                };
+                ctx.log("Could not find relevant schema context for this query.");
+                return null;
             }
             return {
                 systemPrompt: SCHEMA_RAG_SYSTEM_PROMPT,
@@ -83,12 +81,15 @@ async function resolveAgentPayload(
             };
         }
 
-        case "sql-generation": {
-            const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
-            const schemaContext = semanticResult?.context ?? "No specific schema index available.";
+        case "db-overview": {
+            const dbOverviewData = await getDatabaseContextForUserQuery(query);
+            if (!dbOverviewData) {
+                ctx.log("Could not retrieve system metadata for database overview.");
+                return null;
+            }
             return {
-                systemPrompt: SQL_GENERATION_SYSTEM_PROMPT,
-                userPrompt: buildSqlGenerationPrompt(query, schemaContext),
+                systemPrompt: DB_OVERVIEW_PROMPT,
+                userPrompt: buildDbOverviewPrompt(query, dbOverviewData),
             };
         }
 
