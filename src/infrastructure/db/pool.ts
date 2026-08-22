@@ -7,15 +7,13 @@ export class PoolConnector {
     dbId: string | null = null;
 
     async connect(dbUrl: string) {
-        if (this.pool) {
-            this.close();
+        if (this.pool && this.dbUrl === dbUrl) {
+            return;
         }
         this.dbUrl = dbUrl;
         this.pool = new Pool({ connectionString: dbUrl });
-        const dbId = await appContext.services.registryService.registerConnection(dbUrl);
-        if (dbId) {
-            this.dbId = dbId;
-        }
+        const dbId = await appContext.services.databaseRegistryService.registerConnection(dbUrl);
+        this.dbId = dbId;
     }
 
     close() {
@@ -30,8 +28,21 @@ export class PoolConnector {
     }
 
     async query<T extends QueryResultRow = QueryResultRow>(
-        query: string, params?: unknown[]
+        query: string,
+        params?: unknown[]
     ): Promise<QueryResult<T>> {
+        if (!this.dbId) {
+            throw new Error("Database is not connected");
+        }
+
+        if (!this.pool) {
+            if (!this.dbUrl) {
+                throw new Error("Database URL is missing");
+            }
+
+            await this.connect(this.dbUrl);
+        }
+        
         if (!this.pool) {
             throw new Error("Database is not connected");
         }

@@ -62,8 +62,7 @@ export async function startScan(ctx: CommandContext): Promise<void> {
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
 
-    // Single call — updates WorkSpace memory, SQLite, and Supabase together.
-    await appContext.services.registryService.updateDatabase(
+    await appContext.services.databaseRegistryService.updateDatabase(
       dbId,
       {
         schemaFingerprint,
@@ -76,7 +75,7 @@ export async function startScan(ctx: CommandContext): Promise<void> {
     );
   } catch (error) {
     console.error("Error scanning database:", error);
-    await appContext.services.registryService.updateDatabase(dbId, {
+    await appContext.services.databaseRegistryService.updateDatabase(dbId, {
       indexStatus: "failed",
     });
   }

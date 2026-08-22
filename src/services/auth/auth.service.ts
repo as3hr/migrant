@@ -219,7 +219,7 @@ export class AuthService {
     ctx.log("Removing saved database credentials...");
   
     const connectionKeys =
-      this.workspaceRepo.getDbsConnectionKeys(user.id);
+      this.workspaceRepo.getLocalDbsConnectionKeys(user.id);
   
     await Promise.all(
       connectionKeys.map((key) => credentialStore.delete(key))
@@ -228,7 +228,7 @@ export class AuthService {
     ctx.log("Removing workspaces and session...");
   
     for (const db of appContext.workspace.databases) {
-      this.workspaceRepo.deleteWorkspaceDb(db.id);
+      this.workspaceRepo.deleteLocalWorkspaceDb(db.id);
     }
   
     this.sessionRepo.deleteSession(user.id);

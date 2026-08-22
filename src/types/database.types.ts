@@ -44,7 +44,6 @@ export type Database = {
           created_at: string
           database_identifier: string | null
           id: string
-          index_version: number | null
           schema_fingerprint: string | null
           user_id: string | null
         }
@@ -52,7 +51,6 @@ export type Database = {
           created_at?: string
           database_identifier?: string | null
           id?: string
-          index_version?: number | null
           schema_fingerprint?: string | null
           user_id?: string | null
         }
@@ -60,7 +58,6 @@ export type Database = {
           created_at?: string
           database_identifier?: string | null
           id?: string
-          index_version?: number | null
           schema_fingerprint?: string | null
           user_id?: string | null
         }
@@ -68,6 +65,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          batch_id: string | null
           content: string
           created_at: string
           database_id: string
@@ -78,6 +76,7 @@ export type Database = {
           metadata: Json
         }
         Insert: {
+          batch_id?: string | null
           content: string
           created_at?: string
           database_id?: string
@@ -88,6 +87,7 @@ export type Database = {
           metadata: Json
         }
         Update: {
+          batch_id?: string | null
           content?: string
           created_at?: string
           database_id?: string

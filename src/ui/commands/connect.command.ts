@@ -1,6 +1,6 @@
-import { appContext, startScan, type CommandContext, type CommandDefinition } from "@src/exports.ts";
+import { appContext, type CommandContext, type CommandDefinition } from "@src/exports.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
-import { errorMessage } from "./command_helpers.ts";
+import { errorMessage, requireAuth } from "./command_helpers.ts";
 
 export const connectCommand: CommandDefinition = {
   name: "connect",
@@ -12,12 +12,11 @@ export const connectCommand: CommandDefinition = {
 };
 
 async function connectDb(ctx: CommandContext) {
+  await requireAuth();
   const connectionString =
     (await ctx.ask("Connection String", { placeholder: "postgres://username:password@host:port/database" })).trim() ||
     "localhost";
-  
-  ctx.busy("Connecting...");
-
+    
   const isDbExists = appContext.workspace.dbExists(connectionString);
   if (isDbExists) {
     ctx.error('This database is already connected!');
@@ -25,14 +24,13 @@ async function connectDb(ctx: CommandContext) {
     return;
   }
   
+  ctx.busy("Connecting...");
+  
   await pool.connect(connectionString);
   const database = connectionString.split('/')[3];
 
   try {
     ctx.success(`Connected to ${database}`);
-    ctx.busy("Scanning database...");
-    await startScan(ctx);
-    ctx.success("Scan complete");
     await askForMoreConnections(ctx);
   } catch (error) {
     pool.close();

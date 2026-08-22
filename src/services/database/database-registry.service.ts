@@ -1,10 +1,9 @@
 import {
     appContext,
     getDbName,
-    pool,
     supabase,
     type DatabaseCollection,
-    type UpdateDatabaseType,
+    type UpdateDatabaseType
 } from "@src/exports.ts";
 import { createHash } from "crypto";
 
@@ -35,44 +34,40 @@ export class DatabaseRegistryService {
 
         const dbId = await this._getOrCreateSupabaseEntry(dbUrl, user.id);
         if (!dbId) return null;
-
-        const newDb: DatabaseCollection = {
+        const connectionStringKey = `database-${dbId}`;
+        const existingDb = appContext.workspace.databases.find((db)=>db.id === dbId);
+        let payLoad: DatabaseCollection = {
             id: dbId,
             name: getDbName(dbUrl),
-            connectionString: dbUrl,
             type: "postgres",
+            connectionString: dbUrl,
+            connectionStringKey: connectionStringKey,
             schemaFingerprint: null,   // set after first successful scan
+            lastScannedAt: undefined,
             indexStatus: "none",
-            indexVersion: 0,
+            userId: user.id,
         };
-
-        // Remove the old entry first (handles reconnect to same DB)
+        if (existingDb) {
+            payLoad.lastScannedAt = existingDb.lastScannedAt;
+            payLoad.schemaFingerprint = existingDb.schemaFingerprint;
+            payLoad.indexStatus = existingDb.indexStatus;
+        }
+        
         appContext.workspace.removeDb(dbId);
 
-        appContext.workspace.addDb(newDb);
-        await appContext.workspace.persistDb(newDb);
+        appContext.workspace.addDb(payLoad);
+        await appContext.workspace.persistDb(payLoad);
 
         return dbId;
     }
 
-    /**
-     * Updates a database's metadata across all three stores simultaneously.
-     *
-     * Only the fields you pass in `patch` are updated — everything else is
-     * preserved via a merge in WorkSpace.
-     *
-     * Pass `supabaseFields` for any fields that also live in the remote
-     * Supabase "Database" table (e.g. schema_fingerprint).
-     */
     async updateDatabase(
         dbId: string,
         patch: Partial<DatabaseCollection>,
         supabaseFields?: Partial<UpdateDatabaseType>
     ): Promise<void> {
-        // 1. Update in-memory workspace (also re-persists to SQLite)
         await appContext.workspace.updateDb(dbId, patch);
 
-        // 2. If there are Supabase fields to sync, update the remote record
         if (supabaseFields && Object.keys(supabaseFields).length > 0) {
             const { error } = await supabase
                 .from("Database")

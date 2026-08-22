@@ -13,12 +13,12 @@ import {
     WorkSpace,
     type CommandContext
 } from "@src/exports.ts";
-import { DatabaseService } from "@src/services/database/database.service.ts";
 import { DatabaseRegistryService } from "@src/services/database/database-registry.service.ts";
+import { DatabaseService } from "@src/services/database/database.service.ts";
 
 interface AppServices {
     authService: AuthService;
-    registryService: DatabaseRegistryService;
+    databaseRegistryService: DatabaseRegistryService;
     databaseService: DatabaseService;
     ragService: RagService;
     llmService: LlmService;
@@ -57,7 +57,7 @@ class AppContext {
     createServices() {
         return {
             authService: new AuthService(),
-            registryService: new DatabaseRegistryService(),
+            databaseRegistryService: new DatabaseRegistryService(),
             databaseService: new DatabaseService(),
             ragService: new RagService(),
             llmService: new LlmService(),

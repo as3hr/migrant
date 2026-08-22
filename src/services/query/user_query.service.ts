@@ -3,7 +3,6 @@ import { appContext, SYS_PROMPT, type CommandContext } from "@src/exports.ts";
 export async function userQuery(query: string, databaseId: string, ctx: CommandContext) {
     try {
         let response = '';
-        ctx.log('Fetching relevant context...')
         const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
 
         if (!semanticResult) {
@@ -31,7 +30,7 @@ export async function userQuery(query: string, databaseId: string, ctx: CommandC
         `;
         
 
-        ctx.log('Generating response...')
+        ctx.log('Working on it...')
         const stream = appContext.services.llmService.streamLlm(
             SYS_PROMPT,
             prompt,

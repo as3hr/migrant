@@ -5,13 +5,14 @@ export type DatabaseType = "postgres" | "my-sql" | "mongodb";
 
 export interface DatabaseCollection { 
     id: string;
+    userId: string;
     name: string;
-    connectionString: string;
     type: DatabaseType;
+    connectionString: string;
+    connectionStringKey: string;
     schemaFingerprint: string | null;
-    lastScannedAt?: Date | undefined;
     indexStatus: 'none' | 'indexing' | 'ready' | 'failed';
-    indexVersion: number; 
+    lastScannedAt?: Date | undefined;
 }
 
 /**
@@ -38,7 +39,7 @@ export class WorkSpace {
     async loadFromCache(): Promise<void> {
         const row = this.sessionRepo.getUserSession();
         if (!row) return;
-        this.databases = await this.repo.getWorkspaceDbs(row.user_id);
+        this.databases = await this.repo.getLocalDbs(row.user_id);
     }
 
     /** Add a database to the in-memory list. Does NOT persist. */
@@ -58,7 +59,7 @@ export class WorkSpace {
                 if (db.id !== dbId) return db;
                 const updated = { ...db, ...patch };
                 if (row) {
-                    await this.repo.setWorkspaceDb(updated, row.user_id);
+                    await this.repo.setLocalDb(updated, row.user_id);
                 }
                 return updated;
             })
@@ -73,13 +74,13 @@ export class WorkSpace {
     async persistDb(db: DatabaseCollection): Promise<void> {
         const row = this.sessionRepo.getUserSession();
         if (!row) return;
-        await this.repo.setWorkspaceDb(db, row.user_id);
+        await this.repo.setLocalDb(db, row.user_id);
     }
 
     /** Remove a database from memory and delete from SQLite. */
     removeDb(dbId: string): void {
         this.databases = this.databases.filter((db) => db.id !== dbId);
-        this.repo.deleteWorkspaceDb(dbId);
+        this.repo.deleteLocalWorkspaceDb(dbId);
     }
 
     getDb(dbId: string): DatabaseCollection | undefined {

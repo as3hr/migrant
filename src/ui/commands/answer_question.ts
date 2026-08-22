@@ -1,4 +1,4 @@
-import { appContext, getSchemaFingerprint, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
+import { appContext, getSchemaFingerprint, pool, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
 import { userQuery } from "@src/services/query/user_query.service.ts";
 
 export async function answerQuestion(
@@ -8,6 +8,7 @@ export async function answerQuestion(
   const database = await resolveDatabase(ctx);
   if (!database) return;
 
+  await connectToSelectedDatabase(ctx, database);
   await ensureIndexFresh(database, ctx);
   await userQuery(question, database.id, ctx);
 }
@@ -42,10 +43,19 @@ async function resolveDatabase(ctx: CommandContext): Promise<DatabaseCollection 
 
   if (!database) {
     ctx.error("Invalid database selection.");
-  return;
+    return;
   }
 
   return database;
+}
+
+async function connectToSelectedDatabase(ctx: CommandContext, db: DatabaseCollection) {
+  try {
+    await pool.connect(db.connectionString);
+  } catch (error) {
+    ctx.error(`Cannot connect to database: ${error}`);
+    throw error;
+  }
 }
 
 async function ensureIndexFresh(
@@ -53,15 +63,15 @@ async function ensureIndexFresh(
   ctx: CommandContext
 ): Promise<void> {
   const liveFingerprint = await getSchemaFingerprint();
-
+  
   const isStale =
     database.indexStatus !== "ready" ||
     database.schemaFingerprint !== liveFingerprint;
 
   if (!isStale) return;
 
-  ctx.busy("Schema changed — updating knowledge index...");
-  await appContext.services.registryService.updateDatabase(database.id, {
+  ctx.log("Updating knowledge...");
+  await appContext.services.databaseRegistryService.updateDatabase(database.id, {
     indexStatus: "indexing",
   });
 

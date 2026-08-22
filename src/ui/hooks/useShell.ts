@@ -110,10 +110,8 @@ export function useShell(onExit: () => void): UseShellReturn {
         startRunning(command.busyLabel ?? "Working");
         await runCommand(command, parsed.args, ctx);
         if (command.name !== "clear") append({ type: "blank" });
-
       } else if (value === "clear") {
         ctx.clear();
-
       } else {
         startRunning("Thinking");
         await requireAuth();

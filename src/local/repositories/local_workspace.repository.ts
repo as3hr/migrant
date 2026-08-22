@@ -2,18 +2,6 @@ import { type DatabaseCollection, type DatabaseType } from "@src/exports.ts";
 import { sqlLite } from "@src/infrastructure/clients/sqllite.client.ts";
 import { credentialStore } from "@src/infrastructure/security/credential_store.ts";
 
-interface WorkspaceRow {
-    db_id: string;
-    user_id: string;
-    name: string;
-    connection_string_key: string;
-    type: string;
-    schema_fingerprint: string | null;
-    last_scanned_at?: string | null; 
-    index_status: string;
-    index_version: number;
-}
-
 export class LocalWorkspaceRepository {
     private workspaceDbSelectStmt;
     private workspaceDbInsertStmt;
@@ -21,21 +9,20 @@ export class LocalWorkspaceRepository {
     
     constructor() {
         this.workspaceDbInsertStmt = sqlLite.prepare(
-            'INSERT OR REPLACE INTO databases (db_id, user_id, name, connection_string_key, schema_fingerprint, type, last_scanned_at, index_status, index_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT OR REPLACE INTO databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
         this.workspaceDbSelectStmt = sqlLite.prepare(
-            'SELECT * FROM databases WHERE user_id = ?'
+            'SELECT * FROM databases WHERE userId = ?'
         );
         this.workspaceDbDeleteStmt = sqlLite.prepare(
-            'DELETE FROM databases WHERE db_id = ?'
+            'DELETE FROM databases WHERE id = ?'
         );
     }
 
-    async setWorkspaceDb(db: DatabaseCollection, userId: string): Promise<void> { 
+    async setLocalDb(db: DatabaseCollection, userId: string): Promise<void> { 
         const lastScannedStr = db.lastScannedAt ? db.lastScannedAt.toISOString() : null;
-        const connectionStringKey = `database-${db.id}`;
         await credentialStore.set(
-          connectionStringKey,
+          db.connectionStringKey,
           db.connectionString
         );
 
@@ -43,47 +30,47 @@ export class LocalWorkspaceRepository {
             db.id, 
             userId, 
             db.name, 
-            connectionStringKey,
+            db.connectionStringKey,
             db.schemaFingerprint,
             db.type, 
             lastScannedStr,
             db.indexStatus,
-            db.indexVersion,
         );
     }
 
-    async getWorkspaceDbs(user_id: string): Promise<DatabaseCollection[]> {
-        const rows = this.workspaceDbSelectStmt.all(user_id) as WorkspaceRow[];
+    async getLocalDbs(user_id: string): Promise<DatabaseCollection[]> {
+        const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
         const data = await Promise.all(
             rows.map(async (row) => {
-              const value = await credentialStore.get(row.connection_string_key);
+              const value = await credentialStore.get(row.connectionStringKey);
           
               if (!value) return null;
           
               return {
-                id: row.db_id,
+                id: row.id,
+                userId: row.userId,
                 name: row.name,
                 connectionString: value,
+                connectionStringKey: row.connectionStringKey,
                 type: row.type as DatabaseType,
-                schemaFingerprint: row.schema_fingerprint,
-                lastScannedAt: row.last_scanned_at
-                  ? new Date(row.last_scanned_at)
+                schemaFingerprint: row.schemaFingerprint,
+                lastScannedAt: row.lastScannedAt
+                  ? new Date(row.lastScannedAt)
                   : undefined,
-                indexStatus: row.index_status as 'none' | 'indexing' | 'ready' | 'failed',
-                indexVersion: row.index_version,
+                indexStatus: row.indexStatus as 'none' | 'indexing' | 'ready' | 'failed',
               };
             })
         );
         return data.filter((row) => row != null);
     }
 
-    getDbsConnectionKeys(user_id: string): string[] {
-        const rows = this.workspaceDbSelectStmt.all(user_id) as WorkspaceRow[];
-        const data = rows.map((row) => row.connection_string_key);
+    getLocalDbsConnectionKeys(user_id: string): string[] {
+        const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
+        const data = rows.map((row) => row.connectionStringKey);
         return data;
     }
 
-    deleteWorkspaceDb(id: string): boolean {
+    deleteLocalWorkspaceDb(id: string): boolean {
         const info = this.workspaceDbDeleteStmt.run(id);
         return info.changes > 0;
     }
