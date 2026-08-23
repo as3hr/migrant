@@ -1,7 +1,7 @@
 import { pool, type View } from "@src/exports.ts";
 
 export async function getViews(schema: string): Promise<Record<string, View>> {
-  const result = await pool.query(_getViews(), [schema]);
+  const result = await pool.query(getViewsQuery(), [schema]);
 
   const views: Record<string, View> = {};
 
@@ -19,7 +19,7 @@ export async function getViews(schema: string): Promise<Record<string, View>> {
   return views;
 }
 
-function _getViews(): string {
+export function getViewsQuery(): string {
   return `
     SELECT
       v.viewname AS view_name,

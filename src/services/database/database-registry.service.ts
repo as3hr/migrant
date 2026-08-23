@@ -54,7 +54,6 @@ export class DatabaseRegistryService {
         }
         
         appContext.workspace.removeDb(dbId);
-
         appContext.workspace.addDb(payLoad);
         await appContext.workspace.persistDb(payLoad);
 

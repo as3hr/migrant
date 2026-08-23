@@ -44,9 +44,4 @@ export class DatabaseService {
 
         return true;
     }
-
-    async getDatabaseOverview(databaseId: string): Promise<string> {
-        
-        return '';
-    }
 }

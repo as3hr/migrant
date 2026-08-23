@@ -1,7 +1,7 @@
 import { pool, type Extension } from "@src/exports.ts";
 
 export async function getExtensions(): Promise<Extension[]> {
-  const result = await pool.query(_getExtensions());
+  const result = await pool.query(getExtensionsQuery());
 
   return result.rows.map((row) => ({
     name: row.name,
@@ -9,7 +9,7 @@ export async function getExtensions(): Promise<Extension[]> {
   }));
 }
 
-function _getExtensions(): string {
+export function getExtensionsQuery(): string {
   return `
     SELECT
       extname AS name,

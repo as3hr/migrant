@@ -2,27 +2,27 @@ import { pool, type Table } from "@src/exports.ts";
 
 export async function getTables(schema: string): Promise<Record<string, Table>> {
   const columnsResult = await pool.query(
-    _getColumns(),
+    getColumnsQuery(),
     [schema]
   );
   const fkResult = await pool.query(
-    _getFks(),
+    getFksQuery(),
     [schema]
   );
   const indexResult = await pool.query(
-    _getIdxs(),
+    getIdxsQuery(),
     [schema]
   );
   const pksResult = await pool.query(
-    _getPrimaryKeys(),
+    getPrimaryKeysQuery(),
     [schema]
   );
   const uniqueConstraintsResult = await pool.query(
-    _getUniqueConstraints(),
+    getUniqueConstraintsQuery(),
     [schema]
   );
   const checkConstraintsResult = await pool.query(
-    _getCheckConstraints(),
+    getCheckConstraintsQuery(),
     [schema]
   );
 
@@ -111,7 +111,7 @@ export async function getTables(schema: string): Promise<Record<string, Table>> 
   return tables;
 }
 
-function _getColumns(): string {
+export function getColumnsQuery(): string {
   return `
     SELECT 
       c.table_name,
@@ -132,7 +132,7 @@ function _getColumns(): string {
   `;
 }
 
-function _getFks(): string {
+export function getFksQuery(): string {
   return `
     SELECT
       kcu.constraint_name AS foreign_key_name,
@@ -174,7 +174,7 @@ function _getFks(): string {
   `;
 }
 
-function _getIdxs(): string {
+export function getIdxsQuery(): string {
   return `
     SELECT
       t.relname AS table_name,
@@ -208,7 +208,7 @@ function _getIdxs(): string {
   `;
 }
 
-function _getPrimaryKeys(): string {
+export function getPrimaryKeysQuery(): string {
   return `
     SELECT
       c.conname AS constraint_name,
@@ -233,7 +233,7 @@ function _getPrimaryKeys(): string {
   `;
 }
 
-function _getUniqueConstraints(): string {
+export function getUniqueConstraintsQuery(): string {
   return `
     SELECT
       c.conname AS constraint_name,
@@ -258,7 +258,7 @@ function _getUniqueConstraints(): string {
   `;
 }
 
-function _getCheckConstraints(): string {
+export function getCheckConstraintsQuery(): string {
   return `
     SELECT
       c.conname AS constraint_name,

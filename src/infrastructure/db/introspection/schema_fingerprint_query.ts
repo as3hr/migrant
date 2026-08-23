@@ -1,7 +1,13 @@
 import { pool } from "@src/exports.ts";
 
 export async function getSchemaFingerprint(): Promise<string> {
-  const result = await pool.query(`
+  const result = await pool.query(getSchemaFingerprintQuery());
+
+  return result.rows[0]?.fingerprint ?? '';
+}
+
+export function getSchemaFingerprintQuery() {
+  return `
     WITH
     excluded_schemas AS (
       SELECT unnest(ARRAY['pg_catalog', 'information_schema', 'pg_toast', 'auth', 'storage']) AS schema_name
@@ -91,8 +97,5 @@ export async function getSchemaFingerprint(): Promise<string> {
       SELECT '6_enum', schema, enum_name, array_to_string(values, ',') FROM enums_info
     )
     SELECT md5(string_agg(kind || ':' || schema || ':' || name || ':' || coalesce(detail, ''), '|' ORDER BY kind, schema, name)) AS fingerprint
-    FROM combined;
-  `);
-
-  return result.rows[0]?.fingerprint ?? '';
+    FROM combined;`;
 }

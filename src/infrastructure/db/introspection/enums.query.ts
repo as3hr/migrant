@@ -1,7 +1,7 @@
 import { pool, type EnumType } from "@src/exports.ts";
 
 export async function getEnums(schema: string): Promise<EnumType[]> {
-  const result = await pool.query(_getEnums(), [schema]);
+  const result = await pool.query(getEnumsQuery(), [schema]);
 
   return result.rows.map((row) => ({
     schemaName: schema,
@@ -10,7 +10,7 @@ export async function getEnums(schema: string): Promise<EnumType[]> {
   }));
 }
 
-function _getEnums(): string {
+export function getEnumsQuery(): string {
   return `
     SELECT
       t.typname AS enum_name,

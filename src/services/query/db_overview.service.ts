@@ -1,4 +1,18 @@
-import { appContext, pool } from "@src/exports.ts";
+import {
+    appContext,
+    getCheckConstraintsQuery,
+    getColumnsQuery,
+    getEnumsQuery,
+    getFksQuery,
+    getFunctionsQuery,
+    getIdxsQuery,
+    getPrimaryKeysQuery,
+    getSchemaFingerprintQuery,
+    getTriggersQuery,
+    getUniqueConstraintsQuery,
+    getViewsQuery,
+    pool
+} from "@src/exports.ts";
 
 const METADATA_QUERY_SYSTEM_PROMPT = `
 You are a PostgreSQL Schema Introspection Query Generator for Migrant CLI.
@@ -12,36 +26,139 @@ CRITICAL PRIVACY & SECURITY RULES:
 2. NEVER Query User Data: You are STRICTLY FORBIDDEN from querying user data tables directly (e.g. NEVER write "SELECT * FROM users" or access user table rows).
 3. Output Format: Output ONLY the raw SQL query. Do NOT use markdown code blocks (\`\`\`sql). Do NOT include explanations, introduction, or comments.
 4. Read-Only: Only write SELECT or WITH queries.
+
+Example Introspection Queries:
+Get Columns: ${getColumnsQuery()}
+Get Foreign Keys: ${getFksQuery()}
+Get Primary Keys: ${getPrimaryKeysQuery()}
+Get Unique Constraints: ${getUniqueConstraintsQuery()}
+Get Check Constraints: ${getCheckConstraintsQuery()}
+Get Indexes: ${getIdxsQuery()}
+Get Triggers: ${getTriggersQuery()}
+Get Views: ${getViewsQuery()}
+Get Enums: ${getEnumsQuery()}
+Get Functions: ${getFunctionsQuery()}
+Get FingerPrint: ${getSchemaFingerprintQuery()}
 `;
 
-export async function getDatabaseContextForUserQuery(query: string): Promise<string | null> {
+const MAX_RETRIES = 3;
+
+interface ValidationResult {
+    valid: boolean;
+    cleanSql?: string;
+    error?: string;
+}
+
+interface ExecutionResult {
+    success: boolean;
+    data?: string;
+    error?: string;
+    sql?: string;
+}
+
+function buildRetrySystemPrompt(error: string, previousSqlQuery?: string | null): string {
+    return `
+You are a PostgreSQL Schema Introspection Query Generator for Migrant CLI.
+
+CRITICAL REPAIR TASK:
+Your previous SQL query attempt failed or was rejected.
+
+${previousSqlQuery ? `FAILED QUERY:\n${previousSqlQuery}\n` : ""}
+ERROR DETAILS:
+${error}
+
+INSTRUCTIONS FOR FIXING:
+1. Analyze the ERROR DETAILS above to understand why the query failed (e.g. invalid syntax, missing column in pg_catalog, non-existent view, or validation rejection).
+2. Regenerate a new, corrected PostgreSQL SQL query that fulfills the user's request WITHOUT triggering this error.
+3. Ensure the corrected query STILL strictly queries PostgreSQL system catalogs (information_schema or pg_catalog) and NEVER queries user data tables.
+4. Output ONLY the raw SQL query. Do NOT use markdown code blocks (\`\`\`sql).
+
+${METADATA_QUERY_SYSTEM_PROMPT}
+`;
+}
+
+export async function getDatabaseContextForUserQuery(userQuery: string): Promise<string | null> {
+    let lastError = "";
+    let lastAttemptSql: string | null = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        const systemPrompt =
+            attempt > 1 && lastError
+                ? buildRetrySystemPrompt(lastError, lastAttemptSql)
+                : METADATA_QUERY_SYSTEM_PROMPT;
+
+        if (attempt > 1) {
+            appContext.commandCtx?.log(
+                `Attempt ${attempt}/${MAX_RETRIES}: Retrying SQL generation due to error: ${lastError}`
+            );
+        }
+
+        const result = await executeIntrospectionWorkflow(userQuery, systemPrompt);
+
+        if (result.success && result.data) {
+            return result.data;
+        }
+
+        lastError = result.error ?? "Unknown introspection execution error.";
+        lastAttemptSql = result.sql ?? null;
+    }
+
+    appContext.commandCtx?.error(
+        `Failed to generate valid introspection SQL for "${userQuery}" after ${MAX_RETRIES} attempts. Last error: ${lastError}`
+    );
+    return null;
+}
+
+async function executeIntrospectionWorkflow(
+    userQuery: string,
+    systemPrompt: string
+): Promise<ExecutionResult> {
     try {
         const output = await appContext.services.llmService.queryLlm(
-            METADATA_QUERY_SYSTEM_PROMPT,
-            `Generate a system introspection SQL query for: ${query}`,
+            systemPrompt,
+            `Generate a system introspection SQL query for: ${userQuery}`,
             "deepseek/deepseek-chat"
         );
-        if (!output) return null;
 
-        const validatedSql = _validateGeneratedSql(output.toString());
-        if (!validatedSql) return null;
+        if (!output) {
+            return {
+                success: false,
+                error: "LLM returned empty output.",
+            };
+        }
 
-        const response = await pool.query(validatedSql);
-        return JSON.stringify(response.rows, null, 2);
+        const rawSql = output.toString();
+        const validation = validateGeneratedSql(rawSql);
+
+        if (!validation.valid || !validation.cleanSql) {
+            return {
+                success: false,
+                error: validation.error ?? "SQL validation failed.",
+                sql: rawSql,
+            };
+        }
+
+        const response = await pool.query(validation.cleanSql);
+        return {
+            success: true,
+            data: JSON.stringify(response.rows, null, 2),
+            sql: validation.cleanSql,
+        };
     } catch (error) {
-        console.error("Error executing database introspection query:", error);
-        return null;
+        return {
+            success: false,
+            error: (error as Error).message,
+        };
     }
 }
 
-export function _validateGeneratedSql(sql: string): string | null {
+export function validateGeneratedSql(sql: string): ValidationResult {
     // 1. Clean markdown formatting and whitespace
     let cleanSql = sql
         .replace(/```sql/gi, "")
         .replace(/```/g, "")
         .trim();
 
-    // Ensure statement ends cleanly without trailing semicolons for wrapping
     if (cleanSql.endsWith(";")) {
         cleanSql = cleanSql.slice(0, -1).trim();
     }
@@ -50,8 +167,10 @@ export function _validateGeneratedSql(sql: string): string | null {
 
     // 2. Must start with SELECT or WITH
     if (!lowerSql.startsWith("select") && !lowerSql.startsWith("with")) {
-        console.warn("SQL Validation Rejected: Query does not start with SELECT or WITH.");
-        return null;
+        return {
+            valid: false,
+            error: "SQL Validation Rejected: Query must start with SELECT or WITH.",
+        };
     }
 
     // 3. Reject any mutation / DDL keywords
@@ -61,13 +180,14 @@ export function _validateGeneratedSql(sql: string): string | null {
     ];
     for (const forbidden of forbiddenKeywords) {
         if (lowerSql.includes(forbidden)) {
-            console.warn(`SQL Validation Rejected: Query contains forbidden keyword '${forbidden.trim()}'.`);
-            return null;
+            return {
+                valid: false,
+                error: `SQL Validation Rejected: Query contains forbidden keyword '${forbidden.trim()}'.`,
+            };
         }
     }
 
     // 4. Strict Privacy Guarantee: Must ONLY query system metadata catalogs/views!
-    // Every table referenced in FROM / JOIN must belong to information_schema or pg_catalog / pg_* system views.
     const systemSources = [
         "information_schema",
         "pg_catalog",
@@ -86,9 +206,14 @@ export function _validateGeneratedSql(sql: string): string | null {
 
     const hasSystemSource = systemSources.some((source) => lowerSql.includes(source));
     if (!hasSystemSource) {
-        console.warn("SQL Validation Rejected: Query does not reference a valid PostgreSQL system metadata source (information_schema or pg_catalog).");
-        return null;
+        return {
+            valid: false,
+            error: "SQL Validation Rejected: Query does not reference a valid PostgreSQL system metadata source (information_schema or pg_catalog).",
+        };
     }
 
-    return cleanSql;
+    return {
+        valid: true,
+        cleanSql,
+    };
 }

@@ -1,7 +1,7 @@
 import { pool, type Sequence } from "@src/exports.ts";
 
 export async function getSequences(schema: string): Promise<Sequence[]> {
-  const result = await pool.query(_getSequences(), [schema]);
+  const result = await pool.query(getSequencesQuery(), [schema]);
 
   return result.rows.map((row) => ({
     schemaName: schema,
@@ -15,7 +15,7 @@ export async function getSequences(schema: string): Promise<Sequence[]> {
   }));
 }
 
-function _getSequences(): string {
+export function getSequencesQuery(): string {
   return `
     SELECT
       sequence_name,

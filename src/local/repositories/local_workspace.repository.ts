@@ -6,6 +6,7 @@ export class LocalWorkspaceRepository {
     private workspaceDbSelectStmt;
     private workspaceDbInsertStmt;
     private workspaceDbDeleteStmt;
+    private workspaceDbSelectByIdStmt;
     
     constructor() {
         this.workspaceDbInsertStmt = sqlLite.prepare(
@@ -17,15 +18,22 @@ export class LocalWorkspaceRepository {
         this.workspaceDbDeleteStmt = sqlLite.prepare(
             'DELETE FROM databases WHERE id = ?'
         );
+        this.workspaceDbSelectByIdStmt = sqlLite.prepare(
+            'SELECT * FROM databases WHERE id = ?'
+        );
     }
 
     async setLocalDb(db: DatabaseCollection, userId: string): Promise<void> { 
+        const existingDb = await this.getLocalDbById(db.id);
+        if (existingDb) {
+            this.deleteLocalWorkspaceDb(db.id);   
+        }
+        
         const lastScannedStr = db.lastScannedAt ? db.lastScannedAt.toISOString() : null;
         await credentialStore.set(
           db.connectionStringKey,
           db.connectionString
         );
-
         this.workspaceDbInsertStmt.run(
             db.id, 
             userId, 
@@ -60,16 +68,34 @@ export class LocalWorkspaceRepository {
                 indexStatus: row.indexStatus as 'none' | 'indexing' | 'ready' | 'failed',
               };
             })
-        );
-        const uniqueData = Array.from(new Set(data));
-        return uniqueData.filter((row) => row != null);
+        );;
+        return data.filter((row) => row != null);
+    }
+
+
+    async getLocalDbById(id: string): Promise<DatabaseCollection | null> {
+        const row = this.workspaceDbSelectByIdStmt.get(id) as DatabaseCollection;
+        if (!row) return null;
+        const value = await credentialStore.get(row.connectionStringKey);
+        if (!value) return null;
+        return {
+            id: row.id,
+            userId: row.userId,
+            name: row.name,
+            connectionString: value,
+            connectionStringKey: row.connectionStringKey,
+            type: row.type as DatabaseType,
+            schemaFingerprint: row.schemaFingerprint,
+            lastScannedAt: row.lastScannedAt
+              ? new Date(row.lastScannedAt)
+              : undefined,
+            indexStatus: row.indexStatus as 'none' | 'indexing' |'ready' | 'failed',
+        }
     }
 
     getLocalDbsConnectionKeys(user_id: string): string[] {
         const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
-        const uniqueData = Array.from(new Set(rows));
-        const data = uniqueData.map((row) => row.connectionStringKey);
-        return data;
+        return rows.map((row) => row.connectionStringKey);
     }
 
     deleteLocalWorkspaceDb(id: string): boolean {
