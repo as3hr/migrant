@@ -1,5 +1,4 @@
-import { appContext, getDatabaseContextForUserQuery, openRouter, type CommandContext } from "@src/exports.ts";
-import { generateText, Output } from "ai";
+import { appContext, getDatabaseContextForUserQuery, getSchemaFingerprint, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
 import {
     buildConversationalPrompt,
     buildDbOverviewPrompt,
@@ -8,10 +7,8 @@ import {
     CONVERSATIONAL_SYSTEM_PROMPT,
     DB_OVERVIEW_PROMPT,
     GENERAL_DB_SYSTEM_PROMPT,
-    ROUTER_SYSTEM_PROMPT,
-    routerOutputSchema,
     SCHEMA_RAG_SYSTEM_PROMPT,
-    type RouterIntent,
+    type RouterIntent
 } from "./prompts/index.ts";
 
 interface AgentPayload {
@@ -19,77 +16,28 @@ interface AgentPayload {
     userPrompt: string;
 }
 
-export async function userQuery(query: string, databaseId: string, ctx: CommandContext) {
-    try {
-        const { output } = await generateText({
-            model: openRouter("deepseek/deepseek-chat"),
-            output: Output.object({
-                schema: routerOutputSchema,
-            }),
-            instructions: [
-                {
-                    role: "system",
-                    content: ROUTER_SYSTEM_PROMPT,
-                },
-            ],
-            prompt: query,
-        });
-
-        const payload = await resolveAgentPayload(output.targetAgent, query, databaseId, ctx);
-        if (!payload) return;
-
-        let response = "";
-        const stream = appContext.services.llmService.streamLlm(
-            payload.systemPrompt,
-            payload.userPrompt,
-            "deepseek/deepseek-chat"
-        );
-
-        let firstChunk = true;
-        for await (const chunk of stream) {
-            response += chunk;
-            if (firstChunk) {
-                ctx.log(response);
-                firstChunk = false;
-            } else {
-                ctx.replaceLast(response);
-            }
-        }
-    } catch (error) {
-        console.error("Error in userQuery service:", error);
-        ctx.error("Failed to process your query. Please try again.");
-    }
-}
-
-async function resolveAgentPayload(
+export async function resolveAgentPayload(
     targetAgent: RouterIntent,
     query: string,
-    databaseId: string,
     ctx: CommandContext
 ): Promise<AgentPayload | null> {
     ctx.log(`Routing to target agent: ${targetAgent}`);
     switch (targetAgent) {
         case "schema-rag": {
-            const semanticResult = await appContext.services.ragService.performSemanticSearch(query, databaseId);
-            if (!semanticResult?.context) {
-                ctx.log("Could not find relevant schema context for this query.");
-                return null;
-            }
+            const ragContext = await buildRagContext(query, ctx);
+            if (!ragContext) return null;
             return {
                 systemPrompt: SCHEMA_RAG_SYSTEM_PROMPT,
-                userPrompt: buildSchemaRagPrompt(query, semanticResult.context),
+                userPrompt: buildSchemaRagPrompt(query, ragContext),
             };
         }
 
         case "db-overview": {
-            const dbOverviewData = await getDatabaseContextForUserQuery(query, databaseId);
-            if (!dbOverviewData) {
-                ctx.log("Could not retrieve system metadata for database overview.");
-                return null;
-            }
+            const dbOverviewContext = await buildDbOverviewContext(query, ctx);
+            if (!dbOverviewContext) return null;
             return {
                 systemPrompt: DB_OVERVIEW_PROMPT,
-                userPrompt: buildDbOverviewPrompt(query, dbOverviewData),
+                userPrompt: buildDbOverviewPrompt(query, dbOverviewContext),
             };
         }
 
@@ -112,4 +60,70 @@ async function resolveAgentPayload(
             return null;
         }
     }
+}
+
+async function buildRagContext(query: string, ctx: CommandContext) {
+    const databases = appContext.workspace.getActiveDbs();
+    if (!databases) {
+        ctx.error("No connected databases found. Connect a database using /connect.");
+        return null;
+    }
+    const semanticResult = await Promise.all(
+        databases.map(async db => {
+            await ensureIndexFresh(db, ctx);
+            return await appContext.services.ragService.performSemanticSearch(query, db);
+        })
+    );
+    const validResults = semanticResult.filter((r): r is NonNullable<typeof r> => Boolean(r?.context));
+    if (validResults.length === 0) {
+        ctx.log("Could not find relevant schema context for this query.");
+        return null;
+    }
+    const context = validResults.map(r => `### Database: ${r.database.name}\n${r.context}`).join("\n\n");
+    return context;
+}
+
+async function buildDbOverviewContext(query: string, ctx: CommandContext) {
+    const databases = appContext.workspace.getActiveDbs();
+    if (!databases) {
+        ctx.error("No connected databases found. Connect a database using /connect.");
+        return null;
+    }
+    const dbOverviewData = await Promise.all(
+        databases.map(async db => {
+            await ensureIndexFresh(db, ctx);
+            return await getDatabaseContextForUserQuery(query, db);
+        })
+    );
+    const validOverviews = dbOverviewData.filter((r): r is NonNullable<typeof r> => Boolean(r?.finalResponse));
+    if (validOverviews.length === 0) {
+        ctx.log("Could not retrieve system metadata for database overview.");
+        return null;
+    }
+    const formattedData = validOverviews.map(r => `### Database: ${r.database.name}\n${r.finalResponse}`).join("\n\n");
+    return formattedData;
+}
+
+async function ensureIndexFresh(
+  database: DatabaseCollection,
+  ctx: CommandContext
+): Promise<void> {
+  const liveFingerprint = await getSchemaFingerprint(database.id);
+  
+  const isStale =
+    database.indexStatus !== "ready" ||
+    database.schemaFingerprint !== liveFingerprint;
+
+  if (!isStale) return;
+
+  ctx.log(`Updating knowledge for ${database.name}...`);
+  await appContext.services.databaseRegistryService.updateDatabase(database.id, {
+    indexStatus: "indexing",
+  });
+
+  try {
+    await startScan(ctx, database.id);
+  } catch (err) {
+    throw err;
+  }
 }

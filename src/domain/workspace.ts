@@ -26,6 +26,7 @@ export interface DatabaseCollection {
  */
 export class WorkSpace { 
     databases: DatabaseCollection[] = [];
+    activeDbs: DatabaseCollection[] = [];
     private repo: LocalWorkspaceRepository;
     private sessionRepo: LocalSessionRepository;
 
@@ -33,6 +34,19 @@ export class WorkSpace {
         this.repo = new LocalWorkspaceRepository();
         this.sessionRepo = new LocalSessionRepository();
         this.loadFromCache();
+    }
+
+    setActiveDbs(dbs: DatabaseCollection[]) {
+        this.activeDbs = dbs;
+    }
+
+    clearActiveDbs() {
+        this.activeDbs = [];
+    }
+
+    getActiveDbs(): DatabaseCollection[] | null {
+        const dbs = this.activeDbs.length > 0 ? this.activeDbs : this.databases;
+        return dbs.length == 0 ? null : dbs;
     }
 
     /** Restore workspace databases from SQLite on startup. */

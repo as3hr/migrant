@@ -11,7 +11,8 @@ import {
     getTriggersQuery,
     getUniqueConstraintsQuery,
     getViewsQuery,
-    pool
+    pool,
+    type DatabaseCollection
 } from "@src/exports.ts";
 
 const METADATA_QUERY_SYSTEM_PROMPT = `
@@ -56,6 +57,11 @@ interface ExecutionResult {
     sql?: string;
 }
 
+interface FinalSuccessResponse {
+    database: DatabaseCollection;
+    finalResponse: string;
+}
+
 function buildRetrySystemPrompt(error: string, previousSqlQuery?: string | null): string {
     return `
 You are a PostgreSQL Schema Introspection Query Generator for Migrant CLI.
@@ -77,7 +83,7 @@ ${METADATA_QUERY_SYSTEM_PROMPT}
 `;
 }
 
-export async function getDatabaseContextForUserQuery(userQuery: string, dbId: string): Promise<string | null> {
+export async function getDatabaseContextForUserQuery(userQuery: string, db: DatabaseCollection): Promise<FinalSuccessResponse | null> {
     let lastError = "";
     let lastAttemptSql: string | null = null;
 
@@ -93,10 +99,13 @@ export async function getDatabaseContextForUserQuery(userQuery: string, dbId: st
             );
         }
 
-        const result = await executeIntrospectionWorkflow(userQuery, systemPrompt, dbId);
+        const result = await executeIntrospectionWorkflow(userQuery, systemPrompt, db.id);
 
         if (result.success && result.data) {
-            return result.data;
+            return {
+                database: db,
+                finalResponse: result.data
+            };
         }
 
         lastError = result.error ?? "Unknown introspection execution error.";
