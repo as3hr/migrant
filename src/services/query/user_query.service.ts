@@ -82,7 +82,7 @@ async function resolveAgentPayload(
         }
 
         case "db-overview": {
-            const dbOverviewData = await getDatabaseContextForUserQuery(query);
+            const dbOverviewData = await getDatabaseContextForUserQuery(query, databaseId);
             if (!dbOverviewData) {
                 ctx.log("Could not retrieve system metadata for database overview.");
                 return null;

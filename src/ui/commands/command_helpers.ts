@@ -41,7 +41,7 @@ export async function runCommand(
     await requireAuth();
   }
 
-  if (command.requiresConnection && !pool.pool) {
+  if (command.requiresConnection && Object.keys(pool.pools).length === 0) {
     throw new Error("No database connected. Run /connect first.");
   }
 

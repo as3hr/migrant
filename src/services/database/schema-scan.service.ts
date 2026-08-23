@@ -10,25 +10,18 @@ import {
   getTables,
   getTriggers,
   getViews,
-  pool,
   type CommandContext,
   type DatabaseGraph,
   type KnowledgeDocument,
   type SchemaGraph
 } from "@src/exports.ts";
 
-export async function startScan(ctx: CommandContext): Promise<void> {
-  const dbId = pool.dbId;
-  if (!dbId) {
-    ctx.error("No active database connection — cannot scan.");
-    return;
-  }
-
+export async function startScan(ctx: CommandContext, dbId: string): Promise<void> {
   try {
     const startedAt = Date.now();
     
     const schemaGraphs: SchemaGraph[] = [];
-    const schemas = await getSchemas();
+    const schemas = await getSchemas(dbId);
     ctx.success(`${schemas.length} Schemas Scanned Successfully!`);
     
     setTimeout(() => {
@@ -36,13 +29,13 @@ export async function startScan(ctx: CommandContext): Promise<void> {
     }, 2000);
 
     for (const schema of schemas) {
-      const graph = await parseSchema(schema);
+      const graph = await parseSchema(schema, dbId);
       if (graph) {
         schemaGraphs.push(graph);
       }
     }
 
-    const extensions = await getExtensions();
+    const extensions = await getExtensions(dbId);
 
     const result: DatabaseGraph = {
       schemas: schemaGraphs,
@@ -51,14 +44,14 @@ export async function startScan(ctx: CommandContext): Promise<void> {
     };
 
     const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-    const success = await reindexDocuments(dbKnowledgeDocuments);
+    const success = await reindexDocuments(dbId, dbKnowledgeDocuments);
 
     if (!success) {
       ctx.error("Failed to reindex documents — scan results were not persisted.");
       return;
     }
 
-    const schemaFingerprint = await getSchemaFingerprint();
+    const schemaFingerprint = await getSchemaFingerprint(dbId);
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
 
@@ -81,15 +74,15 @@ export async function startScan(ctx: CommandContext): Promise<void> {
   }
 }
 
-async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
+async function parseSchema(schema: string, dbId: string): Promise<SchemaGraph | undefined> {
   try {
     const [tables, views, triggers, functions, enums, sequences] = await Promise.all([
-      getTables(schema),
-      getViews(schema),
-      getTriggers(schema),
-      getFunctions(schema),
-      getEnums(schema),
-      getSequences(schema)
+      getTables(schema, dbId),
+      getViews(schema, dbId),
+      getTriggers(schema, dbId),
+      getFunctions(schema, dbId),
+      getEnums(schema, dbId),
+      getSequences(schema, dbId)
     ]);
 
     return {
@@ -107,13 +100,13 @@ async function parseSchema(schema: string): Promise<SchemaGraph | undefined> {
   }
 }
 
-async function reindexDocuments(documents: KnowledgeDocument[]): Promise<boolean> {
+async function reindexDocuments(dbId: string, documents: KnowledgeDocument[]): Promise<boolean> {
   try { 
     const embeddings = await appContext.services.embeddingService.createEmbeddings(
       documents.map(d => d.content)
     );
     if (embeddings.length > 0) {
-      return await appContext.services.databaseService.reindexDocuments(embeddings, documents);
+      return await appContext.services.databaseService.reindexDocuments(dbId, embeddings, documents);
     }
     return true;
   } catch (error) { 

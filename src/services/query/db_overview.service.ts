@@ -77,7 +77,7 @@ ${METADATA_QUERY_SYSTEM_PROMPT}
 `;
 }
 
-export async function getDatabaseContextForUserQuery(userQuery: string): Promise<string | null> {
+export async function getDatabaseContextForUserQuery(userQuery: string, dbId: string): Promise<string | null> {
     let lastError = "";
     let lastAttemptSql: string | null = null;
 
@@ -93,7 +93,7 @@ export async function getDatabaseContextForUserQuery(userQuery: string): Promise
             );
         }
 
-        const result = await executeIntrospectionWorkflow(userQuery, systemPrompt);
+        const result = await executeIntrospectionWorkflow(userQuery, systemPrompt, dbId);
 
         if (result.success && result.data) {
             return result.data;
@@ -111,7 +111,8 @@ export async function getDatabaseContextForUserQuery(userQuery: string): Promise
 
 async function executeIntrospectionWorkflow(
     userQuery: string,
-    systemPrompt: string
+    systemPrompt: string,
+    dbId: string
 ): Promise<ExecutionResult> {
     try {
         const output = await appContext.services.llmService.queryLlm(
@@ -138,7 +139,7 @@ async function executeIntrospectionWorkflow(
             };
         }
 
-        const response = await pool.query(validation.cleanSql);
+        const response = await pool.query(dbId, validation.cleanSql);
         return {
             success: true,
             data: JSON.stringify(response.rows, null, 2),

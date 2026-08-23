@@ -1,7 +1,7 @@
 import { pool, type View } from "@src/exports.ts";
 
-export async function getViews(schema: string): Promise<Record<string, View>> {
-  const result = await pool.query(getViewsQuery(), [schema]);
+export async function getViews(schema: string, dbId: string): Promise<Record<string, View>> {
+  const result = await pool.query(dbId, getViewsQuery(), [schema]);
 
   const views: Record<string, View> = {};
 

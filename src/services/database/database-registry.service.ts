@@ -35,7 +35,7 @@ export class DatabaseRegistryService {
         const dbId = await this._getOrCreateSupabaseEntry(dbUrl, user.id);
         if (!dbId) return null;
         const connectionStringKey = `database-${dbId}`;
-        const existingDb = appContext.workspace.databases.find((db)=>db.id === dbId);
+        const existingDb = appContext.workspace.databases.find((db) => db.id === dbId);
         let payLoad: DatabaseCollection = {
             id: dbId,
             name: getDbName(dbUrl),

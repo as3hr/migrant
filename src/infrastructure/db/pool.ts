@@ -1,53 +1,45 @@
 import { appContext } from "@src/exports.ts";
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
-export class PoolConnector { 
-    pool: Pool | null = null;
-    dbUrl: string | null = null;
-    dbId: string | null = null;
+export class PoolConnector {
+    pools: Record<string, Pool> = {};
 
-    async connect(dbUrl: string) {
-        if (this.pool && this.dbUrl === dbUrl) {
-            return;
-        }
-        this.dbUrl = dbUrl;
-        this.pool = new Pool({ connectionString: dbUrl });
+    async setConnection(dbUrl: string): Promise<string | null> {
         const dbId = await appContext.services.databaseRegistryService.registerConnection(dbUrl);
-        this.dbId = dbId;
+        if (!dbId) return null;
+        this.pools[dbId] = new Pool({ connectionString: dbUrl });
+        return dbId;
     }
 
-    close() {
-        if (!this.pool) return;
-        this.pool.end();
-        if (this.dbId) {
-            appContext.workspace.removeDb(this.dbId);
-        }
-        this.pool = null;
-        this.dbId = null;
-        this.dbUrl = null;
+    getPool(dbId: string) {
+        return this.pools[dbId];
+    }
+
+    close(dbId: string) {
+        const pool = this.pools[dbId];
+        if (!pool) return;
+        pool.end();
+        delete this.pools[dbId];
+        appContext.workspace.removeDb(dbId);
     }
 
     async query<T extends QueryResultRow = QueryResultRow>(
+        dbId: string,
         query: string,
         params?: unknown[]
     ): Promise<QueryResult<T>> {
-        if (!this.dbId) {
-            throw new Error("Database is not connected");
-        }
-
-        if (!this.pool) {
-            if (!this.dbUrl) {
-                throw new Error("Database URL is missing");
+        if (!this.pools[dbId]) {
+            const db = appContext.workspace.getDb(dbId);
+            if (db?.connectionString) {
+                this.pools[dbId] = new Pool({ connectionString: db.connectionString });
+            } else {
+                throw new Error(`Database ${dbId} is not connected.`);
             }
+        }
 
-            await this.connect(this.dbUrl);
-        }
-        
-        if (!this.pool) {
-            throw new Error("Database is not connected");
-        }
-        return this.pool.query<T>(query, params);
-    }
+        const pool = this.pools[dbId];
+        return pool.query<T>(query, params);
+    }        
 }
 
 export const pool = new PoolConnector();

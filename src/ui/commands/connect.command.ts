@@ -26,14 +26,16 @@ async function connectDb(ctx: CommandContext) {
   
   ctx.busy("Connecting...");
   
-  await pool.connect(connectionString);
+  const db = await pool.setConnection(connectionString);
   const database = connectionString.split('/')[3];
 
   try {
     ctx.success(`Connected to ${database}`);
     await askForMoreConnections(ctx);
   } catch (error) {
-    pool.close();
+    if (db) {
+      pool.close(db);
+    }
     throw new Error(`Connection failed: ${errorMessage(error)}`);
   }
 }

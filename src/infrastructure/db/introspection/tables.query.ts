@@ -1,27 +1,33 @@
 import { pool, type Table } from "@src/exports.ts";
 
-export async function getTables(schema: string): Promise<Record<string, Table>> {
+export async function getTables(schema: string, dbId: string): Promise<Record<string, Table>> {
   const columnsResult = await pool.query(
+    dbId,
     getColumnsQuery(),
     [schema]
   );
   const fkResult = await pool.query(
+    dbId,
     getFksQuery(),
     [schema]
   );
   const indexResult = await pool.query(
+    dbId,
     getIdxsQuery(),
     [schema]
   );
   const pksResult = await pool.query(
+    dbId,
     getPrimaryKeysQuery(),
     [schema]
   );
   const uniqueConstraintsResult = await pool.query(
+    dbId,
     getUniqueConstraintsQuery(),
     [schema]
   );
   const checkConstraintsResult = await pool.query(
+    dbId,
     getCheckConstraintsQuery(),
     [schema]
   );

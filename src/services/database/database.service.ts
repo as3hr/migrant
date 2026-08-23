@@ -1,5 +1,4 @@
 import {
-    pool,
     supabase,
     SYS_DEFAULT_EMBEDDING_MODEL,
     type KnowledgeDocument
@@ -7,22 +6,18 @@ import {
 
 export class DatabaseService {
     async reindexDocuments(
+        dbId: string,
         embeddings: number[][],
         knowledgeDocuments: KnowledgeDocument[],
         model?: string
     ): Promise<boolean> {
-        if (!pool.dbId) {
-            console.error("[DatabaseService] No active dbId on pool — cannot reindex.");
-            return false;
-        }
-
         const batchId = crypto.randomUUID();
         
         const rows = embeddings.map((embedding, index) => ({
             content: knowledgeDocuments[index]!.content,
             embedding: `[${embedding.join(",")}]`,
             embedding_model: model ?? SYS_DEFAULT_EMBEDDING_MODEL,
-            database_id: pool.dbId!,
+            database_id: dbId,
             document_type: knowledgeDocuments[index]!.type,
             metadata: knowledgeDocuments[index]!.metadata,
             batch_id: batchId,
@@ -39,7 +34,7 @@ export class DatabaseService {
         await supabase
             .from('documents')
             .delete()
-            .eq('database_id', pool.dbId)
+            .eq('database_id', dbId)
             .neq('batch_id', batchId);
 
         return true;

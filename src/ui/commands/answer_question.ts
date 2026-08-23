@@ -51,7 +51,7 @@ async function resolveDatabase(ctx: CommandContext): Promise<DatabaseCollection 
 
 async function connectToSelectedDatabase(ctx: CommandContext, db: DatabaseCollection) {
   try {
-    await pool.connect(db.connectionString);
+    await pool.setConnection(db.connectionString);
   } catch (error) {
     ctx.error(`Cannot connect to database: ${error}`);
     throw error;
@@ -62,7 +62,7 @@ async function ensureIndexFresh(
   database: DatabaseCollection,
   ctx: CommandContext
 ): Promise<void> {
-  const liveFingerprint = await getSchemaFingerprint();
+  const liveFingerprint = await getSchemaFingerprint(database.id);
   
   const isStale =
     database.indexStatus !== "ready" ||
@@ -76,7 +76,7 @@ async function ensureIndexFresh(
   });
 
   try {
-    await startScan(ctx);
+    await startScan(ctx, database.id);
   } catch (err) {
     throw err;
   }

@@ -1,9 +1,10 @@
 import { pool, type DatabaseFunction } from "@src/exports.ts";
 
 export async function getFunctions(
-  schema: string
+  schema: string,
+  dbId: string
 ): Promise<DatabaseFunction[]> {
-  const result = await pool.query(getFunctionsQuery(), [schema]);
+  const result = await pool.query(dbId, getFunctionsQuery(), [schema]);
 
   return result.rows.map((row) => ({
     schemaName: schema,
