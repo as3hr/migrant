@@ -1,18 +1,18 @@
 import { appContext, type CommandContext, type CommandDefinition } from "@src/exports.ts";
 import { pool } from "@src/infrastructure/db/pool.ts";
-import { errorMessage, requireAuth } from "./command_helpers.ts";
+import { errorMessage } from "./command_helpers.ts";
 
 export const connectCommand: CommandDefinition = {
   name: "connect",
   description: "Connect and Scan the PostgreSQL database",
   busyLabel: "Connecting...",
+  requiresAuth: true,
   execute: async (_args, ctx) => {
     await connectDb(ctx);
   },
 };
 
 async function connectDb(ctx: CommandContext) {
-  await requireAuth();
   const connectionString =
     (await ctx.ask("Connection String", { placeholder: "postgres://username:password@host:port/database" })).trim() ||
     "localhost";

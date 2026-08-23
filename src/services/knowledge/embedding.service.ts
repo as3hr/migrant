@@ -2,17 +2,32 @@ import { openRouter, SYS_DEFAULT_EMBEDDING_MODEL } from "@src/exports.ts";
 import { embed, embedMany } from "ai";
 
 export class EmbeddingService {
-    async createEmbeddings(texts: string[], model?: string): Promise<number[][]> {
-        const { embeddings } = await embedMany({
-            model: openRouter.textEmbeddingModel(model ?? SYS_DEFAULT_EMBEDDING_MODEL),
-            values: texts,
-        });
+    async createEmbeddings(texts: string[], model?: string, batchSize: number = 20): Promise<number[][]> {
+        if (texts.length === 0) return [];
 
-        if (!embeddings || embeddings.length === 0) {
-            throw new Error("Unexpected embedding response");
+        const batches: string[][] = [];
+        for (let i = 0; i < texts.length; i += batchSize) {
+            batches.push(texts.slice(i, i + batchSize));
         }
 
-        return embeddings;
+        const batchResults = await Promise.all(
+            batches.map(async (batch) => {
+                const { embeddings } = await embedMany({
+                    model: openRouter.textEmbeddingModel(model ?? SYS_DEFAULT_EMBEDDING_MODEL),
+                    values: batch,
+                });
+                if (!embeddings || embeddings.length !== batch.length) {
+                    throw new Error(`Embedding API batch size mismatch: expected ${batch.length}, received ${embeddings?.length ?? 0}`);
+                }
+                return embeddings;
+            })
+        );
+
+        const allEmbeddings = batchResults.flat();
+        if (allEmbeddings.length !== texts.length) {
+            throw new Error(`Total embedding count mismatch: expected ${texts.length}, received ${allEmbeddings.length}`);
+        }
+        return allEmbeddings;
     }
 
     async createSingleEmbedding(texts: string[], model?: string): Promise<number[]> {

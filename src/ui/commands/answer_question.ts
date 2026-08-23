@@ -1,4 +1,4 @@
-import { appContext, openRouter, resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema, type CommandContext } from "@src/exports.ts";
+import { appContext, fileService, openRouter, resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema, type CommandContext } from "@src/exports.ts";
 import { generateText, Output } from "ai";
 
 export async function answerQuestion(
@@ -7,7 +7,7 @@ export async function answerQuestion(
 ): Promise<void> {
     try {
       const { output } = await generateText({
-          model: openRouter("deepseek/deepseek-chat"),
+          model: openRouter("openai/gpt-4o-mini"),
           output: Output.object({
               schema: routerOutputSchema,
           }),
@@ -17,10 +17,14 @@ export async function answerQuestion(
                   content: ROUTER_SYSTEM_PROMPT,
               },
           ],
+          temperature: 0,
+          maxOutputTokens: 200,
           prompt: question,
       });
+
       const payload = await resolveAgentPayload(output.targetAgent, question, ctx);
       if (!payload) return;
+
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
           payload.systemPrompt,
@@ -37,8 +41,8 @@ export async function answerQuestion(
               ctx.replaceLast(response);
           }
       }
-    } catch (error) {
-        console.error("Error in userQuery service:", error);
-        ctx.error("Failed to process your query. Please try again.");
+      await fileService.writeDataToFile(response, `./logs/answer.txt`);
+    } catch (error: any) {
+        ctx.error(`${error}`);
     }
 }

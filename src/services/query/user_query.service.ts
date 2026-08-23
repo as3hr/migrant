@@ -1,4 +1,4 @@
-import { appContext, getDatabaseContextForUserQuery, getSchemaFingerprint, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
+import { appContext, appMemo, getDatabaseContextForUserQuery, getSchemaFingerprint, requireAuth, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
 import {
     buildConversationalPrompt,
     buildDbOverviewPrompt,
@@ -24,6 +24,7 @@ export async function resolveAgentPayload(
     ctx.log(`Routing to target agent: ${targetAgent}`);
     switch (targetAgent) {
         case "schema-rag": {
+            await requireAuth();
             const ragContext = await buildRagContext(query, ctx);
             if (!ragContext) return null;
             return {
@@ -33,6 +34,7 @@ export async function resolveAgentPayload(
         }
 
         case "db-overview": {
+            await requireAuth();
             const dbOverviewContext = await buildDbOverviewContext(query, ctx);
             if (!dbOverviewContext) return null;
             return {
@@ -108,7 +110,9 @@ async function ensureIndexFresh(
   database: DatabaseCollection,
   ctx: CommandContext
 ): Promise<void> {
-  const liveFingerprint = await getSchemaFingerprint(database.id);
+  const liveFingerprint = await appMemo.getOrFetch(database.id, () =>
+    getSchemaFingerprint(database.id)
+  );
   
   const isStale =
     database.indexStatus !== "ready" ||
@@ -116,6 +120,7 @@ async function ensureIndexFresh(
 
   if (!isStale) return;
 
+  appMemo.invalidate(database.id);
   ctx.log(`Updating knowledge for ${database.name}...`);
   await appContext.services.databaseRegistryService.updateDatabase(database.id, {
     indexStatus: "indexing",

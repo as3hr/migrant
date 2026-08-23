@@ -28,22 +28,20 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
       ctx.busy(`Scanning your database in more depth...`);
     }, 2000);
 
-    for (const schema of schemas) {
-      const graph = await parseSchema(schema, dbId);
-      if (graph) {
-        schemaGraphs.push(graph);
-      }
-    }
+    const graphs = await Promise.all(schemas.map((s) => parseSchema(s, dbId)));
+    const validGraphs = graphs.filter((g): g is NonNullable<typeof g> => Boolean(g));
+    schemaGraphs.push(...validGraphs);
 
     const extensions = await getExtensions(dbId);
 
     const result: DatabaseGraph = {
-      schemas: schemaGraphs,
+      schemas: validGraphs,
       extensions,
       generatedAt: new Date().toISOString(),
     };
 
     const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
+
     const success = await reindexDocuments(dbId, dbKnowledgeDocuments);
 
     if (!success) {
@@ -52,6 +50,7 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
     }
 
     const schemaFingerprint = await getSchemaFingerprint(dbId);
+
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
 
@@ -105,8 +104,10 @@ async function reindexDocuments(dbId: string, documents: KnowledgeDocument[]): P
     const embeddings = await appContext.services.embeddingService.createEmbeddings(
       documents.map(d => d.content)
     );
+
     if (embeddings.length > 0) {
-      return await appContext.services.databaseService.reindexDocuments(dbId, embeddings, documents);
+      const res = await appContext.services.databaseService.reindexDocuments(dbId, embeddings, documents);
+      return res;
     }
     return true;
   } catch (error) { 

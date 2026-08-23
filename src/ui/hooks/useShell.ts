@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   errorMessage,
   parseCommandInput,
-  requireAuth,
-  runCommand,
+  runCommand
 } from "../commands/command_helpers.ts";
 import { type OutputItem } from "../components/output.tsx";
 
@@ -114,7 +113,6 @@ export function useShell(onExit: () => void): UseShellReturn {
         ctx.clear();
       } else {
         startRunning("Thinking");
-        await requireAuth();
         await answerQuestion(value, ctx);
         append({ type: "blank" });
       }

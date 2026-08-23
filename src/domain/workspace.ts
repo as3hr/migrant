@@ -1,4 +1,4 @@
-import { LocalSessionRepository } from "@src/exports.ts";
+import { LocalSessionRepository, pool } from "@src/exports.ts";
 import { LocalWorkspaceRepository } from "@src/local/repositories/local_workspace.repository.ts";
 
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";
@@ -53,7 +53,14 @@ export class WorkSpace {
     async loadFromCache(): Promise<void> {
         const row = this.sessionRepo.getUserSession();
         if (!row) return;
-        this.databases = await this.repo.getLocalDbs(row.user_id);
+        const dbs = await this.repo.getLocalDbs(row.user_id);
+        this.databases = dbs;
+        this.activeDbs = dbs;
+        await this.warmUpPool();
+    }
+
+    async warmUpPool() {
+        await Promise.all(this.activeDbs.map(db => pool.setConnection(db.connectionString)));
     }
 
     /** Add a database to the in-memory list. Does NOT persist. */
