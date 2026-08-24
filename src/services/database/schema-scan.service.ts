@@ -30,10 +30,14 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
 
     const graphs = await Promise.all(schemas.map((s) => parseSchema(s, dbId)));
     const validGraphs = graphs.filter((g): g is NonNullable<typeof g> => Boolean(g));
+    if (validGraphs.length == 0) {
+      ctx.log("No valid graphs found. The database is either empty or not supported yet. Visit https://docs.migrant.ai for more information.");
+      return; 
+    }
     schemaGraphs.push(...validGraphs);
 
     const extensions = await getExtensions(dbId);
-
+``
     const result: DatabaseGraph = {
       schemas: validGraphs,
       extensions,

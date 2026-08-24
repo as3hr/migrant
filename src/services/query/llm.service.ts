@@ -2,7 +2,7 @@ import { openRouter, SYS_DEFAULT_MODEL } from "@src/exports.ts";
 import { generateText, streamText } from 'ai';
 
 export class LlmService {
-    async queryLlm(systemPrompt: string, userPrompt: string, model?: string): Promise<string | null> {
+    async queryLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: any[]): Promise<string | null> {
         try {
             const { text } = await generateText({
                 model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
@@ -12,7 +12,7 @@ export class LlmService {
                         content: systemPrompt,
                     },
                 ],
-                messages: [
+                messages: messages ?? [
                     {
                         role: "user",
                         content: userPrompt,
@@ -27,7 +27,7 @@ export class LlmService {
         }
     }
 
-    async *streamLlm(systemPrompt: string, userPrompt: string, model?: string) {
+    async *streamLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: any[]) {
         try {
             const result = streamText({
                 model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
@@ -37,7 +37,7 @@ export class LlmService {
                         content: systemPrompt,
                     },
                 ],
-                messages: [
+                messages: messages ?? [
                     {
                         role: "user",
                         content: userPrompt,

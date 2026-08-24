@@ -39,6 +39,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          completion_tokens: number
+          content: string
+          cost_usd: number
+          created_at: string
+          id: string
+          model_name: string
+          prompt_tokens: number
+          provider: string
+          role: string
+          session_id: string
+          target_agent: string
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          completion_tokens?: number
+          content: string
+          cost_usd?: number
+          created_at?: string
+          id?: string
+          model_name: string
+          prompt_tokens?: number
+          provider: string
+          role: string
+          session_id: string
+          target_agent: string
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          completion_tokens?: number
+          content?: string
+          cost_usd?: number
+          created_at?: string
+          id?: string
+          model_name?: string
+          prompt_tokens?: number
+          provider?: string
+          role?: string
+          session_id?: string
+          target_agent?: string
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          session_token_limit: number
+          session_token_used: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_token_limit?: number
+          session_token_used?: number
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_token_limit?: number
+          session_token_used?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       Database: {
         Row: {
           created_at: string
@@ -100,6 +186,95 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "documentss_database_id_fkey"
+            columns: ["database_id"]
+            isOneToOne: false
+            referencedRelation: "Database"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          monthly_token_quota: number
+          tier: string
+          tokens_used_this_month: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          monthly_token_quota?: number
+          tier?: string
+          tokens_used_this_month?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          monthly_token_quota?: number
+          tier?: string
+          tokens_used_this_month?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_usage_logs: {
+        Row: {
+          completion_tokens: number
+          cost_usd: number
+          created_at: string
+          database_id: string | null
+          id: string
+          is_byok: boolean
+          model_name: string
+          prompt_tokens: number
+          provider: string
+          target_agent: string
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          completion_tokens?: number
+          cost_usd?: number
+          created_at?: string
+          database_id?: string | null
+          id?: string
+          is_byok?: boolean
+          model_name: string
+          prompt_tokens?: number
+          provider: string
+          target_agent: string
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          completion_tokens?: number
+          cost_usd?: number
+          created_at?: string
+          database_id?: string | null
+          id?: string
+          is_byok?: boolean
+          model_name?: string
+          prompt_tokens?: number
+          provider?: string
+          target_agent?: string
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_usage_logs_database_id_fkey"
             columns: ["database_id"]
             isOneToOne: false
             referencedRelation: "Database"
