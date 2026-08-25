@@ -1,4 +1,8 @@
-import { appContext, appMemo, getDatabaseContextForUserQuery, getSchemaFingerprint, requireAuth, startScan, type CommandContext, type DatabaseCollection } from "@src/exports.ts";
+import { appContext, type CommandContext, type DatabaseCollection } from "../../domain/index.ts";
+import { getSchemaFingerprint } from "../../infrastructure/index.ts";
+import { requireAuth } from "../../ui/commands/index.ts";
+import { appMemo } from "../../utils/index.ts";
+import { getDatabaseContextForUserQuery, startScan } from "../index.ts";
 import {
     buildConversationalPrompt,
     buildDbOverviewPrompt,

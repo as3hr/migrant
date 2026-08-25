@@ -1,4 +1,4 @@
-import type { Table } from "@src/exports.ts";
+import type { Table } from "../../domain/index.ts";
 
 export function getTableContent(table: Table, relatedTables: string[]): string {
   const columns = table.columns;

@@ -1,19 +1,5 @@
-import {
-    appContext,
-    getCheckConstraintsQuery,
-    getColumnsQuery,
-    getEnumsQuery,
-    getFksQuery,
-    getFunctionsQuery,
-    getIdxsQuery,
-    getPrimaryKeysQuery,
-    getSchemaFingerprintQuery,
-    getTriggersQuery,
-    getUniqueConstraintsQuery,
-    getViewsQuery,
-    pool,
-    type DatabaseCollection
-} from "@src/exports.ts";
+import { appContext, type DatabaseCollection } from "../../domain/index.ts";
+import { getCheckConstraintsQuery, getColumnsQuery, getEnumsQuery, getFksQuery, getFunctionsQuery, getIdxsQuery, getPrimaryKeysQuery, getSchemaFingerprintQuery, getTriggersQuery, getUniqueConstraintsQuery, getViewsQuery, pool } from "../../infrastructure/index.ts";
 
 const METADATA_QUERY_SYSTEM_PROMPT = `
 You are a PostgreSQL Schema Introspection Query Generator for Migrant CLI.

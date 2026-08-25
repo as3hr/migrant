@@ -1,5 +1,5 @@
-import { appContext, type CommandContext, type CommandDefinition } from "@src/exports.ts";
-import { pool } from "@src/infrastructure/db/pool.ts";
+import { appContext, type CommandContext, type CommandDefinition } from "../../domain/index.ts";
+import { pool } from "../../infrastructure/db/pool.ts";
 
 export function parseCommandInput(input: string): {
   name: string;

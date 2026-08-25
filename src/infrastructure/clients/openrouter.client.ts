@@ -1,5 +1,5 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { appConfig } from "@src/exports.ts";
+import { appConfig } from '../index.ts';
 
 export const openRouter = createOpenRouter({
   apiKey: appConfig.openRouterApiKey,

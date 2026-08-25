@@ -1,4 +1,4 @@
-import { appContext, type CommandDefinition } from "@src/exports.ts";
+import { appContext, type CommandDefinition } from "../../domain/index.ts";
 
 export const logoutCommand: CommandDefinition = {
   name: "logout",

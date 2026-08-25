@@ -1,5 +1,6 @@
-import { appContext, supabase, type DatabaseCollection } from "@src/exports.ts";
-import type { Json } from "@src/types/database.types.ts";
+import { appContext, type DatabaseCollection } from "../../domain/index.ts";
+import { supabase } from "../../infrastructure/index.ts";
+import type { Json } from "../../types/database.types.ts";
 
 interface SemanticSearchResult {
     id: string;

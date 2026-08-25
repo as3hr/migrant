@@ -1,5 +1,6 @@
-import { openRouter, SYS_DEFAULT_EMBEDDING_MODEL } from "@src/exports.ts";
 import { embed, embedMany } from "ai";
+import { openRouter } from "../../infrastructure/index.ts";
+import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
 
 export class EmbeddingService {
     async createEmbeddings(texts: string[], model?: string, batchSize: number = 20): Promise<number[][]> {

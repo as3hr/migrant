@@ -1,4 +1,4 @@
-import { type CommandDefinition } from "@src/exports.ts";
+import type { CommandDefinition } from "../../domain/index.ts";
 
 export const exitCommand: CommandDefinition = {
   name: "exit",

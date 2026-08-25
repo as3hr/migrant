@@ -1,9 +1,7 @@
 export * from "./config/app.config.ts";
 
-export * from "./clients/sqllite.client.ts";
+export * from "./security/credential_store.ts";
 
-export * from "./clients/openrouter.client.ts";
-
-export * from "./clients/supabase.client.ts";
+export * from "./clients/index.ts";
 
 export * from "./db/index.ts";

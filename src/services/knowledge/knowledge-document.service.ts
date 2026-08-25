@@ -1,4 +1,5 @@
-import { getTableContent, type DatabaseGraph, type KnowledgeDocument } from "@src/exports.ts";
+import type { DatabaseGraph, KnowledgeDocument } from "../../domain/index.ts";
+import { getTableContent } from "../../utils/index.ts";
 
 export function databaseToKnowledgeDocuments(dbGraph: DatabaseGraph) {
     const schemas = dbGraph.schemas;

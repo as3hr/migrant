@@ -1,4 +1,4 @@
-import { supabase } from "@src/exports.ts";
+import { supabase } from "../../infrastructure/index.ts";
 
 export interface ModelPrice {
     inputPer1M: number;

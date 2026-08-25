@@ -1,5 +1,7 @@
-import { appContext, fileService, openRouter, resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema, type CommandContext } from "@src/exports.ts";
 import { generateText, Output } from "ai";
+import { appContext, type CommandContext } from "../../domain/index.ts";
+import { openRouter } from "../../infrastructure/index.ts";
+import { fileService, resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema } from "../../services/index.ts";
 
 export async function answerQuestion(
   question: string,

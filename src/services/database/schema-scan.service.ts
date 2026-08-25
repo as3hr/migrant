@@ -1,20 +1,6 @@
-import {
-  appContext,
-  databaseToKnowledgeDocuments,
-  getEnums,
-  getExtensions,
-  getFunctions,
-  getSchemaFingerprint,
-  getSchemas,
-  getSequences,
-  getTables,
-  getTriggers,
-  getViews,
-  type CommandContext,
-  type DatabaseGraph,
-  type KnowledgeDocument,
-  type SchemaGraph
-} from "@src/exports.ts";
+import { appContext, type CommandContext, type DatabaseGraph, type KnowledgeDocument, type SchemaGraph } from "../../domain/index.ts";
+import { getEnums, getExtensions, getFunctions, getSchemaFingerprint, getSchemas, getSequences, getTables, getTriggers, getViews } from "../../infrastructure/index.ts";
+import { databaseToKnowledgeDocuments } from "../index.ts";
 
 export async function startScan(ctx: CommandContext, dbId: string): Promise<void> {
   try {

@@ -1,4 +1,5 @@
-import { pool, type Table } from "@src/exports.ts";
+import type { Table } from "../../domain/index.ts";
+import { pool } from "../index.ts";
 
 export async function getTables(schema: string, dbId: string): Promise<Record<string, Table>> {
   const columnsResult = await pool.query(

@@ -1,9 +1,10 @@
-import { pool, type Extension } from "@src/exports.ts";
+import type { Extension } from "../../domain/index.ts";
+import { pool } from "../index.ts";
 
 export async function getExtensions(dbId: string): Promise<Extension[]> {
   const result = await pool.query(dbId, getExtensionsQuery());
 
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     name: row.name,
     version: row.version,
   }));

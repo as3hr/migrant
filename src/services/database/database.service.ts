@@ -1,8 +1,6 @@
-import {
-    supabase,
-    SYS_DEFAULT_EMBEDDING_MODEL,
-    type KnowledgeDocument
-} from "@src/exports.ts";
+import type { KnowledgeDocument } from "../../domain/index.ts";
+import { supabase } from "../../infrastructure/index.ts";
+import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
 
 export class DatabaseService {
     async reindexDocuments(

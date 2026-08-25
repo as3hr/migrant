@@ -1,11 +1,8 @@
-import {
-    appContext,
-    getDbName,
-    supabase,
-    type DatabaseCollection,
-    type UpdateDatabaseType
-} from "@src/exports.ts";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
+import { appContext, type DatabaseCollection } from "../../domain/index.ts";
+import { supabase } from "../../infrastructure/index.ts";
+import type { UpdateDatabaseType } from "../../types/table_types.ts";
+import { getDbName } from "../../utils/index.ts";
 
 /**
  * DatabaseRegistryService — the single source of truth for all database state.

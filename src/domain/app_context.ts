@@ -1,20 +1,8 @@
-import {
-    AuthService,
-    clearCommand,
-    CommandRegistry,
-    connectCommand,
-    createHelpCommand,
-    EmbeddingService,
-    exitCommand,
-    LlmService,
-    loginCommand,
-    logoutCommand,
-    RagService,
-    WorkSpace,
-    type CommandContext
-} from "@src/exports.ts";
-import { DatabaseRegistryService } from "@src/services/database/database-registry.service.ts";
-import { DatabaseService } from "@src/services/database/database.service.ts";
+import { DatabaseRegistryService } from "../services/database/database-registry.service.ts";
+import { DatabaseService } from "../services/database/database.service.ts";
+import { AuthService, EmbeddingService, LlmService, RagService } from "../services/index.ts";
+import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand } from "../ui/commands/index.ts";
+import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
     authService: AuthService;
@@ -25,7 +13,13 @@ interface AppServices {
     embeddingService: EmbeddingService;
 }
 
+interface AIProvider {
+    name: string;
+    apiKey: string;
+}
+
 class AppContext {
+    providers: AIProvider[];
     commandRegistry: CommandRegistry;
     workspace: WorkSpace;
     services: AppServices;
@@ -35,10 +29,23 @@ class AppContext {
         this.commandRegistry = this.buildCommandRegistry();
         this.services = this.createServices();
         this.workspace = new WorkSpace();
+        this.providers = [];
     }
 
     createCommandContext(commandCtx: CommandContext) {
         this.commandCtx = commandCtx;
+    }
+
+    addProvider(provider: AIProvider) {
+        this.providers.push(provider);
+    }
+
+    removeProvider(providerName: string) {
+        this.providers = this.providers.filter(provider => provider.name !== providerName);
+    }
+
+    getProvider(providerName: string) {
+        return this.providers.find(provider => provider.name === providerName);
     }
 
     buildCommandRegistry() {

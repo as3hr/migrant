@@ -1,9 +1,9 @@
-import { pool } from "@src/exports.ts";
+import { pool } from "../index.ts";
 
 export async function getSchemas(dbId: string): Promise<string[]> {
   const result = await pool.query(dbId, getSchemasQuery());
 
-  return result.rows.map(row => row.schema_name as string);
+  return result.rows.map((row: any) => row.schema_name as string);
 }
 
 export function getSchemasQuery(): string {

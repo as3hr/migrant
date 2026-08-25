@@ -1,12 +1,13 @@
-import { answerQuestion, appContext, type AskOptions, type CommandContext } from "@src/exports.ts";
-import { supabase } from "@src/infrastructure/clients/supabase.client.ts";
 import { useStdout } from "ink";
 import { useEffect, useRef, useState } from "react";
+import { appContext, type AskOptions, type CommandContext } from "../../domain/index.ts";
+import { supabase } from "../../infrastructure/index.ts";
 import {
   errorMessage,
   parseCommandInput,
   runCommand
 } from "../commands/command_helpers.ts";
+import { answerQuestion } from "../commands/index.ts";
 import { type OutputItem } from "../components/output.tsx";
 
 export type RunState =

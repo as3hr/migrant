@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@src/*": ["./src/*"]
-    },
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
+    "types": ["bun"],
     "sourceMap": true,
     "declaration": true,
     "noEmit": true,

@@ -1,4 +1,4 @@
-import { type CommandDefinition, type CommandRegistry } from "@src/exports.ts";
+import type { CommandDefinition, CommandRegistry } from "../../domain/index.ts";
 
 export function createHelpCommand(
   registry: CommandRegistry

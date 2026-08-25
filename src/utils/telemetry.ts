@@ -1,4 +1,4 @@
-import { appContext } from "@src/exports.ts";
+import { appContext } from "../domain/index.ts";
 
 /**
  * Lightweight performance telemetry helper for measuring step-by-step execution metrics.

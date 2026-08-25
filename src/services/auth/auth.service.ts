@@ -1,9 +1,12 @@
-import { appContext, BASE_URL, LocalSessionRepository, LocalWorkspaceRepository, supabase, type CommandContext } from "@src/exports.ts";
-import { credentialStore } from "@src/infrastructure/security/credential_store.ts";
 import type { User } from "@supabase/supabase-js";
 import getPort from "get-port";
-import http from "http";
+import http from "node:http";
 import open from "open";
+import { appContext, type CommandContext } from "../../domain/index.ts";
+import { supabase } from "../../infrastructure/index.ts";
+import { credentialStore } from "../../infrastructure/security/credential_store.ts";
+import { LocalSessionRepository, LocalWorkspaceRepository } from "../../local/index.ts";
+import { BASE_URL } from "../../utils/index.ts";
 
 export class AuthService {
   private sessionRepo: LocalSessionRepository;

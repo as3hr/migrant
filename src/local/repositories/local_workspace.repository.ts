@@ -1,6 +1,6 @@
-import { type DatabaseCollection, type DatabaseType } from "@src/exports.ts";
-import { sqlLite } from "@src/infrastructure/clients/sqllite.client.ts";
-import { credentialStore } from "@src/infrastructure/security/credential_store.ts";
+import type { DatabaseCollection, DatabaseType } from "../../domain/index.ts";
+import { sqlLite } from "../../infrastructure/clients/sqllite.client.ts";
+import { credentialStore } from "../../infrastructure/security/credential_store.ts";
 
 export class LocalWorkspaceRepository {
     private workspaceDbSelectStmt;

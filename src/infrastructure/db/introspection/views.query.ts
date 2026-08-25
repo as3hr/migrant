@@ -1,4 +1,5 @@
-import { pool, type View } from "@src/exports.ts";
+import type { View } from "../../domain/index.ts";
+import { pool } from "../index.ts";
 
 export async function getViews(schema: string, dbId: string): Promise<Record<string, View>> {
   const result = await pool.query(dbId, getViewsQuery(), [schema]);

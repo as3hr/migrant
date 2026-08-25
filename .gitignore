@@ -1,8 +1,7 @@
 node_modules
 dist
 creds.txt
-.env.prod
-.env.dev
+.env
 scan.sh
 logs/*
 .local

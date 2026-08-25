@@ -1,9 +1,11 @@
-import { pool, type Trigger } from "@src/exports.ts";
+import type { Trigger } from "../../domain/index.ts";
+import { pool } from "../index.ts";
+
 
 export async function getTriggers(schema: string, dbId: string): Promise<Trigger[]> {
   const result = await pool.query(dbId, getTriggersQuery(), [schema]);
 
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     schemaName: schema,
     name: row.trigger_name,
     table: row.table_name,
