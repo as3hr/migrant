@@ -1,8 +1,9 @@
 import { embed, embedMany } from "ai";
 import { appContext } from "../../domain/index.ts";
+import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/constants.ts";
 
 export class EmbeddingService {
-    async createEmbeddings(texts: string[], model?: string, batchSize: number = 20): Promise<number[][]> {
+    async createEmbeddings(texts: string[], batchSize: number = 20): Promise<number[][]> {
         if (texts.length === 0) return [];
 
         const batches: string[][] = [];
@@ -13,7 +14,7 @@ export class EmbeddingService {
         const batchResults = await Promise.all(
             batches.map(async (batch) => {
                 const { embeddings } = await embedMany({
-                    model: appContext.providerSdk.textEmbeddingModel(model ?? appContext.selectedModel.modelId),
+                    model: appContext.providerSdk.textEmbeddingModel(SYS_DEFAULT_EMBEDDING_MODEL),
                     values: batch,
                 });
                 if (!embeddings || embeddings.length !== batch.length) {
@@ -30,11 +31,11 @@ export class EmbeddingService {
         return allEmbeddings;
     }
 
-    async createSingleEmbedding(texts: string[], model?: string): Promise<number[]> {
+    async createSingleEmbedding(texts: string[]): Promise<number[]> {
         const targetText = texts[0] ?? ""; 
 
         const { embedding } = await embed({
-            model: appContext.providerSdk.textEmbeddingModel(model ?? appContext.selectedModel.modelId),
+            model: appContext.providerSdk.textEmbeddingModel(SYS_DEFAULT_EMBEDDING_MODEL),
             value: targetText,
         });
 
