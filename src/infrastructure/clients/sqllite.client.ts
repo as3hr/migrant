@@ -1,7 +1,8 @@
 import { Database } from "bun:sqlite";
 
-export const sqlLite: Database.Database = new Database('migrant.db');
+export const sqlLite: Database = new Database('migrant.db');
 
+// done
 sqlLite.run(`
     CREATE TABLE IF NOT EXISTS sessions (
       user_id TEXT PRIMARY KEY,
@@ -10,6 +11,7 @@ sqlLite.run(`
     );
 `);
 
+// done
 sqlLite.run(`
   CREATE TABLE IF NOT EXISTS databases (
     id TEXT PRIMARY KEY,
@@ -24,6 +26,7 @@ sqlLite.run(`
   );
 `);
 
+// done
 sqlLite.run(`
   CREATE TABLE IF NOT EXISTS chat_sessions (
     id TEXT PRIMARY KEY,
@@ -31,10 +34,12 @@ sqlLite.run(`
     title TEXT NOT NULL DEFAULT 'New Conversation',
     session_token_limit BIGINT NOT NULL DEFAULT 100000,
     session_token_used BIGINT NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 `);
 
+// done
 sqlLite.run(`
   CREATE TABLE IF NOT EXISTS chat_messages (
     id TEXT PRIMARY KEY,
@@ -42,6 +47,7 @@ sqlLite.run(`
     session_id TEXT NOT NULL,
     content TEXT NOT NULL,
     provider TEXT NOT NULL,
+    role TEXT NOT NULL,
     model_name TEXT NOT NULL,
     target_agent TEXT NOT NULL,
     prompt_tokens BIGINT NOT NULL DEFAULT 0,
@@ -52,11 +58,11 @@ sqlLite.run(`
   );
 `);
 
+// done
 sqlLite.run(`
   CREATE TABLE IF NOT EXISTS providers (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
-    provider TEXT NOT NULL,
-    api_key_key TEXT NOT NULL
+    api_key_env TEXT NOT NULL
   );
 `);

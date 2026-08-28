@@ -26,13 +26,20 @@ export async function answerQuestion(
 
       const payload = await resolveAgentPayload(output.targetAgent, question, ctx);
       if (!payload) return;
+      await appContext.services.memoryService.setQuestionIntoMemory(question);  
+      const context = await appContext.services.contextManager.getContext();  
 
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
           payload.systemPrompt,
           payload.userPrompt,
-          "deepseek/deepseek-chat"
+          appContext.selectedModel.modelId,
+          context,
+          (result) => {
+              appContext.services.memoryService.setResponseIntoMemory(result);
+          }
       );
+        
       let firstChunk = true;
       for await (const chunk of stream) {
           response += chunk;

@@ -1,6 +1,5 @@
 import { embed, embedMany } from "ai";
-import { openRouter } from "../../infrastructure/index.ts";
-import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
+import { appContext } from "../../domain/index.ts";
 
 export class EmbeddingService {
     async createEmbeddings(texts: string[], model?: string, batchSize: number = 20): Promise<number[][]> {
@@ -14,7 +13,7 @@ export class EmbeddingService {
         const batchResults = await Promise.all(
             batches.map(async (batch) => {
                 const { embeddings } = await embedMany({
-                    model: openRouter.textEmbeddingModel(model ?? SYS_DEFAULT_EMBEDDING_MODEL),
+                    model: appContext.providerSdk.textEmbeddingModel(model ?? appContext.selectedModel.modelId),
                     values: batch,
                 });
                 if (!embeddings || embeddings.length !== batch.length) {
@@ -35,7 +34,7 @@ export class EmbeddingService {
         const targetText = texts[0] ?? ""; 
 
         const { embedding } = await embed({
-            model: openRouter.textEmbeddingModel(model ?? SYS_DEFAULT_EMBEDDING_MODEL),
+            model: appContext.providerSdk.textEmbeddingModel(model ?? appContext.selectedModel.modelId),
             value: targetText,
         });
 

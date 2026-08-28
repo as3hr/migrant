@@ -17,6 +17,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.42",
+    "@ai-sdk/deepseek": "^3.0.32",
+    "@ai-sdk/google": "^4.0.51",
+    "@ai-sdk/groq": "^4.0.31",
+    "@ai-sdk/mistral": "^4.0.33",
+    "@ai-sdk/openai": "^4.0.47",
+    "@ai-sdk/xai": "^4.0.44",
     "@openrouter/ai-sdk-provider": "^3.0.0",
     "@openrouter/sdk": "^1.1.7",
     "@supabase/supabase-js": "^2.110.5",

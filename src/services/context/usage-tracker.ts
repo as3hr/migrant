@@ -1,16 +1,5 @@
 import { supabase } from "../../infrastructure/index.ts";
-
-export interface ModelPrice {
-    inputPer1M: number;
-    outputPer1M: number;
-}
-
-export const MODEL_PRICES: Record<string, ModelPrice> = {
-    "openai/gpt-4o-mini": { inputPer1M: 0.15, outputPer1M: 0.60 },
-    "deepseek/deepseek-chat": { inputPer1M: 0.14, outputPer1M: 0.28 },
-    "anthropic/claude-3-5-sonnet": { inputPer1M: 3.00, outputPer1M: 15.00 },
-    "openai/gpt-4o": { inputPer1M: 2.50, outputPer1M: 10.00 },
-};
+import { getModelById } from "../../infrastructure/provider/providers.ts";
 
 export interface RecordUsageParams {
     userId: string;
@@ -24,8 +13,9 @@ export interface RecordUsageParams {
 }
 
 export class UsageTrackerService {
-    calculateCostUsd(modelName: string, promptTokens: number, completionTokens: number): number {
-        const price = MODEL_PRICES[modelName] ?? { inputPer1M: 0.20, outputPer1M: 0.50 };
+    calculateCostUsd(modelId: string, promptTokens: number, completionTokens: number): number {
+        const price = getModelById(modelId);
+        if (!price) return 0;
         const inputCost = (promptTokens / 1_000_000) * price.inputPer1M;
         const outputCost = (completionTokens / 1_000_000) * price.outputPer1M;
         return Number((inputCost + outputCost).toFixed(6));

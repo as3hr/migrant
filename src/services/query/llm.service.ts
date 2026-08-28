@@ -1,12 +1,12 @@
-import { generateText, streamText, type ModelMessage } from 'ai';
-import { openRouter } from '../../infrastructure/index.ts';
-import { SYS_DEFAULT_MODEL } from '../../utils/index.ts';
+import { generateText, streamText, type GenerateTextOnEndCallback, type ModelMessage, type ToolSet } from 'ai';
+import type { Context } from 'node:vm';
+import { appContext } from '../../domain/index.ts';
 
 export class LlmService {
-    async queryLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[]): Promise<string | null> {
+    async queryLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
         try {
             const { text } = await generateText({
-                model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
+                model: appContext.providerSdk.chat(model ?? appContext.selectedModel.modelId),
                 instructions: [
                     {
                         role: "system",
@@ -20,7 +20,7 @@ export class LlmService {
                     },
                 ],
                 onEnd: (result) => {
-                    
+                    onEnd?.(result);
                 },
             });
 
@@ -31,10 +31,10 @@ export class LlmService {
         }
     }
 
-    async *streamLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[]) {
+    async *streamLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>) {
         try {
             const result = streamText({
-                model: openRouter.chat(model ?? SYS_DEFAULT_MODEL),
+                model: appContext.providerSdk.chat(model ?? appContext.selectedModel.modelId),
                 instructions: [
                     {
                         role: "system",
@@ -48,7 +48,7 @@ export class LlmService {
                     },
                 ],
                 onEnd: (result) => {
-
+                    onEnd?.(result);
                 },
             });
 

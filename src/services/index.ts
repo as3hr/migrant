@@ -19,3 +19,9 @@ export * from "./knowledge/file.service.ts";
 export * from "./auth/auth.service.ts";
 
 export * from "./query/db_overview.service.ts";
+
+export * from "./context/context_manager.ts";
+
+export * from "./context/usage-tracker.ts";
+
+export * from "./memory/memory.service.ts";

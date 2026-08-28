@@ -1,7 +1,11 @@
+import { appConfig } from "../infrastructure/index.ts";
+import { setProvider, type ProviderId, type ProviderSDK } from "../infrastructure/provider/providers.ts";
 import { DatabaseRegistryService } from "../services/database/database-registry.service.ts";
 import { DatabaseService } from "../services/database/database.service.ts";
-import { AuthService, EmbeddingService, LlmService, RagService } from "../services/index.ts";
+import { AuthService, ContextManager, EmbeddingService, LlmService, RagService, UsageTrackerService } from "../services/index.ts";
+import { MemoryService } from "../services/memory/memory.service.ts";
 import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand } from "../ui/commands/index.ts";
+import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
@@ -11,43 +15,59 @@ interface AppServices {
     ragService: RagService;
     llmService: LlmService;
     embeddingService: EmbeddingService;
+    memoryService: MemoryService;
+    contextManager: ContextManager;
+    usageTracker: UsageTrackerService;
 }
 
-interface AIProvider {
-    name: string;
-    apiKey: string;
+interface ProviderModel {
+    modelId: string;
+    providerId: ProviderId;
 }
 
 class AppContext {
-    providers: AIProvider[];
+    selectedModel: ProviderModel;
     commandRegistry: CommandRegistry;
     workspace: WorkSpace;
     services: AppServices;
     commandCtx?: CommandContext; 
+    providerSdk: ProviderSDK;
+    currentChatSessionId: string | undefined;
 
-    constructor() {
+    private constructor(
+        providerSdk: ProviderSDK,
+    ) {
+        this.providerSdk = providerSdk;
         this.commandRegistry = this.buildCommandRegistry();
         this.services = this.createServices();
         this.workspace = new WorkSpace();
-        this.providers = [];
+        this.selectedModel = {
+            modelId: SYS_DEFAULT_MODEL,
+            providerId: "openrouter",
+        }
+    }
+
+    static async create(): Promise<AppContext> {
+        const providerSdk = await setProvider(
+            "openrouter",
+            appConfig.openRouterApiKey
+        );
+
+        return new AppContext(providerSdk);
+    }
+
+    setCurrentChatSessionId(sessionId: string) {
+        this.currentChatSessionId = sessionId;
     }
 
     createCommandContext(commandCtx: CommandContext) {
         this.commandCtx = commandCtx;
     }
 
-    addProvider(provider: AIProvider) {
-        this.providers.push(provider);
+    setSelectedModel(modelId: string, providerId: ProviderId) {
+        this.selectedModel = { modelId, providerId };
     }
-
-    removeProvider(providerName: string) {
-        this.providers = this.providers.filter(provider => provider.name !== providerName);
-    }
-
-    getProvider(providerName: string) {
-        return this.providers.find(provider => provider.name === providerName);
-    }
-
+    
     buildCommandRegistry() {
       const registry = new CommandRegistry();
     
@@ -69,8 +89,11 @@ class AppContext {
             ragService: new RagService(),
             llmService: new LlmService(),
             embeddingService: new EmbeddingService(),
+            memoryService: new MemoryService(),
+            contextManager: new ContextManager(),
+            usageTracker: new UsageTrackerService(),
         };
     }
 }
 
-export const appContext = new AppContext();
+export const appContext = await AppContext.create();
