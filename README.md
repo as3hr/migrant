@@ -6,7 +6,7 @@ Migrant is being built as an engineering intelligence layer that keeps databases
 
 ## The Problem
 
-Modern applications rarely rely on a single source of truth. As engineering systems grow, teams end up managing multiple databases (production, staging, analytics), microservices, background workers, and codebases in different languages—all interacting with the same underlying data.
+Modern applications rarely rely on a single source of truth. As engineering systems grow, developers end up managing multiple databases (production, staging, analytics), microservices, background workers, and codebases in different languages—all interacting with the same underlying data.
 
 Understanding how these fragmented systems connect is painful and manual:
 
@@ -20,9 +20,9 @@ Existing database tools only inspect or query a single database in isolation. Th
 
 ---
 
-## What We Have Done
+## What's Built
 
-We built the core foundation of Migrant, focusing first on deep database introspection and natural language retrieval directly in the CLI:
+The initial foundation of Migrant focuses on deep database introspection and natural language retrieval directly in the CLI:
 
 * **Interactive Terminal Interface:** Built with React + Ink for a fast, responsive CLI experience.
 * **Authentication & Keyring Integration:** Secure web login flow via Supabase, with sessions stored locally in SQLite and database credentials saved directly in OS credential keychains.
@@ -33,12 +33,12 @@ We built the core foundation of Migrant, focusing first on deep database introsp
 
 ---
 
-## What We Are Doing & Planning To Do
+## Roadmap & Next Steps
 
-We are evolving Migrant from pure schema QA into systemic engineering intelligence:
+Migrant is evolving from pure schema QA into systemic engineering intelligence:
 
 * **Query Routing:** Smart classification of user queries to route between direct schema lookups, live database queries, multi-database comparisons, and LLM reasoning.
-* **Schema Freshness & Drift Detection:** Automatically detecting schema changes in connected databases and re-indexing knowledge without requiring manual user rescans.
+* **Schema Freshness & Drift Detection:** Automatically detecting schema changes in connected databases and re-indexing knowledge without requiring manual rescans.
 * **Multi-Database Intelligence:** Answering comparative queries across environments (e.g., *"Compare the users table schema between production and staging"*).
 * **Codebase & Service Graph Integration:** Scanning application codebases (TypeScript, Go, Python, etc.) to map exact code references, queries, and ORM models to database tables and columns.
 * **Impact Analysis:** Pre-evaluating schema migrations to show what breaks before applying a change (e.g., *"Which services will break if I rename user_id?"*).
@@ -48,6 +48,6 @@ We are evolving Migrant from pure schema QA into systemic engineering intelligen
 
 ## The Goal
 
-The ultimate goal for Migrant is to serve as the unified brain between data infrastructure and application code.
+The goal for Migrant is to serve as the unified brain between data infrastructure and application code.
 
 Instead of developers manually digging through migrations, scattered ORMs, microservice repositories, and database tools, Migrant maintains a living map of how databases and codebases depend on each other—keeping your entire engineering system connected, understood, and in sync.
