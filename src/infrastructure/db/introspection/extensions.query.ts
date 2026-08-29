@@ -1,4 +1,4 @@
-import type { Extension } from "../../domain/index.ts";
+import type { Extension } from "../../../domain/index.ts";
 import { pool } from "../index.ts";
 
 export async function getExtensions(dbId: string): Promise<Extension[]> {

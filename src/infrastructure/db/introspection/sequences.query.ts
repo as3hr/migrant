@@ -1,4 +1,4 @@
-import type { Sequence } from "../../domain/index.ts";
+import type { Sequence } from "../../../domain/index.ts";
 import { pool } from "../index.ts";
 
 export async function getSequences(schema: string, dbId: string): Promise<Sequence[]> {

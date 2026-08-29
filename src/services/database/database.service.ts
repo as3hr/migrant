@@ -62,7 +62,7 @@ export class DatabaseService {
     }
 
     async setNewSession(session: Omit<DbChatSessionType, 'id'>) {
-        const { data, error } = await supabase.from('chat_sessions').insert(session).select().maybeSingle();
+        const { data, error } = await supabase.from('chat_sessions').insert(session).select("*").maybeSingle();
         
         if (error || !data) {
             throw new Error(`Failed to create session: ${error?.message ?? 'Unknown error'}`);
@@ -79,7 +79,7 @@ export class DatabaseService {
             .insert({
                 ...message,
                 session_id: sessionId,
-            }).select().maybeSingle();
+            }).select("*").maybeSingle();
 
         if (error || !data) {
             throw new Error(`Failed to store model response: ${error?.message}`);

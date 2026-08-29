@@ -25,7 +25,7 @@ class LocalChatRepository {
         );
 
         this.chatMessageInsertStmt = sqlLite.prepare(
-            'INSERT OR REPLACE INTO chat_messages (id, user_id, session_id, content, provider, role, model_ name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT OR REPLACE INTO chat_messages (id, user_id, session_id, content, provider, role, model_name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         this.chatMessageSelectStmt = sqlLite.prepare(
             'SELECT * FROM chat_messages WHERE session_id = ?'

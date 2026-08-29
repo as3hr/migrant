@@ -1,5 +1,5 @@
 import { appConfig } from "../infrastructure/index.ts";
-import { setProvider, type ProviderId, type ProviderSDK } from "../infrastructure/provider/providers.ts";
+import { setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/provider/providers.ts";
 import { DatabaseRegistryService } from "../services/database/database-registry.service.ts";
 import { DatabaseService } from "../services/database/database.service.ts";
 import { AuthService, ContextManager, EmbeddingService, LlmService, RagService, UsageTrackerService } from "../services/index.ts";
@@ -36,11 +36,12 @@ class AppContext {
 
     private constructor(
         providerSdk: ProviderSDK,
+        services: AppServices
     ) {
         this.providerSdk = providerSdk;
         this.commandRegistry = this.buildCommandRegistry();
-        this.services = this.createServices();
         this.workspace = new WorkSpace();
+        this.services = services;
         this.selectedModel = {
             modelId: SYS_DEFAULT_MODEL,
             providerId: "openrouter",
@@ -52,8 +53,13 @@ class AppContext {
             "openrouter",
             appConfig.openRouterApiKey
         );
+        const services = this.createServices();
+        const user = await services.authService.getCurrentUser();
+        if (user) {
+            setProviderToLocal("openrouter", "OPENROUTER_API_KEY", user.id);
+        }
 
-        return new AppContext(providerSdk);
+        return new AppContext(providerSdk, services);
     }
 
     setCurrentChatSessionId(sessionId: string) {
@@ -81,7 +87,7 @@ class AppContext {
       return registry;
     }
 
-    createServices() {
+    private static createServices() {
         return {
             authService: new AuthService(),
             databaseRegistryService: new DatabaseRegistryService(),

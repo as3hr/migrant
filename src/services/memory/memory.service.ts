@@ -35,7 +35,6 @@ export class MemoryService {
         await appContext.services.databaseService.setChatMessage(sessionId, message);
     }
 
-
     async setQuestionIntoMemory(question: string) {
         const user = await appContext.services.authService.getCurrentUser();
         if (!user) return;
@@ -58,7 +57,9 @@ export class MemoryService {
                     prompt: question,
                 });
                 title = output.title;
-            } catch (e) { }
+            } catch (e) {
+                appContext.commandCtx?.log(`Error in creating title for new conversation ${e}`);
+             }
 
             const newSession: Omit<DbChatSessionType, "id"> = {
                 user_id: user.id,

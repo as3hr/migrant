@@ -5,7 +5,6 @@ import type { MistralProvider } from '@ai-sdk/mistral';
 import type { OpenAIProvider } from '@ai-sdk/openai';
 import type { XaiProvider } from '@ai-sdk/xai';
 import type { OpenRouterProvider } from '@openrouter/ai-sdk-provider';
-import { appContext } from '../../domain/index.ts';
 import { LocalProviderRepository } from '../../local/index.ts';
 import { credentialStore } from '../index.ts';
 
@@ -154,12 +153,13 @@ export const PROVIDERS: ProviderConfig[] = [
 export async function setProvider(id: ProviderId, apiKey: string) {
     const provider = PROVIDERS.find((p) => p.id === id);
     if (!provider) throw new Error(`Unknown provider: ${id}`);
-    const user = await appContext.services.authService.getCurrentUser();
-    if (!user) throw new Error(`User not found`);
     await credentialStore.set(provider.apiKeyEnv, apiKey);
     const providerSdk = await provider.create(apiKey);
-    new LocalProviderRepository().setProvider({ id, user_id: user.id, api_key_env: provider.apiKeyEnv });
     return providerSdk;
+}
+
+export function setProviderToLocal(id: ProviderId, apiKeyEnv: string, userId: string) {
+    new LocalProviderRepository().setProvider({ id, user_id: userId, api_key_env: apiKeyEnv });
 }
 
 export function getModels(id: ProviderId): ModelConfig[] {

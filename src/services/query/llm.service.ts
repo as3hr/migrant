@@ -6,14 +6,20 @@ export class LlmService {
     async queryLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
         try {
             const { text } = await generateText({
-                model: appContext.providerSdk.chat(model ?? appContext.selectedModel.modelId),
+                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
                 instructions: [
                     {
                         role: "system",
                         content: systemPrompt,
                     },
                 ],
-                messages: messages ?? [
+                messages: (messages && messages.length > 0) ? [
+                    ...messages,
+                    {
+                        role: "user",
+                        content: userPrompt,
+                    }
+                ] : [
                     {
                         role: "user",
                         content: userPrompt,
@@ -26,7 +32,7 @@ export class LlmService {
 
             return text;
         } catch (llmE) {
-            console.log('Error in querying llm', llmE);
+            appContext.commandCtx?.error(`Error in querying llm: ${llmE}`);
             return null;
         }
     }
@@ -34,14 +40,17 @@ export class LlmService {
     async *streamLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>) {
         try {
             const result = streamText({
-                model: appContext.providerSdk.chat(model ?? appContext.selectedModel.modelId),
+                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
                 instructions: [
                     {
                         role: "system",
                         content: systemPrompt,
                     },
                 ],
-                messages: messages ?? [
+                messages: (messages && messages.length > 0) ? [...messages, {
+                        role: "user",
+                        content: userPrompt,
+                    }] : [
                     {
                         role: "user",
                         content: userPrompt,
@@ -50,6 +59,9 @@ export class LlmService {
                 onEnd: (result) => {
                     onEnd?.(result);
                 },
+                onError: (result) => {
+                    appContext.commandCtx?.error(`Error in streaming llm: ${JSON.stringify(result, null, 2)}`);
+                }
             });
 
             for await (const chunk of result.textStream) {
@@ -58,7 +70,7 @@ export class LlmService {
                 }
             }
         } catch (llmE) {
-            console.error(`Error in streaming llm: ${llmE}`);
+            appContext.commandCtx?.error(`Error in streaming llm: ${JSON.stringify(llmE, null, 2)}`);
         }
     }
 }

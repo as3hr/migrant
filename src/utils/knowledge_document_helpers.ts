@@ -1,4 +1,4 @@
-import type { Table } from "../../domain/index.ts";
+import type { Table } from "../domain/index.ts";
 
 export function getTableContent(table: Table, relatedTables: string[]): string {
   const columns = table.columns;
@@ -9,7 +9,7 @@ export function getTableContent(table: Table, relatedTables: string[]): string {
       Table: ${table.name}
       
       Columns:
-      ${columns.map(column => `
+      ${columns.map((column: any) => `
       - ${column.name}
         Type: ${column.type}
         Nullable: ${column.nullable}

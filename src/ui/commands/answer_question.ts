@@ -26,7 +26,7 @@ export async function answerQuestion(
 
       const payload = await resolveAgentPayload(output.targetAgent, question, ctx);
       if (!payload) return;
-      await appContext.services.memoryService.setQuestionIntoMemory(question);  
+      await appContext.services.memoryService.setQuestionIntoMemory(question);
       const context = await appContext.services.contextManager.getContext();  
 
       let response = "";

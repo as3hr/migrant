@@ -1,4 +1,4 @@
-import type { Trigger } from "../../domain/index.ts";
+import type { Trigger } from "../../../domain/index.ts";
 import { pool } from "../index.ts";
 
 

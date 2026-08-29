@@ -3,14 +3,12 @@ import { appContext } from "../../domain/index.ts";
 import { localChatRepository } from "../../local/repositories/local_chat.repository.ts";
 
 export class ContextManager {
-    private maxHistoryTokenBudget: number = 4000; /// token budget
+    private maxHistoryTokenBudget: number = 4000;
 
-    /** 4-char per token estimate */
     private estimateTokens(text: string): number {
         return Math.ceil((text ?? "").length / 4);
     }
 
-    /** Prunes heavy raw schema dumps from older assistant messages */
     private pruneHistoricalContent(content: string): string {
         if (content.length > 500 && content.includes("### Database:")) {
             return content.replace(/### Database:[\s\S]*?(?=\n###|\n\n[A-Z]|$)/g, (match) => {

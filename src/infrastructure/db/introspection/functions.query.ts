@@ -1,4 +1,4 @@
-import type { DatabaseFunction } from "../../domain/index.ts";
+import type { DatabaseFunction } from "../../../domain/index.ts";
 import { pool } from "../index.ts";
 
 export async function getFunctions(
