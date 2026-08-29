@@ -1,251 +1,53 @@
 # Migrant
 
-Migrant is a developer tool for understanding databases and the systems built around them.
+Migrant is being built as an engineering intelligence layer that keeps databases and codebases in sync.
 
-Modern applications rarely have a single source of truth. A team may have multiple databases, multiple services, and multiple codebases that depend on the same data. Understanding how these systems relate to each other becomes increasingly difficult as they evolve.
-
-Migrant is being built to solve this problem.
+---
 
 ## The Problem
 
-Developers spend a significant amount of time answering questions about existing systems.
+Modern applications rarely rely on a single source of truth. As engineering systems grow, teams end up managing multiple databases (production, staging, analytics), microservices, background workers, and codebases in different languages—all interacting with the same underlying data.
 
-Which tables exist?
+Understanding how these fragmented systems connect is painful and manual:
 
-What relationships exist between them?
+* **What tables, columns, and relationships exist** across different databases?
+* **Which specific codebase or microservice depends** on a particular table or column?
+* **What happens if a column or constraint is changed or removed?** Will it silently break a service?
+* **Are production, staging, and dev schemas actually consistent?**
+* **How do access controls and RLS policies** protect data across tables?
 
-Which services depend on a particular table?
+Existing database tools only inspect or query a single database in isolation. They don't understand the surrounding engineering context, the applications consuming the data, or the relationships across multiple environments.
 
-What happens if a column or constraint is changed?
+---
 
-Are the schemas in production and staging still consistent?
+## What We Have Done
 
-Which parts of the codebase depend on a database structure?
+We built the core foundation of Migrant, focusing first on deep database introspection and natural language retrieval directly in the CLI:
 
-These questions become harder when a team has multiple databases or multiple codebases using the same database.
+* **Interactive Terminal Interface:** Built with React + Ink for a fast, responsive CLI experience.
+* **Authentication & Keyring Integration:** Secure web login flow via Supabase, with sessions stored locally in SQLite and database credentials saved directly in OS credential keychains.
+* **PostgreSQL Schema Scanner:** Deep extraction of database schemas, tables, columns, data types, primary keys, foreign key relationships, and constraints.
+* **Knowledge Indexing & RAG:** Structuring schema data into searchable knowledge representations and vector embeddings using `pgvector` and vector search.
+* **Natural Language Query Engine:** Ask natural language questions in the CLI about connected database structures and relationships, powered by multi-provider LLM integrations (OpenAI, Anthropic, DeepSeek, Groq, OpenRouter).
+* **Multi-Database Workspaces:** Support for connecting, persisting, and switching between multiple databases (e.g., `production`, `staging`) inside a single local workspace.
 
-Existing database tools are generally focused on inspecting or querying a database. They do not provide a complete understanding of the engineering context surrounding that database.
+---
 
-Migrant aims to provide that layer.
+## What We Are Doing & Planning To Do
 
-## Current Focus
+We are evolving Migrant from pure schema QA into systemic engineering intelligence:
 
-The current implementation focuses on database understanding.
+* **Query Routing:** Smart classification of user queries to route between direct schema lookups, live database queries, multi-database comparisons, and LLM reasoning.
+* **Schema Freshness & Drift Detection:** Automatically detecting schema changes in connected databases and re-indexing knowledge without requiring manual user rescans.
+* **Multi-Database Intelligence:** Answering comparative queries across environments (e.g., *"Compare the users table schema between production and staging"*).
+* **Codebase & Service Graph Integration:** Scanning application codebases (TypeScript, Go, Python, etc.) to map exact code references, queries, and ORM models to database tables and columns.
+* **Impact Analysis:** Pre-evaluating schema migrations to show what breaks before applying a change (e.g., *"Which services will break if I rename user_id?"*).
+* **Security & Policy Audit:** Introspecting PostgreSQL Row Level Security (RLS) policies and permissions to explain who can access what data.
 
-Migrant can currently:
+---
 
-* Authenticate developers through the Migrant web application
-* Connect to PostgreSQL databases
-* Connect multiple databases within the same workspace
-* Persist database connections locally
-* Store database credentials using the operating system credential store
-* Restore sessions after restarting the CLI
-* Scan database schemas
-* Extract tables, columns, relationships and constraints
-* Index database knowledge for retrieval
-* Answer natural language questions about database structure
-* Switch between connected databases
-* Track database scanning state
-* Remove local sessions and credentials on logout
+## The Goal
 
-Example:
+The ultimate goal for Migrant is to serve as the unified brain between data infrastructure and application code.
 
-```text
-$ asher [production, staging] >
-
-> what relationships does the users table have?
-
-Migrant:
-...
-````
-
-## Architecture
-
-The current system is built around several components.
-
-```text
-CLI
- |
- + Auth
- |
- + Workspace
- |
- + Database Connections
- |
- + Schema Scanner
- |
- + Knowledge Index
- |
- + Query Engine
- |
- + LLM
-```
-
-Local workspace information is stored using SQLite.
-
-Database credentials are stored using the operating system credential store rather than being stored directly in the local database.
-
-Supabase is currently used for authentication and remote storage of indexed database knowledge.
-
-## What Is Being Built
-
-The next stage is focused on making Migrant better at understanding database systems rather than simply retrieving individual schema records.
-
-### Query Routing
-
-Migrant needs to determine what a question actually requires.
-
-For example:
-
-```text
-What columns does users have?
-```
-
-may only require schema retrieval.
-
-While:
-
-```text
-Give me an overview of this database.
-```
-
-may require multiple pieces of database knowledge.
-
-Eventually a query router will determine whether a question requires:
-
-```text
-Schema retrieval
-Live database queries
-Multiple databases
-LLM reasoning
-```
-
-### Database Freshness
-
-Database schemas change continuously.
-
-Migrant should detect when its stored understanding of a database is outdated without requiring developers to manually run a scan.
-
-The planned approach is to compare a representation of the current database schema against the previously indexed schema.
-
-If the schema has changed, Migrant can update its indexed knowledge before answering the query.
-
-### Multi Database Intelligence
-
-Migrant is being designed around multiple connected databases.
-
-For example:
-
-```text
-production
-staging
-analytics
-```
-
-A future query could be:
-
-```text
-Compare the users table between production and staging.
-```
-
-Migrant should be able to retrieve the relevant information from both databases and provide a single answer.
-
-### Codebase Understanding
-
-A larger goal is to connect database knowledge with codebase knowledge.
-
-Many teams have multiple services or codebases interacting with the same database.
-
-For example:
-
-```text
-TypeScript service
-        |
-        v
-     Database
-        ^
-        |
-Go service
-```
-
-A database change can therefore affect multiple systems.
-
-Migrant is intended to eventually understand these relationships and detect changes across both database schemas and codebases.
-
-## Long Term Direction
-
-The long term goal is to build an engineering intelligence layer that keeps databases and codebases synchronized.
-
-Migrant should eventually help developers answer questions such as:
-
-```text
-Which codebases depend on this table?
-
-What services use this column?
-
-What will be affected if this foreign key is removed?
-
-Are production and staging schemas different?
-
-Which database does this service depend on?
-
-What changed in the database since the last scan?
-
-Did this schema change break anything in the codebase?
-
-```
-
-Another planned area is database security and management, including understanding and managing database access policies such as PostgreSQL RLS policies.
-
-## Development Status
-
-Migrant is currently under active development.
-
-The current focus is:
-
-```text
-Database connections
-        ↓
-Persistent workspaces
-        ↓
-Schema scanning
-        ↓
-Database knowledge
-        ↓
-Query routing
-        ↓
-Freshness detection
-        ↓
-Multi database reasoning
-        ↓
-Codebase understanding
-```
-
-The architecture and APIs are expected to change as these problems are explored.
-
-## Technology
-
-Current technologies include:
-
-* TypeScript
-* Node.js
-* PostgreSQL
-* pgvector
-* Supabase
-* SQLite
-* better-sqlite3
-* Ink
-* React
-* Drizzle
-
-## Why Migrant Exists
-
-Database knowledge is often distributed across schemas, migrations, documentation, services and codebases.
-
-Developers should not have to reconstruct that knowledge manually every time they work on an unfamiliar system.
-
-Migrant is an attempt to make that knowledge accessible directly from the developer's environment.
-
-## License
-
-License information will be added before the first release.
+Instead of developers manually digging through migrations, scattered ORMs, microservice repositories, and database tools, Migrant maintains a living map of how databases and codebases depend on each other—keeping your entire engineering system connected, understood, and in sync.
