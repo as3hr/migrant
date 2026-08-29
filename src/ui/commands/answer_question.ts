@@ -27,14 +27,14 @@ export async function answerQuestion(
       const payload = await resolveAgentPayload(output.targetAgent, question, ctx);
       if (!payload) return;
       await appContext.services.memoryService.setQuestionIntoMemory(question);
-      const context = await appContext.services.contextManager.getContext();  
+      const context = await appContext.services.contextManager.getContext(payload.userPrompt);
+      ctx.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
           payload.systemPrompt,
-          payload.userPrompt,
-          appContext.selectedModel.modelId,
           context,
+          appContext.selectedModel.modelId,
           (result) => {
               appContext.services.memoryService.setResponseIntoMemory(result);
           }

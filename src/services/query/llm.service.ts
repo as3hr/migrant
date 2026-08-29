@@ -3,7 +3,7 @@ import type { Context } from 'node:vm';
 import { appContext } from '../../domain/index.ts';
 
 export class LlmService {
-    async queryLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
+    async queryLlm(systemPrompt: string, messages: ModelMessage[], model?: string, onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
         try {
             const { text } = await generateText({
                 model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
@@ -13,18 +13,7 @@ export class LlmService {
                         content: systemPrompt,
                     },
                 ],
-                messages: (messages && messages.length > 0) ? [
-                    ...messages,
-                    {
-                        role: "user",
-                        content: userPrompt,
-                    }
-                ] : [
-                    {
-                        role: "user",
-                        content: userPrompt,
-                    },
-                ],
+                messages: messages,
                 onEnd: (result) => {
                     onEnd?.(result);
                 },
@@ -37,7 +26,7 @@ export class LlmService {
         }
     }
 
-    async *streamLlm(systemPrompt: string, userPrompt: string, model?: string, messages?: ModelMessage[], onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>) {
+    async *streamLlm(systemPrompt: string, messages: ModelMessage[], model?: string, onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>) {
         try {
             const result = streamText({
                 model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
@@ -47,15 +36,7 @@ export class LlmService {
                         content: systemPrompt,
                     },
                 ],
-                messages: (messages && messages.length > 0) ? [...messages, {
-                        role: "user",
-                        content: userPrompt,
-                    }] : [
-                    {
-                        role: "user",
-                        content: userPrompt,
-                    },
-                ],
+                messages: messages,
                 onEnd: (result) => {
                     onEnd?.(result);
                 },

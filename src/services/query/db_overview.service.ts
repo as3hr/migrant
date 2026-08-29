@@ -112,8 +112,13 @@ async function executeIntrospectionWorkflow(
     try {
         const output = await appContext.services.llmService.queryLlm(
             systemPrompt,
-            `Generate a system introspection SQL query for: ${userQuery}`,
-            "deepseek/deepseek-chat"
+            [
+                {
+                    role: 'user',
+                    content: `Generate a system introspection SQL query for: ${userQuery}`,
+                }
+            ],
+            "deepseek/deepseek-chat",
         );
 
         if (!output) {

@@ -19,9 +19,13 @@ export class ContextManager {
         return content;
     }
 
-    async getContext(): Promise<ModelMessage[]> {
+    async getContext(userPrompt: string): Promise<ModelMessage[]> {
         const sessionId = appContext.currentChatSessionId;
         if (!sessionId) return [];
+        const newMessage: ModelMessage = {
+            role: 'user',
+            content: userPrompt,
+        };
 
         try {
             const dbMessages = localChatRepository.getChatMessages(sessionId);
@@ -31,8 +35,11 @@ export class ContextManager {
                 (msg: any) => msg.role === "user" || msg.role === "assistant"
             );
 
-            const selectedMessages: ModelMessage[] = [];
+            let selectedMessages: ModelMessage[] = [];
             let accumulatedTokens = 0;
+
+            selectedMessages.push(newMessage);
+            accumulatedTokens += this.estimateTokens(userPrompt);
 
             for (let i = validMessages.length - 1; i >= 0; i--) {
                 const msg = validMessages[i]!;
