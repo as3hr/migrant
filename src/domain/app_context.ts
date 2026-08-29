@@ -1,17 +1,23 @@
-import { appConfig } from "../infrastructure/index.ts";
-import { setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/provider/providers.ts";
-import { DatabaseRegistryService } from "../services/database/database-registry.service.ts";
-import { DatabaseService } from "../services/database/database.service.ts";
-import { AuthService, ContextManager, EmbeddingService, LlmService, RagService, UsageTrackerService } from "../services/index.ts";
-import { MemoryService } from "../services/memory/memory.service.ts";
+import { appConfig, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import {
+    AuthService,
+    CloudSyncService,
+    ContextManager,
+    DbRegistryService,
+    EmbeddingService,
+    LlmService,
+    MemoryService,
+    RagService,
+    UsageTrackerService
+} from "../services/index.ts";
 import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand } from "../ui/commands/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
     authService: AuthService;
-    databaseRegistryService: DatabaseRegistryService;
-    databaseService: DatabaseService;
+    databaseRegistryService: DbRegistryService;
+    databaseService: CloudSyncService;
     ragService: RagService;
     llmService: LlmService;
     embeddingService: EmbeddingService;
@@ -90,8 +96,8 @@ class AppContext {
     private static createServices() {
         return {
             authService: new AuthService(),
-            databaseRegistryService: new DatabaseRegistryService(),
-            databaseService: new DatabaseService(),
+            databaseRegistryService: new DbRegistryService(),
+            databaseService: new CloudSyncService(),
             ragService: new RagService(),
             llmService: new LlmService(),
             embeddingService: new EmbeddingService(),

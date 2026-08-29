@@ -1,6 +1,6 @@
 import type { ModelMessage } from "ai";
 import { appContext } from "../../domain/index.ts";
-import { localChatRepository } from "../../local/repositories/local_chat.repository.ts";
+import { localChatRepository } from "../../infrastructure/index.ts";
 
 export class ContextManager {
     private maxHistoryTokenBudget: number = 4000;
@@ -28,7 +28,7 @@ export class ContextManager {
             if (!dbMessages || dbMessages.length === 0) return [];
 
             const validMessages = dbMessages.filter(
-                (msg) => msg.role === "user" || msg.role === "assistant"
+                (msg: any) => msg.role === "user" || msg.role === "assistant"
             );
 
             const selectedMessages: ModelMessage[] = [];

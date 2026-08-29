@@ -1,5 +1,5 @@
-import { sqlLite } from "../../infrastructure/clients/sqllite.client.ts";
-import type { ProviderId } from "../../infrastructure/provider/providers.ts";
+import { sqlLite } from "./sqlite.client.ts";
+import type { ProviderId } from "../../provider/providers.ts";
 
 interface ProviderRow {
     id: ProviderId;

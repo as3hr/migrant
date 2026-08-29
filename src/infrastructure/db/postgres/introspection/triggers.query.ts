@@ -1,5 +1,5 @@
-import type { Trigger } from "../../../domain/index.ts";
-import { pool } from "../index.ts";
+import type { Trigger } from "../../../../domain/index.ts";
+import { pool } from "../pool.ts";
 
 
 export async function getTriggers(schema: string, dbId: string): Promise<Trigger[]> {

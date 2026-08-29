@@ -1,4 +1,4 @@
-import { sqlLite } from "../../infrastructure/clients/sqllite.client.ts";
+import { sqlLite } from "./sqlite.client.ts";
 
 interface SessionRow {
     user_id: string;

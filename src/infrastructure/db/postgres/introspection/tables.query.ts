@@ -1,5 +1,5 @@
-import type { Table } from "../../../domain/index.ts";
-import { pool } from "../index.ts";
+import type { Table } from "../../../../domain/index.ts";
+import { pool } from "../pool.ts";
 
 export async function getTables(schema: string, dbId: string): Promise<Record<string, Table>> {
   const columnsResult = await pool.query(

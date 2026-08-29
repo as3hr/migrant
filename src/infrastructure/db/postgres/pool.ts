@@ -1,5 +1,5 @@
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
-import { appContext } from "../../domain/index.ts";
+import { appContext } from "../../../domain/index.ts";
 
 export class PoolConnector {
     pools: Record<string, Pool> = {};

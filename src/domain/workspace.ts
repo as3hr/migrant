@@ -1,5 +1,4 @@
-import { pool } from "../infrastructure/index.ts";
-import { LocalSessionRepository, LocalWorkspaceRepository } from "../local/index.ts";
+import { LocalSessionRepository, LocalWorkspaceRepository, pool } from "../infrastructure/index.ts";
 
 
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";

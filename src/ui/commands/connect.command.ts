@@ -1,6 +1,6 @@
 
 import { appContext, type CommandContext, type CommandDefinition } from "../../domain/index.ts";
-import { pool } from "../../infrastructure/db/pool.ts";
+import { pool } from "../../infrastructure/index.ts";
 import { errorMessage } from "./command_helpers.ts";
 
 export const connectCommand: CommandDefinition = {

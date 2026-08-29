@@ -1,5 +1,5 @@
-import type { EnumType } from "../../../domain/index.ts";
-import { pool } from "../index.ts";
+import type { EnumType } from "../../../../domain/index.ts";
+import { pool } from "../pool.ts";
 
 export async function getEnums(schema: string, dbId: string): Promise<EnumType[]> {
   const result = await pool.query(dbId, getEnumsQuery(), [schema]);

@@ -1,4 +1,4 @@
-import { supabase } from "../../infrastructure/index.ts";
+import { supabase } from "../../infrastructure/db/supabase/supabase.client.ts";
 import { getModelById } from "../../infrastructure/provider/providers.ts";
 
 export interface RecordUsageParams {
@@ -13,14 +13,18 @@ export interface RecordUsageParams {
 }
 
 export class UsageTrackerService {
-    calculateCostUsd(modelId: string, promptTokens: number, completionTokens: number): number {
-        const price = getModelById(modelId);
-        if (!price) return 0;
-        const inputCost = (promptTokens / 1_000_000) * price.inputPer1M;
-        const outputCost = (completionTokens / 1_000_000) * price.outputPer1M;
+    /** Calculate cost in USD for given token usage dynamically from providers catalog */
+    calculateCostUsd(modelName: string, promptTokens: number, completionTokens: number): number {
+        const modelConfig = getModelById(modelName);
+        const inputPrice = modelConfig?.inputPer1M ?? 0.20;
+        const outputPrice = modelConfig?.outputPer1M ?? 0.50;
+
+        const inputCost = (promptTokens / 1_000_000) * inputPrice;
+        const outputCost = (completionTokens / 1_000_000) * outputPrice;
         return Number((inputCost + outputCost).toFixed(6));
     }
 
+    /** Log usage event into Supabase user_usage_logs table */
     async recordUsage(params: RecordUsageParams): Promise<boolean> {
         try {
             const costUsd = this.calculateCostUsd(

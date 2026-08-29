@@ -16,7 +16,7 @@ import { getDbName } from "../../utils/index.ts";
  * Nobody else should call workspace.updateDb(), localRepo.setWorkspaceDb(),
  * or supabase.from("Database").update() directly.
  */
-export class DatabaseRegistryService {
+export class DbRegistryService {
     /**
      * Called when a PostgreSQL connection is established.
      * - Gets or creates the Supabase database record.

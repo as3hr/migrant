@@ -3,9 +3,7 @@ import getPort from "get-port";
 import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
-import { supabase } from "../../infrastructure/index.ts";
-import { credentialStore } from "../../infrastructure/security/credential_store.ts";
-import { LocalSessionRepository, LocalWorkspaceRepository } from "../../local/index.ts";
+import { LocalSessionRepository, LocalWorkspaceRepository, credentialStore, supabase } from "../../infrastructure/index.ts";
 import { BASE_URL } from "../../utils/index.ts";
 
 export class AuthService {
@@ -222,7 +220,7 @@ export class AuthService {
       this.workspaceRepo.getLocalDbsConnectionKeys(user.id);
   
     await Promise.all(
-      connectionKeys.map((key) => credentialStore.delete(key))
+      connectionKeys.map((key: string) => credentialStore.delete(key))
     );
   
     ctx.log("Removing workspaces and session...");

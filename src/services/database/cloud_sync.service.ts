@@ -1,10 +1,9 @@
 import { appContext, type KnowledgeDocument } from "../../domain/index.ts";
-import { supabase } from "../../infrastructure/index.ts";
-import { localChatRepository } from "../../local/index.ts";
+import { localChatRepository, supabase } from "../../infrastructure/index.ts";
 import type { DbChatMessageRowType, DbChatSessionType } from "../../types/table_types.ts";
 import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
 
-export class DatabaseService {
+export class CloudSyncService {
     async reindexDocuments(
         dbId: string,
         embeddings: number[][],

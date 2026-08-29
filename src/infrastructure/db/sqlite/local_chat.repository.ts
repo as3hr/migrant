@@ -1,5 +1,5 @@
-import { sqlLite } from "../../infrastructure/clients/sqllite.client.ts";
-import type { DbChatMessageRowType, DbChatSessionType } from "../../types/table_types.ts";
+import { sqlLite } from "./sqlite.client.ts";
+import type { DbChatMessageRowType, DbChatSessionType } from "../../../types/table_types.ts";
 
 class LocalChatRepository {
     private chatSessionInsertStmt;
