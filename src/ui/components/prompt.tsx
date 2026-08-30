@@ -1,6 +1,7 @@
 import { Box, Text } from "ink";
 import TextInput from "ink-text-input";
 import type { JSX } from "react";
+import { AutocompletePopup } from "./autocomplete/autocomplete_popup.tsx";
 
 interface PromptProps {
   value: string;
@@ -43,6 +44,11 @@ export function Prompt(props: PromptProps): JSX.Element {
           <Text color="#5a5a5a">{props.label}</Text>
         </Box>
       )}
+
+      <AutocompletePopup
+        input={props.value}
+        onSelect={(completedText) => props.onChange(completedText)}
+      />
 
       <Box
         borderStyle="round"
