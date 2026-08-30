@@ -21,7 +21,6 @@ export class LlmService {
 
             return text;
         } catch (llmE) {
-            appContext.commandCtx?.error(`Error in querying llm: ${llmE}`);
             return null;
         }
     }
@@ -40,9 +39,6 @@ export class LlmService {
                 onEnd: (result) => {
                     onEnd?.(result);
                 },
-                onError: (result) => {
-                    appContext.commandCtx?.error(`Error in streaming llm: ${JSON.stringify(result, null, 2)}`);
-                }
             });
 
             for await (const chunk of result.textStream) {
@@ -50,8 +46,6 @@ export class LlmService {
                     yield chunk;
                 }
             }
-        } catch (llmE) {
-            appContext.commandCtx?.error(`Error in streaming llm: ${JSON.stringify(llmE, null, 2)}`);
-        }
+        } catch (llmE) {}
     }
 }

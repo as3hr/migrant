@@ -15,14 +15,6 @@ export type RunState =
   | { kind: "running"; label: string }
   | { kind: "form"; label: string };
 
-function bootstrapOutputs(): OutputItem[] {
-  return [
-    { type: "text", text: "Your database has a structure. Ask about it." },
-    { type: "blank" },
-    { type: "text", text: "Type /help to see available commands." },
-    { type: "blank" },
-  ];
-}
 
 export interface UseShellReturn {
   outputs: OutputItem[];
@@ -39,7 +31,7 @@ export interface UseShellReturn {
 
 export function useShell(onExit: () => void): UseShellReturn {
   const { stdout } = useStdout();
-  const [outputs, setOutputs] = useState<OutputItem[]>(bootstrapOutputs);
+  const [outputs, setOutputs] = useState<OutputItem[]>([]);
   const [input, setInput] = useState("");
   const [run, setRun] = useState<RunState>({ kind: "idle" });
   const [formOptions, setFormOptions] = useState<AskOptions | null>(null);

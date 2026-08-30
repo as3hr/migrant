@@ -8,4 +8,7 @@ export default function App(): JSX.Element {
   return <Shell onExit={() => exit()} />;
 }
 
-render(<App />);
+render(<App />, {
+  alternateScreen: true,
+  exitOnCtrlC: true,
+});

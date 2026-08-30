@@ -28,12 +28,16 @@ export async function answerQuestion(
       if (!payload) return;
       await appContext.services.memoryService.setQuestionIntoMemory(question);
       const context = await appContext.services.contextManager.getContext(payload.userPrompt);
-      ctx.log(`Context: ${JSON.stringify(context, null, 2)}`);
 
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
           payload.systemPrompt,
-          context,
+          [
+              {
+                  role: 'user',
+                  content: payload.userPrompt
+              }
+          ],
           appContext.selectedModel.modelId,
           (result) => {
               appContext.services.memoryService.setResponseIntoMemory(result);
