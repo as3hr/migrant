@@ -10,7 +10,7 @@
     "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts"
   },
   "bin": {
-    "migrant": "./src/ui/index.tsx"
+    "migrant": "./src/cli.ts"
   },
   "keywords": [],
   "author": "",
