@@ -126,7 +126,7 @@ async function ensureIndexFresh(
 
   appMemo.invalidate(database.id);
   ctx.log(`Updating knowledge for ${database.name}...`);
-  await appContext.services.databaseRegistryService.updateDatabase(database.id, {
+  await appContext.services.databaseConnectionService.updateDatabase(database.id, {
     indexStatus: "indexing",
   });
 

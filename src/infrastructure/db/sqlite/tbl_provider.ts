@@ -1,5 +1,5 @@
 import type { ProviderId } from "../../index.ts";
-import { sqlClient } from "../index.ts";
+import { sqlClient } from "./sqlite.client.ts";
 
 interface IProvider {
     id: ProviderId;
@@ -8,21 +8,9 @@ interface IProvider {
 }
 
 class TblProvider {
-    private insertProviderStmt;
-    private selectProviderStmt;
-    private deleteProviderStmt;
-    
-    constructor() { 
-        this.insertProviderStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO providers (id, user_id, api_key_env) VALUES (?, ?, ?)'
-        );
-        this.selectProviderStmt = sqlClient.prepare(
-            'SELECT * FROM providers WHERE id = ?'
-        );
-        this.deleteProviderStmt = sqlClient.prepare(
-            'DELETE FROM providers WHERE id = ?'
-        );
-    }
+    private insertProviderStmt: any;
+    private selectProviderStmt: any;
+    private deleteProviderStmt: any;
 
     initializeTblProvider() {
         sqlClient.run(`
@@ -38,6 +26,16 @@ class TblProvider {
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
           );
         `);
+
+        this.insertProviderStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO providers (id, user_id, api_key_env) VALUES (?, ?, ?)'
+        );
+        this.selectProviderStmt = sqlClient.prepare(
+            'SELECT * FROM providers WHERE id = ?'
+        );
+        this.deleteProviderStmt = sqlClient.prepare(
+            'DELETE FROM providers WHERE id = ?'
+        );
     }
 
     setProvider(provider: IProvider): void { 

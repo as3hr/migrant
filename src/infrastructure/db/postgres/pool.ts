@@ -5,7 +5,7 @@ export class PoolConnector {
     pools: Record<string, Pool> = {};
 
     async setConnection(dbUrl: string): Promise<string | null> {
-        const dbId = await appContext.services.databaseRegistryService.registerConnection(dbUrl);
+        const dbId = await appContext.services.databaseConnectionService.registerConnection(dbUrl);
         if (!dbId) return null;
         this.pools[dbId] = new Pool({ connectionString: dbUrl });
         return dbId;

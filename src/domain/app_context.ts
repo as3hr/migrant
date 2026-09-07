@@ -1,9 +1,9 @@
 import { appConfig, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
 import {
     AuthService,
-    CloudSyncService,
+    ChatSessionService,
     ContextManager,
-    DbRegistryService,
+    DatabaseConnectionService,
     EmbeddingService,
     LlmService,
     MemoryService,
@@ -16,8 +16,11 @@ import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
     authService: AuthService;
-    databaseRegistryService: DbRegistryService;
-    databaseService: CloudSyncService;
+    databaseConnectionService: DatabaseConnectionService;
+    chatSessionService: ChatSessionService;
+    // Backward compatibility aliases
+    databaseRegistryService: DatabaseConnectionService;
+    databaseService: ChatSessionService;
     ragService: RagService;
     llmService: LlmService;
     embeddingService: EmbeddingService;
@@ -94,10 +97,16 @@ class AppContext {
     }
 
     private static createServices() {
+        const databaseConnectionService = new DatabaseConnectionService();
+        const chatSessionService = new ChatSessionService();
+
         return {
             authService: new AuthService(),
-            databaseRegistryService: new DbRegistryService(),
-            databaseService: new CloudSyncService(),
+            databaseConnectionService,
+            chatSessionService,
+            // Aliases
+            databaseRegistryService: databaseConnectionService,
+            databaseService: chatSessionService,
             ragService: new RagService(),
             llmService: new LlmService(),
             embeddingService: new EmbeddingService(),

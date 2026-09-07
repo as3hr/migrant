@@ -1,6 +1,6 @@
 export * from "./auth/auth.service.ts";
-export * from "./database/db_registry.service.ts";
-export * from "./database/cloud_sync.service.ts";
+export * from "./chat/chat_session.service.ts";
+export * from "./database/database_connection.service.ts";
 export * from "./database/schema-scan.service.ts";
 
 export * from "./knowledge/embedding.service.ts";

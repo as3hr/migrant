@@ -1,4 +1,4 @@
-import { sqlClient } from "../index.ts";
+import { sqlClient } from "./sqlite.client.ts";
 
 export interface IChatMessageModel {
     id: string;
@@ -17,17 +17,8 @@ export interface IChatMessageModel {
 };
 
 class TblChatMessage {
-    private chatMessageInsertStmt;
-    private chatMessageSelectStmt;
-
-    constructor() {
-        this.chatMessageInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO tbl_chat_messages (id, user_id, session_id, content, provider, role, model_name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-        this.chatMessageSelectStmt = sqlClient.prepare(
-            'SELECT * FROM tbl_chat_messages WHERE session_id = ?'
-        );
-    }
+    private chatMessageInsertStmt: any;
+    private chatMessageSelectStmt: any;
     
     initializeTblChatMessage() {
         sqlClient.run(`
@@ -47,6 +38,12 @@ class TblChatMessage {
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        this.chatMessageInsertStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO tbl_chat_messages (id, user_id, session_id, content, provider, role, model_name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        this.chatMessageSelectStmt = sqlClient.prepare(
+            'SELECT * FROM tbl_chat_messages WHERE session_id = ?'
+        );
     }
 
     setChatMessage(message: IChatMessageModel): boolean {

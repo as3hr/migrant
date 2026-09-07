@@ -39,21 +39,9 @@ function cosineDistance(vecA: number[], vecB: number[]): number {
 }
 
 class TblDocuments {
-    private documentInsertStmt;
-    private documentSelectByDbStmt;
-    private documentDeleteByDbStmt;
-
-    constructor() {
-        this.documentInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO tbl_documents (id, database_id, content, document_type, embedding_model, embedding, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-        this.documentSelectByDbStmt = sqlClient.prepare(
-            'SELECT * FROM tbl_documents WHERE database_id = ?'
-        );
-        this.documentDeleteByDbStmt = sqlClient.prepare(
-            'DELETE FROM tbl_documents WHERE database_id = ?'
-        );
-    }
+    private documentInsertStmt: any;
+    private documentSelectByDbStmt: any;
+    private documentDeleteByDbStmt: any;
 
     initializeTblDocuments() {
         sqlClient.run(`
@@ -68,6 +56,17 @@ class TblDocuments {
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+
+        this.documentInsertStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO tbl_documents (id, database_id, content, document_type, embedding_model, embedding, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        this.documentSelectByDbStmt = sqlClient.prepare(
+            'SELECT * FROM tbl_documents WHERE database_id = ?'
+        );
+        this.documentDeleteByDbStmt = sqlClient.prepare(
+            'DELETE FROM tbl_documents WHERE database_id = ?'
+        );
     }
 
     setDocument(doc: IDocumentModel): boolean {

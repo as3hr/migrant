@@ -2,17 +2,7 @@ import { createHash } from "node:crypto";
 import { appContext, type DatabaseCollection } from "../../domain/index.ts";
 import { getDbName } from "../../utils/index.ts";
 
-/**
- * DatabaseRegistryService — single source of truth for local database management.
- *
- * Keeps local SQLite persistence + keychain + in-memory WorkSpace synchronized.
- */
-export class DbRegistryService {
-    /**
-     * Called when a database connection is established.
-     * - Adds the database to the in-memory workspace.
-     * - Persists it to local SQLite + keychain.
-     */
+export class DatabaseConnectionService {
     async registerConnection(dbUrl: string): Promise<string | null> {
         const user = await appContext.services.authService.getCurrentUser();
         if (!user?.id) return null;
@@ -29,7 +19,7 @@ export class DbRegistryService {
             type: "postgres",
             connectionString: dbUrl,
             connectionStringKey: connectionStringKey,
-            schemaFingerprint: null,   // set after first successful scan
+            schemaFingerprint: null,
             lastScannedAt: undefined,
             indexStatus: "none",
             userId: user.id,

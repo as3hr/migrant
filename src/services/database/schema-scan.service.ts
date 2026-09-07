@@ -44,20 +44,17 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
     const diff: number = (Date.now() - startedAt) / 1000;
     ctx.success(`Completed db scan in ${diff} seconds`);
 
-    await appContext.services.databaseRegistryService.updateDatabase(
+    await appContext.services.databaseConnectionService.updateDatabase(
       dbId,
       {
         schemaFingerprint,
         indexStatus: "ready",
         lastScannedAt: new Date(),
-      },
-      {
-        schema_fingerprint: schemaFingerprint,
       }
     );
   } catch (error) {
     console.error("Error scanning database:", error);
-    await appContext.services.databaseRegistryService.updateDatabase(dbId, {
+    await appContext.services.databaseConnectionService.updateDatabase(dbId, {
       indexStatus: "failed",
     });
   }
@@ -96,7 +93,7 @@ async function reindexDocuments(dbId: string, documents: KnowledgeDocument[]): P
     );
 
     if (embeddings.length > 0) {
-      const res = await appContext.services.databaseService.reindexDocuments(dbId, embeddings, documents);
+      const res = await appContext.services.chatSessionService.reindexDocuments(dbId, embeddings, documents);
       return res;
     }
     return true;

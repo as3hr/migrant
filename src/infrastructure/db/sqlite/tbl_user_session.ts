@@ -6,21 +6,9 @@ interface IUserSession {
 }
 
 export class TblUserSession {
-    private sessionInsertStmt;
-    private sessionSelectStmt;
-    private sessionDeleteStmt;
-
-    constructor() {
-        this.sessionInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO user_sessions (user_id, session_data) VALUES (?, ?)'
-        );
-        this.sessionSelectStmt = sqlClient.prepare(
-            'SELECT * FROM user_sessions'
-        );
-        this.sessionDeleteStmt = sqlClient.prepare(
-            'DELETE FROM user_sessions WHERE user_id = ?'
-        );
-    }
+    private sessionInsertStmt: any;
+    private sessionSelectStmt: any;
+    private sessionDeleteStmt: any;
 
     initializeTblUserSessions() {
         sqlClient.run(`
@@ -30,6 +18,16 @@ export class TblUserSession {
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+        this.sessionInsertStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO user_sessions (user_id, session_data) VALUES (?, ?)'
+        );
+        this.sessionSelectStmt = sqlClient.prepare(
+            'SELECT * FROM user_sessions'
+        );
+        this.sessionDeleteStmt = sqlClient.prepare(
+            'DELETE FROM user_sessions WHERE user_id = ?'
+        );
     }
 
     setSession(userId: string, sessionData: string): void { 

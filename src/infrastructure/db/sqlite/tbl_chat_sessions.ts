@@ -1,4 +1,4 @@
-import { sqlClient } from "../index.ts";
+import { sqlClient } from "./sqlite.client.ts";
 
 export interface IChatSessionsModel {
     id: string;
@@ -11,25 +11,10 @@ export interface IChatSessionsModel {
 }
 
 class TblChatSessions {
-    private chatSessionInsertStmt;
-    private chatSessionSelectStmt;
-    private chatSessionSelectByIdStmt;
-    private chatSessionDeleteStmt;
-
-    constructor() {
-        this.chatSessionInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO tbl_chat_sessions (id, user_id, title,session_token_limit, session_token_used, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?)'
-        );
-        this.chatSessionSelectStmt = sqlClient.prepare(
-            'SELECT * FROM tbl_chat_sessions WHERE user_id = ? order by updated_at desc'
-        );
-        this.chatSessionSelectByIdStmt = sqlClient.prepare(
-            'SELECT * FROM tbl_chat_sessions WHERE id = ?'
-        );
-        this.chatSessionDeleteStmt = sqlClient.prepare(
-            'DELETE FROM tbl_chat_sessions WHERE id = ?'
-        );
-    }
+    private chatSessionInsertStmt: any;
+    private chatSessionSelectStmt: any;
+    private chatSessionSelectByIdStmt: any;
+    private chatSessionDeleteStmt: any;
 
     initializeTblChatSessions() {
         sqlClient.run(`
@@ -43,6 +28,19 @@ class TblChatSessions {
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
           );
         `);
+
+        this.chatSessionInsertStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO tbl_chat_sessions (id, user_id, title,session_token_limit, session_token_used, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?)'
+        );
+        this.chatSessionSelectStmt = sqlClient.prepare(
+            'SELECT * FROM tbl_chat_sessions WHERE user_id = ? order by updated_at desc'
+        );
+        this.chatSessionSelectByIdStmt = sqlClient.prepare(
+            'SELECT * FROM tbl_chat_sessions WHERE id = ?'
+        );
+        this.chatSessionDeleteStmt = sqlClient.prepare(
+            'DELETE FROM tbl_chat_sessions WHERE id = ?'
+        );
     }
 
     setChatSession(chatSession: IChatSessionsModel): IChatSessionsModel | undefined { 

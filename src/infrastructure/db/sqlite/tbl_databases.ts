@@ -3,25 +3,10 @@ import { credentialStore } from "../../security/credential_store.ts";
 import { sqlClient } from "./sqlite.client.ts";
 
 class TblDatabases {
-    private databasesDbSelectStmt;
-    private databasesDbInsertStmt;
-    private databasesDbDeleteStmt;
-    private databasesDbSelectByIdStmt;
-    
-    constructor() {
-        this.databasesDbInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-        this.databasesDbSelectStmt = sqlClient.prepare(
-            'SELECT * FROM databases WHERE userId = ?'
-        );
-        this.databasesDbDeleteStmt = sqlClient.prepare(
-            'DELETE FROM databases WHERE id = ?'
-        );
-        this.databasesDbSelectByIdStmt = sqlClient.prepare(
-            'SELECT * FROM databases WHERE id = ?'
-        );
-    }
+    private databasesDbSelectStmt: any;
+    private databasesDbInsertStmt: any;
+    private databasesDbDeleteStmt: any;
+    private databasesDbSelectByIdStmt: any;
 
     initializeTblDatabases() {
         sqlClient.run(`
@@ -37,6 +22,19 @@ class TblDatabases {
               createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+        this.databasesDbInsertStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        this.databasesDbSelectStmt = sqlClient.prepare(
+            'SELECT * FROM databases WHERE userId = ?'
+        );
+        this.databasesDbDeleteStmt = sqlClient.prepare(
+            'DELETE FROM databases WHERE id = ?'
+        );
+        this.databasesDbSelectByIdStmt = sqlClient.prepare(
+            'SELECT * FROM databases WHERE id = ?'
+        );
     }
 
     async setLocalDb(db: DatabaseCollection, userId: string): Promise<void> { 
