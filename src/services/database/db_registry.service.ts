@@ -1,36 +1,26 @@
 import { createHash } from "node:crypto";
 import { appContext, type DatabaseCollection } from "../../domain/index.ts";
-import { supabase } from "../../infrastructure/index.ts";
-import type { UpdateDatabaseType } from "../../types/table_types.ts";
 import { getDbName } from "../../utils/index.ts";
 
 /**
- * DatabaseRegistryService — the single source of truth for all database state.
+ * DatabaseRegistryService — single source of truth for local database management.
  *
- * Every mutation to a connected database's metadata must go through here.
- * It keeps all three stores in sync atomically:
- *   1. Supabase  — remote "Database" table (dbId, schema_fingerprint, etc.)
- *   2. SQLite    — local workspace persistence (via LocalWorkspaceRepository)
- *   3. WorkSpace — in-memory runtime state
- *
- * Nobody else should call workspace.updateDb(), localRepo.setWorkspaceDb(),
- * or supabase.from("Database").update() directly.
+ * Keeps local SQLite persistence + keychain + in-memory WorkSpace synchronized.
  */
 export class DbRegistryService {
     /**
-     * Called when a PostgreSQL connection is established.
-     * - Gets or creates the Supabase database record.
+     * Called when a database connection is established.
      * - Adds the database to the in-memory workspace.
-     * - Persists it to SQLite + keychain.
-     *
-     * Returns the Supabase database id (uuid), or null on failure.
+     * - Persists it to local SQLite + keychain.
      */
     async registerConnection(dbUrl: string): Promise<string | null> {
         const user = await appContext.services.authService.getCurrentUser();
         if (!user?.id) return null;
 
-        const dbId = await this._getOrCreateSupabaseEntry(dbUrl, user.id);
-        if (!dbId) return null;
+        const url = new URL(dbUrl);
+        const identity = `${url.hostname}:${url.port || "5432"}${url.pathname}`;
+        const dbId = createHash("sha256").update(identity).digest("hex").slice(0, 32);
+
         const connectionStringKey = `database-${dbId}`;
         const existingDb = appContext.workspace.databases.find((db) => db.id === dbId);
         let payLoad: DatabaseCollection = {
@@ -49,7 +39,7 @@ export class DbRegistryService {
             payLoad.schemaFingerprint = existingDb.schemaFingerprint;
             payLoad.indexStatus = existingDb.indexStatus;
         }
-        
+
         appContext.workspace.removeDb(dbId);
         appContext.workspace.addDb(payLoad);
         await appContext.workspace.persistDb(payLoad);
@@ -59,60 +49,8 @@ export class DbRegistryService {
 
     async updateDatabase(
         dbId: string,
-        patch: Partial<DatabaseCollection>,
-        supabaseFields?: Partial<UpdateDatabaseType>
+        patch: Partial<DatabaseCollection>
     ): Promise<void> {
         await appContext.workspace.updateDb(dbId, patch);
-
-        if (supabaseFields && Object.keys(supabaseFields).length > 0) {
-            const { error } = await supabase
-                .from("Database")
-                .update(supabaseFields)
-                .eq("id", dbId);
-
-            if (error) {
-                console.error(
-                    `[DatabaseRegistryService] Failed to sync to Supabase for db ${dbId}: ${error.message}`
-                );
-            }
-        }
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────────
-
-    private async _getOrCreateSupabaseEntry(
-        dbUrl: string,
-        userId: string
-    ): Promise<string | null> {
-        const url = new URL(dbUrl);
-        const identity = `${url.hostname}:${url.port || "5432"}${url.pathname}`;
-        const dbIdentifier = createHash("sha256").update(identity).digest("hex");
-
-        const { data, error } = await supabase
-            .from("Database")
-            .select("id")
-            .eq("database_identifier", dbIdentifier)
-            .eq("user_id", userId)
-            .maybeSingle();
-
-        if (error) {
-            console.error(`[DatabaseRegistryService] Supabase lookup failed: ${error.message}`);
-            return null;
-        }
-
-        if (data) return data.id;
-
-        const { data: inserted, error: insertError } = await supabase
-            .from("Database")
-            .insert({ database_identifier: dbIdentifier, user_id: userId })
-            .select("id")
-            .single();
-
-        if (insertError) {
-            console.error(`[DatabaseRegistryService] Supabase insert failed: ${insertError.message}`);
-            return null;
-        }
-
-        return inserted.id;
     }
 }

@@ -3,17 +3,10 @@ import getPort from "get-port";
 import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
-import { LocalSessionRepository, LocalWorkspaceRepository, credentialStore, supabase } from "../../infrastructure/index.ts";
+import { credentialStore, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
 import { BASE_URL } from "../../utils/index.ts";
 
 export class AuthService {
-  private sessionRepo: LocalSessionRepository;
-  private workspaceRepo: LocalWorkspaceRepository;
-
-  constructor() {
-    this.sessionRepo = new LocalSessionRepository();
-    this.workspaceRepo = new LocalWorkspaceRepository();
-  }
 
   async authenticateUser() {
     try {
@@ -164,7 +157,7 @@ export class AuthService {
         return true;
       }
 
-      const row = this.sessionRepo.getUserSession();
+      const row = tblUserSession.getUserSession();
       if (!row) {
         return false;
       }
@@ -176,7 +169,7 @@ export class AuthService {
       });
 
       if (error || !data.session) {
-        this.sessionRepo.deleteSession(row.user_id);
+        tblUserSession.deleteSession(row.user_id);
         return false;
       }
 
@@ -203,7 +196,7 @@ export class AuthService {
 
   private saveSession(session: any) {
     const sessionData = JSON.stringify(session, null, 2);
-    this.sessionRepo.setSession(session.user.id, sessionData);
+    tblUserSession.setSession(session.user.id, sessionData);
   }
 
   async logOut(ctx: CommandContext) {
@@ -217,7 +210,7 @@ export class AuthService {
     ctx.log("Removing saved database credentials...");
   
     const connectionKeys =
-      this.workspaceRepo.getLocalDbsConnectionKeys(user.id);
+      tblDatabases.getLocalDbsConnectionKeys(user.id);
   
     await Promise.all(
       connectionKeys.map((key: string) => credentialStore.delete(key))
@@ -226,10 +219,10 @@ export class AuthService {
     ctx.log("Removing workspaces and session...");
   
     for (const db of appContext.workspace.databases) {
-      this.workspaceRepo.deleteLocalWorkspaceDb(db.id);
+      tblDatabases.deleteLocalWorkspaceDb(db.id);
     }
   
-    this.sessionRepo.deleteSession(user.id);
+    tblUserSession.deleteSession(user.id);
     await supabase.auth.signOut();
   
     appContext.workspace.databases = [];

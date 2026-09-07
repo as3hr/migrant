@@ -1,6 +1,6 @@
 import type { ModelMessage } from "ai";
 import { appContext } from "../../domain/index.ts";
-import { localChatRepository } from "../../infrastructure/index.ts";
+import { tblChatMessage } from "../../infrastructure/db/sqlite/tbl_chat_message.ts";
 
 export class ContextManager {
     private maxHistoryTokenBudget: number = 4000;
@@ -28,7 +28,7 @@ export class ContextManager {
         };
 
         try {
-            const dbMessages = localChatRepository.getChatMessages(sessionId);
+            const dbMessages = tblChatMessage.getChatMessages(sessionId);
             if (!dbMessages || dbMessages.length === 0) return [];
 
             const validMessages = dbMessages.filter(

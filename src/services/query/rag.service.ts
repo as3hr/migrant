@@ -1,5 +1,5 @@
 import { appContext, type DatabaseCollection } from "../../domain/index.ts";
-import { supabase } from "../../infrastructure/index.ts";
+import { tblDocuments } from "../../infrastructure/db/sqlite/tbl_documents.ts";
 import type { Json } from "../../types/database.types.ts";
 
 interface SemanticSearchResult {
@@ -22,18 +22,12 @@ export class RagService {
     async performSemanticSearch(query: string, database: DatabaseCollection, match_count?: number): Promise<SemanticSearchResponse | null> {
         try { 
             const embedding = await appContext.services.embeddingService.createSingleEmbedding([query]);
-            const queryEmbedding = `[${embedding.join(",")}]`;
 
-            const { data, error } = await supabase.rpc("match_documents", {
-                query_embedding: queryEmbedding,
-                match_count: match_count ?? 5,
-                target_database_id: database.id,
-            });
-
-            if (error) {
-                console.error("Error retrieving documents:", error);
-                return null;
-            }
+            const data = tblDocuments.matchDocuments(
+                embedding,
+                database.id,
+                match_count ?? 5
+            );
 
             const context = data
                 .map((doc: SemanticSearchResult, index: number) => {

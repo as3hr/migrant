@@ -1,4 +1,4 @@
-import { LocalSessionRepository, LocalWorkspaceRepository, pool } from "../infrastructure/index.ts";
+import { pool, tblDatabases, tblUserSession } from "../infrastructure/index.ts";
 
 
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";
@@ -27,12 +27,8 @@ export interface DatabaseCollection {
 export class WorkSpace { 
     databases: DatabaseCollection[] = [];
     activeDbs: DatabaseCollection[] = [];
-    private repo: LocalWorkspaceRepository;
-    private sessionRepo: LocalSessionRepository;
 
     constructor() {
-        this.repo = new LocalWorkspaceRepository();
-        this.sessionRepo = new LocalSessionRepository();
         this.loadFromCache();
     }
 
@@ -51,9 +47,9 @@ export class WorkSpace {
 
     /** Restore workspace databases from SQLite on startup. */
     async loadFromCache(): Promise<void> {
-        const row = this.sessionRepo.getUserSession();
+        const row = tblUserSession.getUserSession();
         if (!row) return;
-        const dbs = await this.repo.getLocalDbs(row.user_id);
+        const dbs = await tblDatabases.getLocalDbs(row.user_id);
         this.databases = dbs;
         this.activeDbs = dbs;
         await this.warmUpPool();
@@ -74,13 +70,13 @@ export class WorkSpace {
      * Does NOT touch Supabase.
      */
     async updateDb(dbId: string, patch: Partial<DatabaseCollection>): Promise<void> {
-        const row = this.sessionRepo.getUserSession();
+        const row = tblUserSession.getUserSession();
         const updatedList = await Promise.all(
             this.databases.map(async (db) => {
                 if (db.id !== dbId) return db;
                 const updated = { ...db, ...patch };
                 if (row) {
-                    await this.repo.setLocalDb(updated, row.user_id);
+                    await tblDatabases.setLocalDb(updated, row.user_id);
                 }
                 return updated;
             })
@@ -93,15 +89,15 @@ export class WorkSpace {
      * Called by DatabaseRegistryService after registerConnection.
      */
     async persistDb(db: DatabaseCollection): Promise<void> {
-        const row = this.sessionRepo.getUserSession();
+        const row = tblUserSession.getUserSession();
         if (!row) return;
-        await this.repo.setLocalDb(db, row.user_id);
+        await tblDatabases.setLocalDb(db, row.user_id);
     }
 
     /** Remove a database from memory and delete from SQLite. */
     removeDb(dbId: string): void {
         this.databases = this.databases.filter((db) => db.id !== dbId);
-        this.repo.deleteLocalWorkspaceDb(dbId);
+        tblDatabases.deleteLocalWorkspaceDb(dbId);
     }
 
     getDb(dbId: string): DatabaseCollection | undefined {

@@ -1,0 +1,58 @@
+import type { ProviderId } from "../../index.ts";
+import { sqlClient } from "../index.ts";
+
+interface IProvider {
+    id: ProviderId;
+    user_id: string;
+    api_key_env: string;
+}
+
+class TblProvider {
+    private insertProviderStmt;
+    private selectProviderStmt;
+    private deleteProviderStmt;
+    
+    constructor() { 
+        this.insertProviderStmt = sqlClient.prepare(
+            'INSERT OR REPLACE INTO providers (id, user_id, api_key_env) VALUES (?, ?, ?)'
+        );
+        this.selectProviderStmt = sqlClient.prepare(
+            'SELECT * FROM providers WHERE id = ?'
+        );
+        this.deleteProviderStmt = sqlClient.prepare(
+            'DELETE FROM providers WHERE id = ?'
+        );
+    }
+
+    initializeTblProvider() {
+        sqlClient.run(`
+          CREATE TABLE IF NOT EXISTS providers (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            name TEXT,
+            connectionStringKey TEXT,
+            schemaFingerprint TEXT,
+            type TEXT,
+            lastScannedAt DATETIME,
+            indexStatus TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+    }
+
+    setProvider(provider: IProvider): void { 
+        this.insertProviderStmt.run(provider.id, provider.user_id, provider.api_key_env); 
+    }
+    
+    getProvider(providerId: ProviderId) { 
+        return this.selectProviderStmt.get(providerId) as IProvider | undefined;
+    }
+
+    deleteProvider(providerId: ProviderId): boolean {
+        const info = this.deleteProviderStmt.run(providerId);
+        return info.changes > 0;
+    }
+}
+
+
+export const tblProvider = new TblProvider();

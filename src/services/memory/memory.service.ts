@@ -1,9 +1,10 @@
 import { generateText, Output, type GenerateTextEndEvent, type ToolSet } from "ai";
+import { randomUUID } from "node:crypto";
 import type { Context } from "node:vm";
 import z from "zod";
 import { appContext } from "../../domain/index.ts";
-import { openRouter } from "../../infrastructure/index.ts";
-import type { DbChatMessageRowType, DbChatSessionType } from "../../types/table_types.ts";
+import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure/index.ts";
+import { openRouter, tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
 
 export class MemoryService {
     async setResponseIntoMemory(response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>) {
@@ -17,7 +18,8 @@ export class MemoryService {
             response.usage.outputTokens ?? 0,
         );
     
-        const message: Omit<DbChatMessageRowType, 'id'> = {
+        const message: IChatMessageModel = {
+            id: randomUUID(),
             session_id: sessionId,
             user_id: user.id,
             role: 'assistant',
@@ -32,7 +34,7 @@ export class MemoryService {
             created_at: new Date().toISOString(),
         };
     
-        await appContext.services.databaseService.setChatMessage(sessionId, message);
+        tblChatMessage.setChatMessage(message);
     }
 
     async setQuestionIntoMemory(question: string) {
@@ -61,7 +63,8 @@ export class MemoryService {
                 appContext.commandCtx?.log(`Error in creating title for new conversation ${e}`);
              }
 
-            const newSession: Omit<DbChatSessionType, "id"> = {
+            const newSession: IChatSessionsModel = {
+                id: randomUUID(),
                 user_id: user.id,
                 title: title,
                 session_token_limit: 100000,
@@ -70,26 +73,29 @@ export class MemoryService {
                 updated_at: new Date().toISOString(),
             };
 
-            const session = await appContext.services.databaseService.setNewSession(newSession);
-            sessionId = session.id;
-            appContext.currentChatSessionId = sessionId;
+            const session = tblChatSessions.setChatSession(newSession);
+            if (session) {
+                sessionId = session.id;
+                appContext.currentChatSessionId = sessionId;
+                const userMessage: IChatMessageModel = {
+                    id: randomUUID(),
+                    session_id: sessionId,
+                    user_id: user.id,
+                    role: "user",
+                    content: question,
+                    provider: "user",
+                    model_name: "user",
+                    target_agent: "input",
+                    prompt_tokens: 0,
+                    completion_tokens: 0,
+                    total_tokens: 0,
+                    cost_usd: 0,
+                    created_at: new Date().toISOString(),
+                };
+
+                tblChatMessage.setChatMessage(userMessage);
+            }
         }
 
-        const userMessage: Omit<DbChatMessageRowType, "id"> = {
-            session_id: sessionId,
-            user_id: user.id,
-            role: "user",
-            content: question,
-            provider: "user",
-            model_name: "user",
-            target_agent: "input",
-            prompt_tokens: 0,
-            completion_tokens: 0,
-            total_tokens: 0,
-            cost_usd: 0,
-            created_at: new Date().toISOString(),
-        };
-    
-        await appContext.services.databaseService.setChatMessage(sessionId, userMessage);
     }
 }

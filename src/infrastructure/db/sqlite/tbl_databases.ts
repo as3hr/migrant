@@ -1,26 +1,42 @@
 import type { DatabaseCollection, DatabaseType } from "../../../domain/index.ts";
-import { sqlLite } from "./sqlite.client.ts";
 import { credentialStore } from "../../security/credential_store.ts";
+import { sqlClient } from "./sqlite.client.ts";
 
-export class LocalWorkspaceRepository {
-    private workspaceDbSelectStmt;
-    private workspaceDbInsertStmt;
-    private workspaceDbDeleteStmt;
-    private workspaceDbSelectByIdStmt;
+class TblDatabases {
+    private databasesDbSelectStmt;
+    private databasesDbInsertStmt;
+    private databasesDbDeleteStmt;
+    private databasesDbSelectByIdStmt;
     
     constructor() {
-        this.workspaceDbInsertStmt = sqlLite.prepare(
+        this.databasesDbInsertStmt = sqlClient.prepare(
             'INSERT OR REPLACE INTO databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
-        this.workspaceDbSelectStmt = sqlLite.prepare(
+        this.databasesDbSelectStmt = sqlClient.prepare(
             'SELECT * FROM databases WHERE userId = ?'
         );
-        this.workspaceDbDeleteStmt = sqlLite.prepare(
+        this.databasesDbDeleteStmt = sqlClient.prepare(
             'DELETE FROM databases WHERE id = ?'
         );
-        this.workspaceDbSelectByIdStmt = sqlLite.prepare(
+        this.databasesDbSelectByIdStmt = sqlClient.prepare(
             'SELECT * FROM databases WHERE id = ?'
         );
+    }
+
+    initializeTblDatabases() {
+        sqlClient.run(`
+            CREATE TABLE IF NOT EXISTS databases (
+              id TEXT PRIMARY KEY,
+              userId TEXT,
+              name TEXT,
+              connectionStringKey TEXT,
+              schemaFingerprint TEXT,
+              type TEXT,
+              lastScannedAt DATETIME,
+              indexStatus TEXT,
+              createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
     }
 
     async setLocalDb(db: DatabaseCollection, userId: string): Promise<void> { 
@@ -34,7 +50,7 @@ export class LocalWorkspaceRepository {
           db.connectionStringKey,
           db.connectionString
         );
-        this.workspaceDbInsertStmt.run(
+        this.databasesDbInsertStmt.run(
             db.id, 
             userId, 
             db.name, 
@@ -47,7 +63,7 @@ export class LocalWorkspaceRepository {
     }
 
     async getLocalDbs(user_id: string): Promise<DatabaseCollection[]> {
-        const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
+        const rows = this.databasesDbSelectStmt.all(user_id) as DatabaseCollection[];
         const data = await Promise.all(
             rows.map(async (row) => {
               const value = await credentialStore.get(row.connectionStringKey);
@@ -74,7 +90,7 @@ export class LocalWorkspaceRepository {
 
 
     async getLocalDbById(id: string): Promise<DatabaseCollection | null> {
-        const row = this.workspaceDbSelectByIdStmt.get(id) as DatabaseCollection;
+        const row = this.databasesDbSelectByIdStmt.get(id) as DatabaseCollection;
         if (!row) return null;
         const value = await credentialStore.get(row.connectionStringKey);
         if (!value) return null;
@@ -94,12 +110,15 @@ export class LocalWorkspaceRepository {
     }
 
     getLocalDbsConnectionKeys(user_id: string): string[] {
-        const rows = this.workspaceDbSelectStmt.all(user_id) as DatabaseCollection[];
+        const rows = this.databasesDbSelectStmt.all(user_id) as DatabaseCollection[];
         return rows.map((row) => row.connectionStringKey);
     }
 
     deleteLocalWorkspaceDb(id: string): boolean {
-        const info = this.workspaceDbDeleteStmt.run(id);
+        const info = this.databasesDbDeleteStmt.run(id);
         return info.changes > 0;
     }
 }
+
+
+export const tblDatabases = new TblDatabases();

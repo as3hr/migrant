@@ -1,5 +1,5 @@
 import { appContext, type KnowledgeDocument } from "../../domain/index.ts";
-import { localChatRepository, supabase } from "../../infrastructure/index.ts";
+import { supabase, tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
 import type { DbChatMessageRowType, DbChatSessionType } from "../../types/table_types.ts";
 import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
 
@@ -45,7 +45,7 @@ export class CloudSyncService {
             return [];
         }
 
-        const existingSessions = localChatRepository.getChatSessions(user.id);
+        const existingSessions = tblChatSessions.getChatSessions(user.id);
         if (existingSessions) return existingSessions;
 
         const { data, error } = await supabase
@@ -67,7 +67,7 @@ export class CloudSyncService {
             throw new Error(`Failed to create session: ${error?.message ?? 'Unknown error'}`);
         }
 
-        localChatRepository.setChatSession(data);
+        tblChatSessions.setChatSession(data);
 
         return data;
     }
@@ -84,13 +84,13 @@ export class CloudSyncService {
             throw new Error(`Failed to store model response: ${error?.message}`);
         }
 
-        localChatRepository.setChatMessage(data);
+        tblChatMessage.setChatMessage(data);
 
         return true;
     }
 
     async getSessionMessages(sessionId: string) {
-        const messages = localChatRepository.getChatMessages(sessionId);
+        const messages = tblChatMessage.getChatMessages(sessionId);
         if (messages.length > 0) return messages;
 
         const { data, error } = await supabase
@@ -106,7 +106,7 @@ export class CloudSyncService {
     }
 
     async getSession(sessionId: string) {
-        const session = localChatRepository.getChatSessionById(sessionId);
+        const session = tblChatSessions.getChatSessionById(sessionId);
         if (session) return session;
 
         const user = await appContext.services.authService.getCurrentUser();
