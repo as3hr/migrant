@@ -1,6 +1,5 @@
 import { pool, tblDatabases, tblUserSession } from "../infrastructure/index.ts";
 
-
 export type DatabaseType = "postgres" | "my-sql" | "mongodb";
 
 export interface DatabaseCollection { 
@@ -15,15 +14,6 @@ export interface DatabaseCollection {
     lastScannedAt?: Date | undefined;
 }
 
-/**
- * WorkSpace — pure in-memory runtime state for the connected databases.
- *
- * WorkSpace does NOT call Supabase.
- * WorkSpace does NOT decide when to persist — that is DatabaseRegistryService's job.
- *
- * Public persistence API (persistDb) is called explicitly by DatabaseRegistryService
- * so that all three stores update together.
- */
 export class WorkSpace { 
     databases: DatabaseCollection[] = [];
     activeDbs: DatabaseCollection[] = [];
@@ -45,7 +35,6 @@ export class WorkSpace {
         return dbs.length == 0 ? null : dbs;
     }
 
-    /** Restore workspace databases from SQLite on startup. */
     async loadFromCache(): Promise<void> {
         const row = tblUserSession.getUserSession();
         if (!row) return;
@@ -59,16 +48,10 @@ export class WorkSpace {
         await Promise.all(this.activeDbs.map(db => pool.setConnection(db.connectionString)));
     }
 
-    /** Add a database to the in-memory list. Does NOT persist. */
-    addDb(db: DatabaseCollection): void {
+    addDbToWorkspace(db: DatabaseCollection): void {
         this.databases.push(db);
     }
 
-    /**
-     * Merge a partial patch into an existing database entry in memory.
-     * Also re-persists the updated entry to SQLite.
-     * Does NOT touch Supabase.
-     */
     async updateDb(dbId: string, patch: Partial<DatabaseCollection>): Promise<void> {
         const row = tblUserSession.getUserSession();
         const updatedList = await Promise.all(
@@ -84,18 +67,7 @@ export class WorkSpace {
         this.databases = updatedList;
     }
 
-    /**
-     * Persist a database entry to SQLite + keychain.
-     * Called by DatabaseRegistryService after registerConnection.
-     */
-    async persistDb(db: DatabaseCollection): Promise<void> {
-        const row = tblUserSession.getUserSession();
-        if (!row) return;
-        await tblDatabases.setLocalDb(db, row.user_id);
-    }
-
-    /** Remove a database from memory and delete from SQLite. */
-    removeDb(dbId: string): void {
+    removeDbFromWorkspace(dbId: string): void {
         this.databases = this.databases.filter((db) => db.id !== dbId);
         tblDatabases.deleteLocalWorkspaceDb(dbId);
     }

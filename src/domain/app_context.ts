@@ -18,7 +18,6 @@ interface AppServices {
     authService: AuthService;
     databaseConnectionService: DatabaseConnectionService;
     chatSessionService: ChatSessionService;
-    // Backward compatibility aliases
     databaseRegistryService: DatabaseConnectionService;
     databaseService: ChatSessionService;
     ragService: RagService;
@@ -104,7 +103,6 @@ class AppContext {
             authService: new AuthService(),
             databaseConnectionService,
             chatSessionService,
-            // Aliases
             databaseRegistryService: databaseConnectionService,
             databaseService: chatSessionService,
             ragService: new RagService(),

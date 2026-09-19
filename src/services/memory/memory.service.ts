@@ -1,10 +1,9 @@
-import { generateText, Output, type GenerateTextEndEvent, type ToolSet } from "ai";
+import { type GenerateTextEndEvent, type ToolSet } from "ai";
 import { randomUUID } from "node:crypto";
 import type { Context } from "node:vm";
-import z from "zod";
 import { appContext } from "../../domain/index.ts";
 import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure/index.ts";
-import { openRouter, tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
+import { tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
 
 export class MemoryService {
     async setResponseIntoMemory(response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>) {
@@ -43,25 +42,7 @@ export class MemoryService {
 
         let sessionId = appContext.currentChatSessionId;
         if (!sessionId) {
-            let title = "New Conversation";
-            try {
-                const { output } = await generateText({
-                    model: openRouter("openai/gpt-4o-mini"),
-                    output: Output.object({
-                        schema: z.object({ title: z.string() }),
-                    }),
-                    instructions: [{
-                        role: "system",
-                        content: "Create a concise 3-4 word title for this chat topic based on the prompt.",
-                    }],
-                    temperature: 0,
-                    maxOutputTokens: 50,
-                    prompt: question,
-                });
-                title = output.title;
-            } catch (e) {
-                appContext.commandCtx?.log(`Error in creating title for new conversation ${e}`);
-             }
+            const title = await appContext.services.llmService.generateTitle(question);
 
             const newSession: IChatSessionsModel = {
                 id: randomUUID(),
@@ -77,6 +58,7 @@ export class MemoryService {
             if (session) {
                 sessionId = session.id;
                 appContext.currentChatSessionId = sessionId;
+
                 const userMessage: IChatMessageModel = {
                     id: randomUUID(),
                     session_id: sessionId,
@@ -96,6 +78,5 @@ export class MemoryService {
                 tblChatMessage.setChatMessage(userMessage);
             }
         }
-
     }
 }

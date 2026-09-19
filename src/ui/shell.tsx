@@ -11,6 +11,9 @@ import { Spinner } from "./components/spinner.tsx";
 import { useHotkeys, useShell, useStdoutDimensions } from "./hooks/index.ts";
 import { theme } from "./theme.ts";
 
+import { AuthCheckingView } from "./components/auth/auth_checking_view.tsx";
+import { LoginScreen } from "./components/auth/login_screen.tsx";
+
 interface ShellProps {
   onExit: () => void;
 }
@@ -29,6 +32,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     spinnerVisible,
     formInputProps,
     handleSubmit,
+    auth,
   } = useShell(onExit);
 
   const listRef = useRef<ScrollListRef>(null);
@@ -65,6 +69,22 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
   const mainWidth = dimensions.width - (isHeroView ? 0 : sidebarWidth);
   const atBottom = selectedIndex >= totalItems - 1;
+
+  if (auth.authStatus === "checking") {
+    return <AuthCheckingView />;
+  }
+
+  if (auth.authStatus === "unauthenticated") {
+    return (
+      <LoginScreen
+        onLogin={auth.triggerLogin}
+        onExit={onExit}
+        isLoggingIn={auth.isLoggingIn}
+        {...(auth.loginError !== null ? { loginError: auth.loginError } : {})}
+        width={dimensions.width}
+      />
+    );
+  }
 
   return (
     <Box

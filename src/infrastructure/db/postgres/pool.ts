@@ -20,7 +20,7 @@ export class PoolConnector {
         if (!pool) return;
         pool.end();
         delete this.pools[dbId];
-        appContext.workspace.removeDb(dbId);
+        appContext.workspace.removeDbFromWorkspace(dbId);
     }
 
     async query<T extends QueryResultRow = QueryResultRow>(

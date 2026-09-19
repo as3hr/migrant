@@ -93,7 +93,7 @@ async function reindexDocuments(dbId: string, documents: KnowledgeDocument[]): P
     );
 
     if (embeddings.length > 0) {
-      const res = await appContext.services.chatSessionService.reindexDocuments(dbId, embeddings, documents);
+      const res = await appContext.services.embeddingService.reindexDocuments(dbId, embeddings, documents);
       return res;
     }
     return true;

@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
-import { useEffect, useState } from "react";
 import type { JSX } from "react";
+import { useEffect, useState } from "react";
 
 export interface SlashCommandItem {
   name: string;
@@ -27,7 +27,7 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
   {
     name: "represent",
     argsHint: "<db>",
-    description: "Open live ER diagram on migrant.monster",
+    description: "Open live ER diagram on migrant.as3hr.dev",
   },
   {
     name: "login",
@@ -49,32 +49,43 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
 export interface AutocompletePopupProps {
   input: string;
   onSelect: (completedText: string) => void;
+  onHighlight?: (completedText: string | null) => void;
   onClose?: () => void;
 }
 
 export function AutocompletePopup({
   input,
   onSelect,
+  onHighlight,
   onClose,
 }: AutocompletePopupProps): JSX.Element | null {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Extract search query after leading '/'
   const searchQuery = input.startsWith("/")
     ? input.slice(1).trim().toLowerCase()
     : "";
 
-  // Filter commands matching current query
   const filteredCommands = SLASH_COMMANDS.filter((cmd) =>
     cmd.name.toLowerCase().startsWith(searchQuery)
   );
 
-  // Reset selected index when query changes
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchQuery]);
 
-  // Handle Arrow navigation & Tab/Enter selection
+  useEffect(() => {
+    if (input.startsWith("/") && filteredCommands.length > 0) {
+      const selected = filteredCommands[selectedIndex];
+      if (selected) {
+        onHighlight?.(`/${selected.name} `);
+      } else {
+        onHighlight?.(null);
+      }
+    } else {
+      onHighlight?.(null);
+    }
+  }, [input, selectedIndex, filteredCommands.length]);
+
   useInput((_, key) => {
     if (!filteredCommands.length) return;
 

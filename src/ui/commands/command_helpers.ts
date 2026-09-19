@@ -26,8 +26,8 @@ export function parseCommandInput(input: string): {
 }
 
 export async function requireAuth(): Promise<void> {
-  const isLoggedIn = await appContext.services.authService.checkLoginGuard();
-  if (!isLoggedIn) {
+  const user = await appContext.services.authService.checkLoginGuard();
+  if (!user) {
     throw new Error("You must be logged in. Run /login first.");
   }
 }

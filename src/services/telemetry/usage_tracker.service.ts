@@ -12,7 +12,6 @@ export interface RecordUsageParams {
 }
 
 export class UsageTrackerService {
-    /** Calculate cost in USD for given token usage dynamically from providers catalog */
     calculateCostUsd(modelName: string, promptTokens: number, completionTokens: number): number {
         const modelConfig = getModelById(modelName);
         const inputPrice = modelConfig?.inputPer1M ?? 0.20;
@@ -23,7 +22,6 @@ export class UsageTrackerService {
         return Number((inputCost + outputCost).toFixed(6));
     }
 
-    /** Log usage event locally */
     async recordUsage(params: RecordUsageParams): Promise<boolean> {
         return true;
     }

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { appContext, type DatabaseCollection } from "../../domain/index.ts";
+import { tblDatabases } from "../../infrastructure/index.ts";
 import { getDbName } from "../../utils/index.ts";
 
 export class DatabaseConnectionService {
@@ -30,9 +31,10 @@ export class DatabaseConnectionService {
             payLoad.indexStatus = existingDb.indexStatus;
         }
 
-        appContext.workspace.removeDb(dbId);
-        appContext.workspace.addDb(payLoad);
-        await appContext.workspace.persistDb(payLoad);
+        appContext.workspace.removeDbFromWorkspace(dbId);
+        appContext.workspace.addDbToWorkspace(payLoad);
+
+        tblDatabases.setLocalDb(payLoad, user.id);
 
         return dbId;
     }

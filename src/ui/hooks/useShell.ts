@@ -10,6 +10,9 @@ import {
 import { answerQuestion } from "../commands/index.ts";
 import { type OutputItem } from "../components/output.tsx";
 
+import { appEmitter } from "../../utils/emitter.ts";
+import { useAuth, type UseAuthReturn } from "./useAuth.ts";
+
 export type RunState =
   | { kind: "idle" }
   | { kind: "running"; label: string }
@@ -27,10 +30,12 @@ export interface UseShellReturn {
   spinnerVisible: boolean;
   formInputProps: AskOptions;
   handleSubmit: (rawValue: string) => void;
+  auth: UseAuthReturn;
 }
 
 export function useShell(onExit: () => void): UseShellReturn {
   const { stdout } = useStdout();
+  const auth = useAuth();
   const [outputs, setOutputs] = useState<OutputItem[]>([]);
   const [input, setInput] = useState("");
   const [run, setRun] = useState<RunState>({ kind: "idle" });
@@ -115,7 +120,7 @@ export function useShell(onExit: () => void): UseShellReturn {
     } finally {
       setFormOptions(null);
       setRun({ kind: "idle" });
-      refreshStatus();
+      void refreshStatus();
     }
   };
 
@@ -141,14 +146,16 @@ export function useShell(onExit: () => void): UseShellReturn {
   };
 
   useEffect(() => {
-    let active = true;
-    void (async () => {
-      if (await appContext.services.authService.checkLoginGuard() && active) {
-        void refreshStatus();
-      }
-    })();
-    return () => { active = false; };
-  }, []);
+    if (auth.authStatus === "authenticated") {
+      void refreshStatus();
+    }
+
+    const handler = () => auth.checkAuth();
+    appEmitter.on('logout', handler);
+    return () => {
+      appEmitter.off('logout', handler);
+    };
+  }, [auth.authStatus]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -186,5 +193,6 @@ export function useShell(onExit: () => void): UseShellReturn {
     spinnerVisible,
     formInputProps,
     handleSubmit,
+    auth,
   };
 }

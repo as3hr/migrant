@@ -1,6 +1,5 @@
 import { appContext, type CommandContext, type DatabaseCollection } from "../../domain/index.ts";
 import { getSchemaFingerprint } from "../../infrastructure/index.ts";
-import { requireAuth } from "../../ui/commands/index.ts";
 import { appMemo } from "../../utils/index.ts";
 import { getDatabaseContextForUserQuery, startScan } from "../index.ts";
 import {
@@ -28,7 +27,6 @@ export async function resolveAgentPayload(
     ctx.log(`Routing to target agent: ${targetAgent}`);
     switch (targetAgent) {
         case "schema-rag": {
-            await requireAuth();
             const ragContext = await buildRagContext(query, ctx);
             if (!ragContext) return null;
             return {
@@ -38,7 +36,6 @@ export async function resolveAgentPayload(
         }
 
         case "db-overview": {
-            await requireAuth();
             const dbOverviewContext = await buildDbOverviewContext(query, ctx);
             if (!dbOverviewContext) return null;
             return {

@@ -21,21 +21,21 @@ export class ContextManager {
 
     async getContext(userPrompt: string): Promise<ModelMessage[]> {
         const sessionId = appContext.currentChatSessionId;
-        if (!sessionId) return [];
+        let selectedMessages: ModelMessage[] = [];
         const newMessage: ModelMessage = {
             role: 'user',
             content: userPrompt,
         };
+        if (!sessionId) return selectedMessages;
 
         try {
             const dbMessages = tblChatMessage.getChatMessages(sessionId);
-            if (!dbMessages || dbMessages.length === 0) return [];
+            if (!dbMessages || dbMessages.length === 0) return selectedMessages;
 
             const validMessages = dbMessages.filter(
                 (msg: any) => msg.role === "user" || msg.role === "assistant"
             );
 
-            let selectedMessages: ModelMessage[] = [];
             let accumulatedTokens = 0;
 
             selectedMessages.push(newMessage);

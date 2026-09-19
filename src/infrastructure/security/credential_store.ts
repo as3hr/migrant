@@ -11,15 +11,31 @@ process.env.TS_KEYRING_BACKEND = backendMap[process.platform] ?? 'file';
 
 export class CredentialStore {
   async set(key: string, value: string): Promise<void> {
-    await setPassword(SERVICE, key, value);
+    try {
+      await setPassword(SERVICE, key, value);
+    }
+    catch (error) {
+      console.error("Error setting credential:", error);
+    }
   }
 
   async get(key: string): Promise<string | null> {
-    return getPassword(SERVICE, key);
+    try {
+      return await getPassword(SERVICE, key);
+    }
+    catch (error) {
+      console.error("Error getting credential:", error);
+      return null;
+    }
   }
 
   async delete(key: string): Promise<void> {
-    await deletePassword(SERVICE, key);
+    try { 
+      await deletePassword(SERVICE, key);
+    }
+    catch (error) {
+      console.error("Error setting credential:", error);
+    }
   }
 }
 

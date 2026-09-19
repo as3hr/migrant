@@ -4,7 +4,7 @@ import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
 import { credentialStore, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
-import { BASE_URL } from "../../utils/index.ts";
+import { appEmitter, BASE_URL } from "../../utils/index.ts";
 
 export class AuthService {
 
@@ -17,7 +17,6 @@ export class AuthService {
           `${BASE_URL}/login?cli_callback=` +
           encodeURIComponent(`http://127.0.0.1:${port}/callback`);
 
-      console.log("Opening browser for authentication...");
       await open(loginUrl);
 
       await callbackPromise;
@@ -150,16 +149,17 @@ export class AuthService {
     });
   }
 
-  async checkLoginGuard(): Promise<boolean> {
+  async checkLoginGuard(): Promise<User | null> {
     try {
       const { data: activeData } = await supabase.auth.getSession();
       if (activeData.session) {
-        return true;
+        return activeData.session.user;
       }
 
       const row = tblUserSession.getUserSession();
+      appContext.commandCtx?.log(`Auth Sessions: ${JSON.stringify(row)}`);
       if (!row) {
-        return false;
+        return null;
       }
 
       const sessionData = JSON.parse(row.session_data);
@@ -170,24 +170,21 @@ export class AuthService {
 
       if (error || !data.session) {
         tblUserSession.deleteSession(row.user_id);
-        return false;
+        return null;
       }
 
       this.saveSession(data.session);
-      return true;
+      return data.session.user;
     } catch (e) {
       console.error("Error in checkLoginGuard:", e);
-      return false;
+      return null;
     }
   }
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      const isLoggedIn = await this.checkLoginGuard();
-      if (!isLoggedIn) return null;
-
-      const { data } = await supabase.auth.getSession();
-      return data.session?.user ?? null;
+      const user = await this.checkLoginGuard();
+      return user;
     } catch (e) {
       console.error("Error in fetching current user:", e);
       return null;
@@ -228,6 +225,6 @@ export class AuthService {
     appContext.workspace.databases = [];
   
     ctx.success("Logged out successfully.");
-    ctx.exit();
+    appEmitter.emit('logout');
   }
 }

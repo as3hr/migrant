@@ -8,8 +8,6 @@ interface AppConfig {
   openRouterApiKey: string;
 }
 
-
-
 export const appConfig: AppConfig = {
   port: parseInt(process.env.PORT || "5000", 10),
   supabaseUrl: process.env.SUPABASE_URL!,

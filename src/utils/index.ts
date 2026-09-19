@@ -8,4 +8,4 @@ export * from "./cache.ts";
 
 export * from "./telemetry.ts";
 
-
+export * from "./emitter.ts";

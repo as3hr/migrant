@@ -1,31 +1,7 @@
-import { randomUUID } from "node:crypto";
-import { appContext, type KnowledgeDocument } from "../../domain/index.ts";
-import { tblChatMessage, tblChatSessions, tblDocuments, type IChatMessageModel, type IChatSessionsModel } from "../../infrastructure/index.ts";
-import { SYS_DEFAULT_EMBEDDING_MODEL } from "../../utils/index.ts";
+import { appContext } from "../../domain/index.ts";
+import { tblChatMessage, tblChatSessions, type IChatMessageModel, type IChatSessionsModel } from "../../infrastructure/index.ts";
 
 export class ChatSessionService {
-    async reindexDocuments(
-        dbId: string,
-        embeddings: number[][],
-        knowledgeDocuments: KnowledgeDocument[],
-        model?: string
-    ): Promise<boolean> {
-        tblDocuments.deleteDocumentsByDatabase(dbId);
-
-        const rows = embeddings.map((embedding, index) => ({
-            id: randomUUID(),
-            database_id: dbId,
-            content: knowledgeDocuments[index]!.content,
-            document_type: knowledgeDocuments[index]!.type,
-            embedding_model: model ?? SYS_DEFAULT_EMBEDDING_MODEL,
-            embedding: JSON.stringify(embedding),
-            metadata: JSON.stringify(knowledgeDocuments[index]!.metadata ?? {}),
-            created_at: new Date().toISOString(),
-        }));
-
-        tblDocuments.setDocuments(rows);
-        return true;
-    }
 
     async getSessions(): Promise<IChatSessionsModel[]> {
         const user = await appContext.services.authService.getCurrentUser();
