@@ -42,11 +42,15 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     formInputProps,
     handleSubmit,
     auth,
+    activeModel,
   } = useShell(onExit);
 
+  
   const listRef = useRef<ScrollListRef>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [session, setCurrentSession] = useState<IChatSessionsModel>();
+  
+
   useEffect(() => {
     const activeSessionId = appContext.currentChatSessionId;
     if (activeSessionId) {
@@ -56,13 +60,13 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           if (sess) setCurrentSession(sess);
         });
     }
-  
+
     const handleUpdateSession = ({ updatedSession }: { updatedSession:  IChatSessionsModel }) => {
       setCurrentSession(updatedSession);
     };
-  
+
     appEmitter.on("update-session", handleUpdateSession);
-  
+
     return () => {
       appEmitter.off("update-session", handleUpdateSession);
     };
@@ -97,6 +101,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
 
   const isHeroView = outputs.length <= 2 && run.kind === "idle";
   const activeDb = databases?.[0];
+  
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
   const mainWidth = dimensions.width - (isHeroView ? 0 : sidebarWidth);
   const atBottom = selectedIndex >= totalItems - 1;
@@ -261,7 +266,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
      <StatusBar
         cwd={process.cwd()}
         activeDb={activeDb}
-        modelName="deepseek-chat"
+        modelName={activeModel}
         version="1.0.0"
       />
      

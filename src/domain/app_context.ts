@@ -9,7 +9,7 @@ import {
     MemoryService,
     RagService
 } from "../services/index.ts";
-import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, representCommand, sessionsCommand } from "../ui/commands/index.ts";
+import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, sessionsCommand } from "../ui/commands/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
@@ -85,10 +85,8 @@ class AppContext {
     
       registry.register(loginCommand);
       registry.register(connectCommand);
-      registry.register(clearCommand);
       registry.register(exitCommand);
       registry.register(logoutCommand);
-      registry.register(representCommand);
       registry.register(sessionsCommand);
       registry.register(createHelpCommand(registry));
     

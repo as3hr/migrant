@@ -8,10 +8,11 @@ import {
   runCommand
 } from "../commands/command_helpers.ts";
 import { answerQuestion } from "../commands/index.ts";
-import { type OutputItem } from "../components/output.tsx";
 import type { ParameterCommandType } from "../components/autocomplete/command_parameter_popup.tsx";
+import { type OutputItem } from "../components/output.tsx";
 
 import { appEmitter } from "../../utils/emitter.ts";
+import { SYS_DEFAULT_MODEL } from "../../utils/index.ts";
 import { useAuth, type UseAuthReturn } from "./useAuth.ts";
 
 export type RunState =
@@ -28,6 +29,7 @@ export interface UseShellReturn {
   dimensions: { width: number; height: number };
   user: string | undefined;
   databases: string[] | undefined;
+  activeModel: string;
   sessions: IChatSessionsModel[];
   activePopup: ParameterCommandType | null;
   openPopup: (type: ParameterCommandType) => void;
@@ -55,6 +57,7 @@ export function useShell(onExit: () => void): UseShellReturn {
   const [sessions, setSessions] = useState<IChatSessionsModel[]>([]);
   const [activePopup, setActivePopup] = useState<ParameterCommandType | null>(null);
   const [spinnerVisible, setSpinnerVisible] = useState(false);
+  const [activeModel, setActiveModel] = useState<string>(SYS_DEFAULT_MODEL);
 
   const askResolver = useRef<((value: string) => void) | null>(null);
   const busyLabel = useRef("Working");
@@ -176,10 +179,6 @@ export function useShell(onExit: () => void): UseShellReturn {
       openPopup("connect");
       return;
     }
-    if (lower === "/represent" || lower === "/represent ") {
-      openPopup("represent");
-      return;
-    }
     if (lower === "/sessions" || lower === "/sessions ") {
       openPopup("sessions");
       return;
@@ -188,6 +187,17 @@ export function useShell(onExit: () => void): UseShellReturn {
     append({ type: "command", line: value });
     void executeInput(value);
   };
+
+  useEffect(() => {
+    const handler = ({ model }: { model: string }) => {
+      setActiveModel(model);
+    };
+
+    appEmitter.on('update-model', handler);
+    return () => {
+      appEmitter.off('update-model', handler);
+    };
+  }, []);
 
   useEffect(() => {
     if (auth.authStatus === "authenticated") {
@@ -243,6 +253,7 @@ export function useShell(onExit: () => void): UseShellReturn {
     formInputProps,
     handleSubmit,
     auth,
+    activeModel,
   };
 }
 

@@ -20,16 +20,6 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     description: "List & switch past chat sessions",
   },
   {
-    name: "clear",
-    argsHint: "",
-    description: "Clear terminal screen & outputs",
-  },
-  {
-    name: "represent",
-    argsHint: "<db>",
-    description: "Open live ER diagram on migrant.as3hr.dev",
-  },
-  {
     name: "login",
     argsHint: "",
     description: "Authenticate your Migrant account",
@@ -45,6 +35,7 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     description: "Show available commands & descriptions",
   },
 ];
+
 
 export interface AutocompletePopupProps {
   input: string;

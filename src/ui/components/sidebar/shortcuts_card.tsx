@@ -7,32 +7,37 @@ export function ShortcutsCard(): JSX.Element {
     <Box
       flexDirection="column"
       paddingX={1}
-      paddingY={0}
+      paddingY={1}
+      borderColor={theme.borderPrimary}
     >
       <Text color={theme.purple} bold>
-        Shortcuts & Commands
+        ⌨ Commands & Keys
       </Text>
 
-      <Box flexDirection="column" marginTop={1} gap={0}>
+      <Box flexDirection="column" marginTop={1}>
         <Box justifyContent="space-between">
-          <Text color={theme.textPrimary}>/connect</Text>
-          <Text color={theme.textDim}>Connect DB</Text>
+          <Text color={theme.brandLight} bold>/connect</Text>
+          <Text color={theme.textDim}>Connect DB Pool</Text>
         </Box>
         <Box justifyContent="space-between">
-          <Text color={theme.textPrimary}>/sessions</Text>
-          <Text color={theme.textDim}>Past Sessions</Text>
+          <Text color={theme.brandLight} bold>/sessions</Text>
+          <Text color={theme.textDim}>Switch Session</Text>
         </Box>
         <Box justifyContent="space-between">
-          <Text color={theme.textPrimary}>/represent</Text>
-          <Text color={theme.textDim}>Web Diagram</Text>
+          <Text color={theme.brandLight} bold>/login</Text>
+          <Text color={theme.textDim}>Sign In Account</Text>
         </Box>
         <Box justifyContent="space-between">
-          <Text color={theme.textPrimary}>Ctrl + P</Text>
-          <Text color={theme.textDim}>Palette</Text>
+          <Text color={theme.brandLight} bold>/logout</Text>
+          <Text color={theme.textDim}>Sign Out</Text>
         </Box>
         <Box justifyContent="space-between">
-          <Text color={theme.textPrimary}>Ctrl + L</Text>
-          <Text color={theme.textDim}>Clear Screen</Text>
+          <Text color={theme.brandLight} bold>/help</Text>
+          <Text color={theme.textDim}>All Commands</Text>
+        </Box>
+        <Box justifyContent="space-between" marginTop={1}>
+          <Text color={theme.textSecondary}>Ctrl + C</Text>
+          <Text color={theme.textDim}>Quit CLI</Text>
         </Box>
       </Box>
     </Box>

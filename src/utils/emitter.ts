@@ -4,7 +4,8 @@ type AppEvent = "logout"
     | "login"
     | "workspace_change"
     | "token-limit-breached"
-    | "update-session";
+    | "update-session"
+    | "update-model";
 
 class AppEmitter {
     private readonly _emitter = new EventEmitter();
