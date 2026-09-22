@@ -5,13 +5,11 @@ import { theme } from "../../theme.ts";
 export interface TelemetryCardProps {
   tokensUsed?: number | undefined;
   maxTokens?: number | undefined;
-  costUsd?: number | undefined;
 }
 
 export function TelemetryCard({
   tokensUsed = 0,
   maxTokens = 64000,
-  costUsd = 0.0,
 }: TelemetryCardProps): JSX.Element {
   const percentUsed = Math.min(
     100,
@@ -42,11 +40,6 @@ export function TelemetryCard({
           <Text color={percentUsed > 80 ? theme.warning : theme.success}>
             {percentUsed}%
           </Text>
-        </Box>
-
-        <Box justifyContent="space-between">
-          <Text color={theme.textSecondary}>Session Cost:</Text>
-          <Text color={theme.badgeCost}>${costUsd.toFixed(4)}</Text>
         </Box>
       </Box>
     </Box>

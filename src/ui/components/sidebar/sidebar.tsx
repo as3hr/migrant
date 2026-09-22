@@ -17,13 +17,13 @@ export function Sidebar({
   session,
   width = 34,
 }: SidebarProps): JSX.Element {
+
   return (
     <Box flexDirection="column" width={width} paddingLeft={1} backgroundColor={theme.bgCanvas}>
       <DatabaseCard databases={databases} sessionName={session?.title || "Untitled Session"} />
       <TelemetryCard
         tokensUsed={session?.session_token_used || 0}
         maxTokens={session?.session_token_limit || 0}
-        costUsd={(session?.session_token_used || 0) * 0.0001}
       />
       <ShortcutsCard />
     </Box>

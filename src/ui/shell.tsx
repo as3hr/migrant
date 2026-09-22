@@ -10,6 +10,7 @@ import { Spinner } from "./components/spinner.tsx";
 import { useHotkeys, useShell, useStdoutDimensions } from "./hooks/index.ts";
 import { theme } from "./theme.ts";
 
+import { appContext } from "../domain/index.ts";
 import type { IChatSessionsModel } from "../infrastructure/index.ts";
 import { appEmitter } from "../utils/emitter.ts";
 import { AuthCheckingView } from "./components/auth/auth_checking_view.tsx";
@@ -46,16 +47,27 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   const listRef = useRef<ScrollListRef>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [session, setCurrentSession] = useState<IChatSessionsModel>();
-
   useEffect(() => {
-    appEmitter.on("update-session", ({ updatedSession }) => {
+    const activeSessionId = appContext.currentChatSessionId;
+    if (activeSessionId) {
+      void appContext.services.chatSessionService
+        .getSession(activeSessionId)
+        .then((sess) => {
+          if (sess) setCurrentSession(sess);
+        });
+    }
+  
+    const handleUpdateSession = ({ updatedSession }: { updatedSession:  IChatSessionsModel }) => {
       setCurrentSession(updatedSession);
-    });
-
+    };
+  
+    appEmitter.on("update-session", handleUpdateSession);
+  
     return () => {
-      appEmitter.off("update-session", () => { });
+      appEmitter.off("update-session", handleUpdateSession);
     };
   }, []);
+
 
   const totalItems = outputs.length;
 
