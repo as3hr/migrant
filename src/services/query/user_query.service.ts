@@ -24,7 +24,6 @@ export async function resolveAgentPayload(
     query: string,
     ctx: CommandContext
 ): Promise<AgentPayload | null> {
-    ctx.log(`Routing to target agent: ${targetAgent}`);
     switch (targetAgent) {
         case "schema-rag": {
             const ragContext = await buildRagContext(query, ctx);

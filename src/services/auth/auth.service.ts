@@ -139,11 +139,7 @@ export class AuthService {
         });
       });
   
-      server.listen(port, "127.0.0.1", () => {
-        console.log(
-          `CLI authentication callback listening on http://127.0.0.1:${port}/callback`
-        );
-      });
+      server.listen(port, "127.0.0.1", () => { });
   
       server.on("error", reject);
     });
@@ -203,18 +199,14 @@ export class AuthService {
       ctx.exit();
       return;
     }
-  
-    ctx.log("Removing saved database credentials...");
-  
+
     const connectionKeys =
       tblDatabases.getLocalDbsConnectionKeys(user.id);
   
     await Promise.all(
       connectionKeys.map((key: string) => credentialStore.delete(key))
     );
-  
-    ctx.log("Removing workspaces and session...");
-  
+
     for (const db of appContext.workspace.databases) {
       tblDatabases.deleteLocalWorkspaceDb(db.id);
     }
@@ -223,8 +215,7 @@ export class AuthService {
     await supabase.auth.signOut();
   
     appContext.workspace.databases = [];
-  
-    ctx.success("Logged out successfully.");
+
     appEmitter.emit('logout');
   }
 }

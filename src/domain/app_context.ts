@@ -10,7 +10,7 @@ import {
     RagService,
     UsageTrackerService
 } from "../services/index.ts";
-import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand } from "../ui/commands/index.ts";
+import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, representCommand, sessionsCommand } from "../ui/commands/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
@@ -90,6 +90,8 @@ class AppContext {
       registry.register(clearCommand);
       registry.register(exitCommand);
       registry.register(logoutCommand);
+      registry.register(representCommand);
+      registry.register(sessionsCommand);
       registry.register(createHelpCommand(registry));
     
       return registry;

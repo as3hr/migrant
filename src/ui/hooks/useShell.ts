@@ -1,7 +1,7 @@
 import { useStdout } from "ink";
 import { useEffect, useRef, useState } from "react";
 import { appContext, type AskOptions, type CommandContext } from "../../domain/index.ts";
-import { supabase } from "../../infrastructure/index.ts";
+import { supabase, type IChatSessionsModel } from "../../infrastructure/index.ts";
 import {
   errorMessage,
   parseCommandInput,
@@ -9,6 +9,7 @@ import {
 } from "../commands/command_helpers.ts";
 import { answerQuestion } from "../commands/index.ts";
 import { type OutputItem } from "../components/output.tsx";
+import type { ParameterCommandType } from "../components/autocomplete/command_parameter_popup.tsx";
 
 import { appEmitter } from "../../utils/emitter.ts";
 import { useAuth, type UseAuthReturn } from "./useAuth.ts";
@@ -27,6 +28,11 @@ export interface UseShellReturn {
   dimensions: { width: number; height: number };
   user: string | undefined;
   databases: string[] | undefined;
+  sessions: IChatSessionsModel[];
+  activePopup: ParameterCommandType | null;
+  openPopup: (type: ParameterCommandType) => void;
+  closePopup: () => void;
+  handleParameterSubmit: (paramValue: string) => void;
   spinnerVisible: boolean;
   formInputProps: AskOptions;
   handleSubmit: (rawValue: string) => void;
@@ -46,6 +52,8 @@ export function useShell(onExit: () => void): UseShellReturn {
   });
   const [user, setUser] = useState<string>();
   const [databases, setDatabases] = useState<string[]>();
+  const [sessions, setSessions] = useState<IChatSessionsModel[]>([]);
+  const [activePopup, setActivePopup] = useState<ParameterCommandType | null>(null);
   const [spinnerVisible, setSpinnerVisible] = useState(false);
 
   const askResolver = useRef<((value: string) => void) | null>(null);
@@ -71,6 +79,18 @@ export function useShell(onExit: () => void): UseShellReturn {
     const { data } = await supabase.auth.getSession();
     setUser(data?.session?.user.email ?? undefined);
     setDatabases(appContext.workspace.databases.map((db) => db.name));
+    const sessionList = await appContext.services.chatSessionService.getSessions();
+    setSessions(sessionList);
+  };
+
+  const openPopup = (type: ParameterCommandType) => {
+    setInput("");
+    setActivePopup(type);
+    void refreshStatus();
+  };
+
+  const closePopup = () => {
+    setActivePopup(null);
   };
 
   const createCommandContext = (): CommandContext => ({
@@ -124,6 +144,16 @@ export function useShell(onExit: () => void): UseShellReturn {
     }
   };
 
+  const handleParameterSubmit = (paramValue: string) => {
+    if (!activePopup) return;
+    const cmdName = activePopup;
+    setActivePopup(null);
+
+    const fullCommand = `/${cmdName} ${paramValue}`;
+    append({ type: "command", line: fullCommand });
+    void executeInput(fullCommand);
+  };
+
   const handleSubmit = (rawValue: string) => {
     if (run.kind === "form") {
       const resolve = askResolver.current;
@@ -140,6 +170,20 @@ export function useShell(onExit: () => void): UseShellReturn {
     const value = rawValue.trim();
     setInput("");
     if (!value) return;
+
+    const lower = value.toLowerCase();
+    if (lower === "/connect" || lower === "/connect ") {
+      openPopup("connect");
+      return;
+    }
+    if (lower === "/represent" || lower === "/represent ") {
+      openPopup("represent");
+      return;
+    }
+    if (lower === "/sessions" || lower === "/sessions ") {
+      openPopup("sessions");
+      return;
+    }
 
     append({ type: "command", line: value });
     void executeInput(value);
@@ -190,9 +234,15 @@ export function useShell(onExit: () => void): UseShellReturn {
     dimensions,
     user,
     databases,
+    sessions,
+    activePopup,
+    openPopup,
+    closePopup,
+    handleParameterSubmit,
     spinnerVisible,
     formInputProps,
     handleSubmit,
     auth,
   };
 }
+

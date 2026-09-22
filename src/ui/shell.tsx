@@ -6,13 +6,14 @@ import { StatusBar } from "./components/common/status_bar.tsx";
 import { HeroLogo } from "./components/hero/hero_logo.tsx";
 import { Output } from "./components/output.tsx";
 import { Prompt } from "./components/prompt.tsx";
-import { Sidebar } from "./components/sidebar/sidebar.tsx";
 import { Spinner } from "./components/spinner.tsx";
 import { useHotkeys, useShell, useStdoutDimensions } from "./hooks/index.ts";
 import { theme } from "./theme.ts";
 
+import { CommandParameterPopup } from "./components/autocomplete/command_parameter_popup.tsx";
 import { AuthCheckingView } from "./components/auth/auth_checking_view.tsx";
 import { LoginScreen } from "./components/auth/login_screen.tsx";
+import { Sidebar } from "./components/sidebar/sidebar.tsx";
 
 interface ShellProps {
   onExit: () => void;
@@ -29,6 +30,11 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     run,
     user,
     databases,
+    sessions,
+    activePopup,
+    openPopup,
+    closePopup,
+    handleParameterSubmit,
     spinnerVisible,
     formInputProps,
     handleSubmit,
@@ -111,13 +117,24 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           </Box>
 
           <Box width={Math.min(80, dimensions.width - 4)}>
-            <Prompt
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSubmit}
-              {...(user !== undefined ? { user } : {})}
-              {...(databases !== undefined ? { databases } : {})}
-            />
+            {activePopup ? (
+              <CommandParameterPopup
+                command={activePopup}
+                onSubmit={handleParameterSubmit}
+                onClose={closePopup}
+                databases={databases}
+                sessions={sessions}
+              />
+            ) : (
+              <Prompt
+                value={input}
+                onChange={setInput}
+                onSubmit={handleSubmit}
+                onTriggerPopup={openPopup}
+                {...(user !== undefined ? { user } : {})}
+                {...(databases !== undefined ? { databases } : {})}
+              />
+            )}
           </Box>
 
           <Box marginTop={1}>
@@ -151,42 +168,50 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
             )}
 
             <Box flexGrow={1}>
-            <ScrollList
-              ref={listRef}
-              selectedIndex={selectedIndex}
-              scrollAlignment="auto"
-              backgroundColor={theme.bgCanvas}
-            >
-              {outputs.map((item, index) => (
-                <Box key={index} width={mainWidth} flexShrink={0}>
-                  <Output item={item} />
-                </Box>
-              ))}
+              <ScrollList
+                ref={listRef}
+                selectedIndex={selectedIndex}
+                scrollAlignment="auto"
+                backgroundColor={theme.bgCanvas}
+              >
+                {outputs.map((item, index) => (
+                  <Box key={index} width={mainWidth} flexShrink={0}>
+                    <Output item={item} />
+                  </Box>
+                ))}
 
-              {run.kind === "running" && spinnerVisible && (
-                <Box width={mainWidth} marginTop={1} flexShrink={0}>
-                  <Spinner label={run.label} />
-                </Box>
-              )}
-            </ScrollList>
-              </Box>
+                {run.kind === "running" && spinnerVisible && (
+                  <Box width={mainWidth} marginTop={1} flexShrink={0}>
+                    <Spinner label={run.label} />
+                  </Box>
+                )}
+              </ScrollList>
+            </Box>
 
             <Box width={mainWidth} flexShrink={0}>
-              {run.kind === "idle" && (
+              {activePopup ? (
+                <CommandParameterPopup
+                  command={activePopup}
+                  onSubmit={handleParameterSubmit}
+                  onClose={closePopup}
+                  databases={databases}
+                  sessions={sessions}
+                />
+              ) : run.kind === "idle" ? (
                 <Prompt
                   value={input}
                   onChange={setInput}
                   onSubmit={handleSubmit}
+                  onTriggerPopup={openPopup}
                   {...(user !== undefined ? { user } : {})}
                   {...(databases !== undefined ? { databases } : {})}
                 />
-              )}
-
-              {run.kind === "form" && (
+              ) : run.kind === "form" ? (
                 <Prompt
                   value={input}
                   onChange={setInput}
                   onSubmit={handleSubmit}
+                  onTriggerPopup={openPopup}
                   label={run.label}
                   {...(formInputProps.placeholder !== undefined
                     ? { placeholder: formInputProps.placeholder }
@@ -195,10 +220,10 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
                     ? { mask: formInputProps.mask }
                     : {})}
                 />
-              )}
-            </Box>  
+              ) : null}
+            </Box>
           </Box>
-            
+
           <Sidebar
             databases={databases}
             tokensUsed={2450}
@@ -208,6 +233,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           />
         </Box>
       )}
+
 
      <StatusBar
         cwd={process.cwd()}

@@ -6,7 +6,7 @@ import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure
 import { tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
 
 export class MemoryService {
-    async setResponseIntoMemory(response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>) {
+    async updateMem(response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>, question: string) {
         const user = await appContext.services.authService.getCurrentUser();
         const sessionId = appContext.currentChatSessionId;
         if (!user || !sessionId) return;
@@ -16,8 +16,25 @@ export class MemoryService {
             response.usage.inputTokens ?? 0,
             response.usage.outputTokens ?? 0,
         );
-    
-        const message: IChatMessageModel = {
+
+
+        const userMessage: IChatMessageModel = {
+            id: randomUUID(),
+            session_id: sessionId,
+            user_id: user.id,
+            role: 'user',
+            content: question,
+            provider: response.model.provider,
+            model_name: response.model.modelId,
+            target_agent: response.model.modelId,
+            prompt_tokens: response.usage.inputTokens ?? 0,
+            completion_tokens: response.usage.outputTokens ?? 0,
+            total_tokens: response.usage.totalTokens ?? 0,
+            cost_usd: cost,
+            created_at: new Date().toISOString(),
+        };
+
+        const assistantMessage: IChatMessageModel = {
             id: randomUUID(),
             session_id: sessionId,
             user_id: user.id,
@@ -33,10 +50,11 @@ export class MemoryService {
             created_at: new Date().toISOString(),
         };
     
-        tblChatMessage.setChatMessage(message);
+        tblChatMessage.setChatMessage(userMessage);
+        tblChatMessage.setChatMessage(assistantMessage);
     }
 
-    async setQuestionIntoMemory(question: string) {
+    async setUpSession(question: string) {
         const user = await appContext.services.authService.getCurrentUser();
         if (!user) return;
 
@@ -58,24 +76,6 @@ export class MemoryService {
             if (session) {
                 sessionId = session.id;
                 appContext.currentChatSessionId = sessionId;
-
-                const userMessage: IChatMessageModel = {
-                    id: randomUUID(),
-                    session_id: sessionId,
-                    user_id: user.id,
-                    role: "user",
-                    content: question,
-                    provider: "user",
-                    model_name: "user",
-                    target_agent: "input",
-                    prompt_tokens: 0,
-                    completion_tokens: 0,
-                    total_tokens: 0,
-                    cost_usd: 0,
-                    created_at: new Date().toISOString(),
-                };
-
-                tblChatMessage.setChatMessage(userMessage);
             }
         }
     }

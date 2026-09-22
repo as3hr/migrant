@@ -15,7 +15,6 @@ class FileService {
                 JSON.stringify(data, null, 2),
                 () => { }
             );
-          console.log('Data successfully appended.');
         } catch (error) {
           console.error('Failed to append data:', error);
         }

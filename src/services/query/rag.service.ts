@@ -47,7 +47,7 @@ export class RagService {
                 documentsData: data
             }
         } catch (e) {
-            console.log('Error in performing semantic search', e);
+            appContext.commandCtx?.log(`Error in performing semantic search ${e}`)
             return null;
         }
     }

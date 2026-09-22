@@ -19,7 +19,8 @@ export class UsageTrackerService {
 
         const inputCost = (promptTokens / 1_000_000) * inputPrice;
         const outputCost = (completionTokens / 1_000_000) * outputPrice;
-        return Number((inputCost + outputCost).toFixed(6));
+
+        return +((inputCost + outputCost).toFixed(6));
     }
 
     async recordUsage(params: RecordUsageParams): Promise<boolean> {

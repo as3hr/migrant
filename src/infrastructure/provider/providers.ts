@@ -39,36 +39,49 @@ export interface ModelConfig {
 
 export const PROVIDER_MODELS: Record<ProviderId, ModelConfig[]> = {
   anthropic: [
-    { id: 'claude-opus-4-5', name: 'Claude Opus 4.5', description: 'Most capable', inputPer1M: 15.00, outputPer1M: 75.00 },
-    { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', description: 'Best balance', inputPer1M: 3.00, outputPer1M: 15.00 },
-    { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', description: 'Fast and cheap', inputPer1M: 0.80, outputPer1M: 4.00 },
+    { id: 'claude-fable-5-1', name: 'Claude Fable 5.1', description: 'Mythos-class flagship', inputPer1M: 10.00, outputPer1M: 50.00 },
+    { id: 'claude-opus-5-5', name: 'Claude Opus 5.5', description: 'Most capable Opus', inputPer1M: 5.00, outputPer1M: 25.00 },
+    { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', description: 'Best agentic balance', inputPer1M: 3.00, outputPer1M: 15.00 },
+    { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', description: 'Reliable workhorse', inputPer1M: 3.00, outputPer1M: 15.00 },
+    { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', description: 'Fast and cheap', inputPer1M: 1.00, outputPer1M: 5.00 },
   ],
   openai: [
-    { id: 'gpt-4o', name: 'GPT-4o', description: 'Most capable', inputPer1M: 2.50, outputPer1M: 10.00 },
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and cheap', inputPer1M: 0.15, outputPer1M: 0.60 },
-    { id: 'o3-mini', name: 'o3 Mini', description: 'Reasoning model', inputPer1M: 1.10, outputPer1M: 4.40 },
+    { id: 'gpt-5', name: 'GPT-5', description: 'Flagship general purpose', inputPer1M: 1.25, outputPer1M: 10.00 },
+    { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Fast and cheap', inputPer1M: 0.25, outputPer1M: 2.00 },
+    { id: 'o3', name: 'o3', description: 'Deep reasoning', inputPer1M: 2.00, outputPer1M: 8.00 },
+    { id: 'o4-mini', name: 'o4-mini', description: 'Cheap reasoning', inputPer1M: 1.10, outputPer1M: 4.40 },
+    { id: 'gpt-4o', name: 'GPT-4o', description: 'Legacy flagship', inputPer1M: 2.50, outputPer1M: 10.00 },
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Legacy cheap', inputPer1M: 0.15, outputPer1M: 0.60 },
   ],
   google: [
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Fast and capable', inputPer1M: 0.10, outputPer1M: 0.40 },
-    { id: 'gemini-2.0-pro', name: 'Gemini 2.0 Pro', description: 'Most capable', inputPer1M: 1.25, outputPer1M: 5.00 },
+    { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview', description: 'Most capable (preview)', inputPer1M: 2.00, outputPer1M: 12.00 },
+    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', description: 'Fast (preview)', inputPer1M: 0.50, outputPer1M: 3.00 },
+    { id: 'gemini-3.1-flash-lite', name: 'Gemini 3.1 Flash Lite', description: 'Cheapest stable', inputPer1M: 0.25, outputPer1M: 1.50 },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', description: 'Stable production', inputPer1M: 1.25, outputPer1M: 10.00 },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Best stable balance', inputPer1M: 0.30, outputPer1M: 2.50 },
+    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', description: 'Cheapest stable', inputPer1M: 0.10, outputPer1M: 0.40 },
   ],
   mistral: [
-    { id: 'mistral-large-latest', name: 'Mistral Large', description: 'Most capable', inputPer1M: 2.00, outputPer1M: 6.00 },
-    { id: 'mistral-small-latest', name: 'Mistral Small', description: 'Fast and cheap', inputPer1M: 0.10, outputPer1M: 0.30 },
+    { id: 'mistral-large-latest', name: 'Mistral Large 3', description: 'Most capable', inputPer1M: 0.50, outputPer1M: 1.50 },
+    { id: 'mistral-small-latest', name: 'Mistral Small 4', description: 'Fast and cheap', inputPer1M: 0.15, outputPer1M: 0.60 },
   ],
   xai: [
-    { id: 'grok-3', name: 'Grok 3', description: 'Most capable', inputPer1M: 3.00, outputPer1M: 15.00 },
+    { id: 'grok-4.3', name: 'Grok 4.3', description: 'Current flagship', inputPer1M: 1.25, outputPer1M: 2.50 },
+    { id: 'grok-3', name: 'Grok 3', description: 'Legacy capable', inputPer1M: 3.00, outputPer1M: 15.00 },
     { id: 'grok-3-mini', name: 'Grok 3 Mini', description: 'Fast and cheap', inputPer1M: 0.30, outputPer1M: 0.50 },
   ],
   deepseek: [
-    { id: 'deepseek-chat', name: 'DeepSeek V3', description: 'Best value', inputPer1M: 0.14, outputPer1M: 0.28 },
-    { id: 'deepseek-reasoner', name: 'DeepSeek R1', description: 'Reasoning model', inputPer1M: 0.55, outputPer1M: 2.19 },
+    { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro', description: 'Best capability', inputPer1M: 0.435, outputPer1M: 0.87 },
+    { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash', description: 'Best value', inputPer1M: 0.14, outputPer1M: 0.28 },
   ],
   openrouter: [
-    { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat via OpenRouter', description: 'Best value', inputPer1M: 0.40, outputPer1M: 0.90 },
-    { id: 'deepseek/deepseek-reasoner', name: 'DeepSeek Reasoner via OpenRouter', description: 'Reasoning model', inputPer1M: 0.75, outputPer1M: 2.19 },
+    { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek V4 Flash via OpenRouter', description: 'Best value', inputPer1M: 0.40, outputPer1M: 0.90 },
+    { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek V4 Pro via OpenRouter', description: 'High capability', inputPer1M: 0.75, outputPer1M: 2.19 },
+    { id: 'anthropic/claude-sonnet-5', name: 'Claude Sonnet 5 via OpenRouter', description: 'Best agentic Claude', inputPer1M: 3.20, outputPer1M: 15.60 },
+    { id: 'openai/gpt-5', name: 'GPT-5 via OpenRouter', description: 'OpenAI flagship', inputPer1M: 1.40, outputPer1M: 10.50 },
   ],
 };
+
 
 export const PROVIDERS: ProviderConfig[] = [
   {
@@ -183,4 +196,3 @@ export function getProviderLabel(provider: ProviderConfig): string {
   }
   return `${provider.name} (${provider.id})`;
 }
-
