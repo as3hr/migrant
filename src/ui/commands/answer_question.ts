@@ -30,7 +30,7 @@ export async function answerQuestion(
 
       if (!payload) return;
 
-        await appContext.services.memoryService.setUpSession(question);
+        await appContext.services.memoryService.ensureActiveSession(question);
       const context = await appContext.services.contextManager.getContext(payload.userPrompt);
 
       let response = "";
@@ -39,7 +39,7 @@ export async function answerQuestion(
           context,
           appContext.selectedModel.modelId,
           (result) => {
-              appContext.services.memoryService.updateMem(result, question);
+              appContext.services.memoryService.saveTurnToMemory(result, output.targetAgent);
           }
       );
         

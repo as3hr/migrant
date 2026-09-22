@@ -7,8 +7,7 @@ import {
     EmbeddingService,
     LlmService,
     MemoryService,
-    RagService,
-    UsageTrackerService
+    RagService
 } from "../services/index.ts";
 import { clearCommand, connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, representCommand, sessionsCommand } from "../ui/commands/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
@@ -25,7 +24,6 @@ interface AppServices {
     embeddingService: EmbeddingService;
     memoryService: MemoryService;
     contextManager: ContextManager;
-    usageTracker: UsageTrackerService;
 }
 
 interface ProviderModel {
@@ -111,8 +109,7 @@ class AppContext {
             llmService: new LlmService(),
             embeddingService: new EmbeddingService(),
             memoryService: new MemoryService(),
-            contextManager: new ContextManager(),
-            usageTracker: new UsageTrackerService(),
+            contextManager: new ContextManager()
         };
     }
 }

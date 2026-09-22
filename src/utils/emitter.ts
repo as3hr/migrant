@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-type AppEvent = "logout" | "login" | "workspace_change";
+type AppEvent = "logout" | "login" | "workspace_change" | 'token-limit-breached';
 
 class AppEmitter {
     private readonly _emitter = new EventEmitter();
