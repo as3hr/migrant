@@ -10,9 +10,11 @@ import { Spinner } from "./components/spinner.tsx";
 import { useHotkeys, useShell, useStdoutDimensions } from "./hooks/index.ts";
 import { theme } from "./theme.ts";
 
-import { CommandParameterPopup } from "./components/autocomplete/command_parameter_popup.tsx";
+import type { IChatSessionsModel } from "../infrastructure/index.ts";
+import { appEmitter } from "../utils/emitter.ts";
 import { AuthCheckingView } from "./components/auth/auth_checking_view.tsx";
 import { LoginScreen } from "./components/auth/login_screen.tsx";
+import { CommandParameterPopup } from "./components/autocomplete/command_parameter_popup.tsx";
 import { Sidebar } from "./components/sidebar/sidebar.tsx";
 
 interface ShellProps {
@@ -43,6 +45,17 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
 
   const listRef = useRef<ScrollListRef>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [session, setCurrentSession] = useState<IChatSessionsModel>();
+
+  useEffect(() => {
+    appEmitter.on("update-session", ({ updatedSession }) => {
+      setCurrentSession(updatedSession);
+    });
+
+    return () => {
+      appEmitter.off("update-session", () => { });
+    };
+  }, []);
 
   const totalItems = outputs.length;
 
@@ -226,9 +239,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
 
           <Sidebar
             databases={databases}
-            tokensUsed={2450}
-            maxTokens={64000}
-            costUsd={0.0003}
+            session={session}
             width={sidebarWidth}
           />
         </Box>

@@ -4,6 +4,7 @@ import type { Context } from "node:vm";
 import { appContext } from "../../domain/index.ts";
 import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure/index.ts";
 import { tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
+import { appEmitter } from "../../utils/emitter.ts";
 
 export class MemoryService {
     async saveTurnToMemory(
@@ -47,11 +48,17 @@ export class MemoryService {
 
             const currentSession = tblChatSessions.getChatSessionById(sessionId);
             if (currentSession) {
-                tblChatSessions.setChatSession({
+                const sessionTotalTokensUsed = (currentSession.session_token_used || 0) + totalTokens;
+                const updatedSession = tblChatSessions.setChatSession({
                     ...currentSession,
-                    session_token_used: (currentSession.session_token_used || 0) + totalTokens,
+                    session_token_used: sessionTotalTokensUsed,
                     updated_at: new Date().toISOString(),
                 });
+
+                appEmitter.emit('update-session', {
+                    updatedSession,
+                });
+
             }
         } catch (error) {
             console.error("Error saving chat memory:", error);
@@ -66,11 +73,13 @@ export class MemoryService {
         if (!sessionId) {
             const title = await appContext.services.llmService.generateTitle(question);
 
+            const tokenLimit = appContext.services.contextManager.getHistoryTokenBudget(appContext.selectedModel.modelId);
+
             const newSession: IChatSessionsModel = {
                 id: randomUUID(),
                 user_id: user.id,
                 title: title,
-                session_token_limit: 100000,
+                session_token_limit: tokenLimit,
                 session_token_used: 0,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -80,6 +89,10 @@ export class MemoryService {
             if (session) {
                 sessionId = session.id;
                 appContext.currentChatSessionId = sessionId;
+
+                appEmitter.emit('update-session', {
+                    updatedSession: session,
+                });
             }
         }
         if (sessionId) {

@@ -16,7 +16,7 @@ export class ContextManager {
         return +((inputCost + outputCost).toFixed(6));
     }
 
-    private getHistoryTokenBudget(modelId: string): number {
+    getHistoryTokenBudget(modelId: string): number {
         const config = getModelById(modelId);
         const contextWindow = config?.contextWindow ?? 64000;
         return Math.min(32000, Math.max(4000, Math.floor((contextWindow - 20000) * 0.5)));

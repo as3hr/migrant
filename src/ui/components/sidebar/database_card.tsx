@@ -2,11 +2,12 @@ import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { theme } from "../../theme.ts";
 
-export interface DatabaseCardProps {
+export interface SessionOverviewCardProps {
   databases?: string[] | undefined;
+  sessionName: string;
 }
 
-export function DatabaseCard({ databases = [] }: DatabaseCardProps): JSX.Element {
+export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCardProps): JSX.Element {
   return (
     <Box
       flexDirection="column"
@@ -14,6 +15,10 @@ export function DatabaseCard({ databases = [] }: DatabaseCardProps): JSX.Element
       paddingY={0}
       marginBottom={1}
     >
+      <Text color={theme.brandLight} bold>
+        Session: {sessionName}
+      </Text>
+
       <Text color={theme.brand} bold>
         Connected Databases
       </Text>
