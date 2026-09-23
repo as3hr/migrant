@@ -2,7 +2,6 @@ import { Box, Text } from "ink";
 import { ScrollList, type ScrollListRef } from "ink-scroll-list";
 import type { JSX } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StatusBar } from "./components/common/status_bar.tsx";
 import { HeroLogo } from "./components/hero/hero_logo.tsx";
 import { Output } from "./components/output.tsx";
 import { Prompt } from "./components/prompt.tsx";
@@ -98,7 +97,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   });
 
   const isHeroView = outputs.length <= 2 && run.kind === "idle";
-  const activeDb = databases?.[0];
   
   const availableWidth = Math.max(20, dimensions.width - 4);
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
@@ -257,15 +255,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
             width={sidebarWidth}
           />
         </Box>
-      )}
-
-
-     <StatusBar
-        activeDb={activeDb}
-        modelName={activeModel}
-        version="1.0.0"
-      />
-     
+      )}     
     </Box>
   );
 }
