@@ -20,7 +20,7 @@ interface PromptProps {
   mask?: string;
 }
 
-const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions"];
+const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions", "models"];
 
 export function Prompt(props: PromptProps): JSX.Element {
   const placeholder = props.placeholder ?? "Ask anything about your schema...";

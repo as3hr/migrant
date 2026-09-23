@@ -10,7 +10,7 @@ export interface AssistantMessageCardProps {
 
 export function AssistantMessageCard({
   response,
-  thoughtTime = "1.4s",
+  thoughtTime,
 }: AssistantMessageCardProps): JSX.Element {
   const accentIndex = Math.abs(response.length) % theme.thinkingAccents.length;
   const accentColor = theme.thinkingAccents[accentIndex] ?? theme.accent;

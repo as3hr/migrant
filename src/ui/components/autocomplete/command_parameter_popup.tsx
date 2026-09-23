@@ -6,7 +6,32 @@ import { appContext } from "../../../domain/app_context.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
 
-export type ParameterCommandType = "connect" | "sessions";
+import { PROVIDER_MODELS, PROVIDERS, type ModelConfig, type ProviderId } from "../../../infrastructure/provider/providers.ts";
+
+export type ParameterCommandType = "connect" | "sessions" | "models";
+
+interface FlatModelItem {
+  providerId: ProviderId;
+  providerName: string;
+  model: ModelConfig;
+  isFirstInGroup: boolean;
+}
+
+const FLAT_MODELS: FlatModelItem[] = (() => {
+  const result: FlatModelItem[] = [];
+  for (const provider of PROVIDERS) {
+    const models = PROVIDER_MODELS[provider.id] || [];
+    models.forEach((m, idx) => {
+      result.push({
+        providerId: provider.id,
+        providerName: provider.name,
+        model: m,
+        isFirstInGroup: idx === 0,
+      });
+    });
+  }
+  return result;
+})();
 
 export interface CommandParameterPopupProps {
   command: ParameterCommandType;
@@ -51,6 +76,21 @@ export function CommandParameterPopup({
           const selectedSession = activeSessions[selectedIndex];
           appContext.commandCtx?.log(`CommandParameterPopup: selected session: ${selectedSession?.id}`);
           if (selectedSession) onSubmit(selectedSession.id);
+        }
+      }
+    } else if (command === "models") {
+      if (key.upArrow) {
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : Math.max(0, FLAT_MODELS.length - 1)
+        );
+      } else if (key.downArrow) {
+        setSelectedIndex((prev) =>
+          prev < FLAT_MODELS.length - 1 ? prev + 1 : 0
+        );
+      } else if (key.return) {
+        const selected = FLAT_MODELS[selectedIndex];
+        if (selected) {
+          onSubmit(`${selected.providerId}:${selected.model.id}`);
         }
       }
     }
@@ -156,6 +196,52 @@ export function CommandParameterPopup({
           <Box marginTop={1}>
             <Text color={theme.textDim}>
               Use ↑/↓ to navigate · [Enter] to switch · [Esc] to cancel
+            </Text>
+          </Box>
+        </Box>
+      )}
+
+      {command === "models" && (
+        <Box flexDirection="column">
+          <Box marginBottom={1}>
+            <Text color={theme.brandLight} bold>
+              🤖 Select AI Provider & Model
+            </Text>
+          </Box>
+          <Box flexDirection="column">
+            {FLAT_MODELS.map((item, index) => {
+              const isSelected = index === selectedIndex;
+              return (
+                <Box flexDirection="column" key={`${item.providerId}-${item.model.id}`}>
+                  {item.isFirstInGroup && (
+                    <Box marginTop={index === 0 ? 0 : 1}>
+                      <Text color={theme.accent} bold>
+                        {`── ${item.providerName} ──`}
+                      </Text>
+                    </Box>
+                  )}
+                  <Box justifyContent="space-between" width="100%" paddingX={1}>
+                    <Box>
+                      <Text
+                        color={isSelected ? theme.brandLight : theme.textSecondary}
+                        bold={isSelected}
+                      >
+                        {isSelected ? "► " : "  "}
+                        {item.model.name}
+                      </Text>
+                      <Text color={theme.textDim}> ({item.model.id})</Text>
+                    </Box>
+                    <Text color={isSelected ? theme.textPrimary : theme.textDim}>
+                      {Math.round(item.model.contextWindow / 1000)}k ctx
+                    </Text>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+          <Box marginTop={1}>
+            <Text color={theme.textDim}>
+              Use ↑/↓ to navigate · [Enter] to select model · [Esc] to cancel
             </Text>
           </Box>
         </Box>

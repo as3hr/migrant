@@ -1,7 +1,7 @@
 import { generateText, Output } from "ai";
 import { appContext, type CommandContext } from "../../domain/index.ts";
 import { openRouter } from "../../infrastructure/index.ts";
-import { fileService, resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema } from "../../services/index.ts";
+import { resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema } from "../../services/index.ts";
 import { requireAuth } from "./command_helpers.ts";
 
 export async function answerQuestion(
@@ -39,6 +39,9 @@ export async function answerQuestion(
 
       const context = await appContext.services.contextManager.getContext(payload.userPrompt);
 
+      const startTime = Date.now();
+      let thoughtTimeStr = "";
+
       let savedAssistantMsg: any = null;
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
@@ -46,7 +49,11 @@ export async function answerQuestion(
           context,
           appContext.selectedModel.modelId,
           async (result) => {
-              savedAssistantMsg = await appContext.services.memoryService.saveTurnToMemory(result, output.targetAgent);
+              savedAssistantMsg = await appContext.services.memoryService.saveTurnToMemory(
+                  result,
+                  output.targetAgent,
+                  thoughtTimeStr
+              );
           }
       );
         
@@ -54,6 +61,8 @@ export async function answerQuestion(
       for await (const chunk of stream) {
           response += chunk;
           if (firstChunk) {
+              const thoughtMs = Date.now() - startTime;
+              thoughtTimeStr = thoughtMs < 1000 ? `${thoughtMs}ms` : `${(thoughtMs / 1000).toFixed(1)}s`;
               ctx.replaceLast(response);
               firstChunk = false;
           } else {
@@ -62,9 +71,14 @@ export async function answerQuestion(
       }
 
       if (savedAssistantMsg && ctx.replaceLastWithItem) {
-          ctx.replaceLastWithItem({ type: "assistant", content: savedAssistantMsg });
+          ctx.replaceLastWithItem({
+              type: "assistant",
+              content: {
+                  ...savedAssistantMsg,
+                  thought_time: thoughtTimeStr || savedAssistantMsg.thought_time,
+              },
+          });
       }
-      await fileService.writeDataToFile(response, `./logs/answer.txt`);
     } catch (error: any) {
         ctx.error(`${error}`);
     }

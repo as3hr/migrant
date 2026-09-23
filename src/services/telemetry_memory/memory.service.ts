@@ -9,7 +9,8 @@ import { appEmitter } from "../../utils/emitter.ts";
 export class MemoryService {
     async saveTurnToMemory(
         response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>,
-        targetAgent?: string
+        targetAgent?: string,
+        thoughtTime?: string
     ): Promise<IChatMessageModel | undefined> {
         try {
             const user = await appContext.services.authService.getCurrentUser();
@@ -41,6 +42,7 @@ export class MemoryService {
                 completion_tokens: completionTokens,
                 total_tokens: totalTokens,
                 cost_usd: cost,
+                ...(thoughtTime !== undefined ? { thought_time: thoughtTime } : {}),
                 created_at: new Date(now).toISOString(),
             };
 

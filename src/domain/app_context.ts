@@ -9,7 +9,9 @@ import {
     MemoryService,
     RagService
 } from "../services/index.ts";
-import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, sessionsCommand } from "../ui/commands/index.ts";
+import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../ui/commands/index.ts";
+import { credentialStore } from "../infrastructure/security/credential_store.ts";
+import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { appEmitter } from "../utils/emitter.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
@@ -43,33 +45,46 @@ class AppContext {
 
     private constructor(
         providerSdk: ProviderSDK,
-        services: AppServices
+        services: AppServices,
+        initialModel: ProviderModel
     ) {
         this.providerSdk = providerSdk;
+        this.services = services;
+        this.selectedModel = initialModel;
         this.commandRegistry = this.buildCommandRegistry();
         this.workspace = new WorkSpace();
-        this.services = services;
-        this.selectedModel = {
-            modelId: SYS_DEFAULT_MODEL,
-            providerId: "openrouter",
-        }
     }
 
     static async create(): Promise<AppContext> {
-        const providerSdk = await setProvider(
-            "openrouter",
-            appConfig.openRouterApiKey
-        );
+        let providerId: ProviderId = "openrouter";
+        let modelId = SYS_DEFAULT_MODEL;
+        let apiKey: string | null = null;
+
+        const savedProvider = tblProvider.getActiveProvider();
+        if (savedProvider) {
+            apiKey = await credentialStore.get(savedProvider.api_key_env);
+            if (apiKey) {
+                providerId = savedProvider.id;
+            }
+        }
+
+        if (!apiKey) {
+            apiKey = appConfig.openRouterApiKey;
+            providerId = "openrouter";
+        }
+
+        const providerSdk = await setProvider(providerId, apiKey);
         const services = this.createServices();
         const user = await services.authService.getCurrentUser();
-        if (user) {
+        if (user && providerId === "openrouter") {
             setProviderToLocal("openrouter", "OPENROUTER_API_KEY", user.id);
         }
-        appEmitter.emit('update-model', {
-            model: SYS_DEFAULT_MODEL,
-        })
 
-        return new AppContext(providerSdk, services);
+        appEmitter.emit('update-model', {
+            model: modelId,
+        });
+
+        return new AppContext(providerSdk, services, { modelId, providerId });
     }
 
     setCurrentChatSessionId(sessionId: string) {
@@ -92,6 +107,7 @@ class AppContext {
       registry.register(exitCommand);
       registry.register(logoutCommand);
       registry.register(sessionsCommand);
+      registry.register(modelsCommand);
       registry.register(createHelpCommand(registry));
     
       return registry;

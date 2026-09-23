@@ -19,7 +19,12 @@ export function Output({ item }: { item: OutputItem }): JSX.Element {
       return <UserMessageCard prompt={item.content.content} />;
 
     case "assistant":
-      return <AssistantMessageCard response={item.content.content} />;
+      return (
+        <AssistantMessageCard
+          response={item.content.content}
+          thoughtTime={item.content.thought_time}
+        />
+      );
 
     case "stream":
       return <AssistantMessageCard response={item.content} />;

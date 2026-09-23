@@ -1,7 +1,7 @@
 import type { ProviderId } from "../../index.ts";
 import { sqlClient } from "./sqlite.client.ts";
 
-interface IProvider {
+export interface IProvider {
     id: ProviderId;
     user_id: string;
     api_key_env: string;
@@ -16,14 +16,9 @@ class TblProvider {
         sqlClient.run(`
           CREATE TABLE IF NOT EXISTS providers (
             id TEXT PRIMARY KEY,
-            userId TEXT,
-            name TEXT,
-            connectionStringKey TEXT,
-            schemaFingerprint TEXT,
-            type TEXT,
-            lastScannedAt DATETIME,
-            indexStatus TEXT,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            user_id TEXT NOT NULL,
+            api_key_env TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
           );
         `);
 
@@ -44,6 +39,11 @@ class TblProvider {
     
     getProvider(providerId: ProviderId) { 
         return this.selectProviderStmt.get(providerId) as IProvider | undefined;
+    }
+
+    getActiveProvider(): IProvider | undefined {
+        const row = sqlClient.prepare('SELECT * FROM providers LIMIT 1').get();
+        return row as IProvider | undefined;
     }
 
     deleteProvider(providerId: ProviderId): boolean {

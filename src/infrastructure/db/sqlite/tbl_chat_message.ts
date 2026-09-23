@@ -15,8 +15,9 @@ export interface IChatMessageModel {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
+    thought_time?: string;
     created_at: string;
-};
+}
 
 class TblChatMessage {
     private chatMessageInsertStmt: any;
@@ -37,11 +38,12 @@ class TblChatMessage {
                 completion_tokens BIGINT NOT NULL DEFAULT 0,
                 total_tokens BIGINT NOT NULL DEFAULT 0,
                 cost_usd REAL NOT NULL DEFAULT 0.0,
+                thought_time TEXT NOT NULL DEFAULT '',
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
         `);
         this.chatMessageInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO tbl_chat_messages (id, user_id, session_id, content, provider, role, model_name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT OR REPLACE INTO tbl_chat_messages (id, user_id, session_id, content, provider, role, model_name, target_agent, prompt_tokens, completion_tokens, total_tokens, cost_usd, thought_time, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         this.chatMessageSelectStmt = sqlClient.prepare(
             'SELECT * FROM tbl_chat_messages WHERE session_id = ?'
@@ -62,6 +64,7 @@ class TblChatMessage {
             message.completion_tokens,
             message.total_tokens,
             message.cost_usd,
+            message.thought_time ?? '',
             message.created_at
         );
         return info.changes > 0;

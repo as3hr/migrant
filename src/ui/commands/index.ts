@@ -5,4 +5,5 @@ export * from "./exit.command.ts";
 export * from "./help.command.ts";
 export * from "./login.command.ts";
 export * from "./logout.command.ts";
+export * from "./models.command.ts";
 export * from "./sessions.command.ts";
