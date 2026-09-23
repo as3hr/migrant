@@ -1,9 +1,11 @@
 import { sqlClient } from "./sqlite.client.ts";
 
+export type MessageRole = 'assistant' | 'user' | 'system' | 'tool_code' | 'tool_output';
+
 export interface IChatMessageModel {
     id: string;
     user_id: string;
-    role: string;
+    role: MessageRole;
     content: string;
     session_id: string;
     provider: string;

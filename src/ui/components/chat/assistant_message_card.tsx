@@ -5,13 +5,11 @@ import { MarkdownRenderer } from "./markdown_renderer.tsx";
 
 export interface AssistantMessageCardProps {
   response: string;
-  modelName?: string | undefined;
   thoughtTime?: string | undefined;
 }
 
 export function AssistantMessageCard({
   response,
-  modelName = "deepseek-chat",
   thoughtTime = "1.4s",
 }: AssistantMessageCardProps): JSX.Element {
   const accentIndex = Math.abs(response.length) % theme.thinkingAccents.length;
@@ -45,7 +43,7 @@ export function AssistantMessageCard({
       {/* Card Header */}
       <Box justifyContent="space-between" marginBottom={1}>
         <Text color={theme.brandLight} bold>
-          ◆ Migrant Intelligence [{modelName}]
+          ◆ Migrant Intelligence
         </Text>
         {thoughtTime ? (
           <Text color={accentColor} bold>+ Thought: {thoughtTime}</Text>

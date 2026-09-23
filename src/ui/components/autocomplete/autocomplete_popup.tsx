@@ -52,20 +52,23 @@ export function AutocompletePopup({
 }: AutocompletePopupProps): JSX.Element | null {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const searchQuery = input.startsWith("/")
+  const isSlashInput = input.startsWith("/");
+  const searchQuery = isSlashInput
     ? input.slice(1).trim().toLowerCase()
     : "";
 
-  const filteredCommands = SLASH_COMMANDS.filter((cmd) =>
-    cmd.name.toLowerCase().startsWith(searchQuery)
-  );
+  const filteredCommands = isSlashInput
+    ? SLASH_COMMANDS.filter((cmd) =>
+        cmd.name.toLowerCase().startsWith(searchQuery)
+      )
+    : [];
 
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchQuery]);
 
   useEffect(() => {
-    if (input.startsWith("/") && filteredCommands.length > 0) {
+    if (isSlashInput && filteredCommands.length > 0) {
       const selected = filteredCommands[selectedIndex];
       if (selected) {
         onHighlight?.(`/${selected.name} `);
@@ -75,28 +78,31 @@ export function AutocompletePopup({
     } else {
       onHighlight?.(null);
     }
-  }, [input, selectedIndex, filteredCommands.length]);
+  }, [input, selectedIndex, filteredCommands.length, isSlashInput]);
 
-  useInput((_, key) => {
-    if (!filteredCommands.length) return;
+  useInput(
+    (_, key) => {
+      if (!filteredCommands.length) return;
 
-    if (key.upArrow) {
-      setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCommands.length - 1
-      );
-    } else if (key.downArrow) {
-      setSelectedIndex((prev) =>
-        prev < filteredCommands.length - 1 ? prev + 1 : 0
-      );
-    } else if (key.tab || key.return) {
-      const selected = filteredCommands[selectedIndex];
-      if (selected) {
-        onSelect(`/${selected.name} `);
+      if (key.upArrow) {
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredCommands.length - 1
+        );
+      } else if (key.downArrow) {
+        setSelectedIndex((prev) =>
+          prev < filteredCommands.length - 1 ? prev + 1 : 0
+        );
+      } else if (key.tab || key.return) {
+        const selected = filteredCommands[selectedIndex];
+        if (selected) {
+          onSelect(`/${selected.name} `);
+        }
+      } else if (key.escape) {
+        onClose?.();
       }
-    } else if (key.escape) {
-      onClose?.();
-    }
-  });
+    },
+    { isActive: isSlashInput && filteredCommands.length > 0 }
+  );
 
   if (!input.startsWith("/") || filteredCommands.length === 0) {
     return null;

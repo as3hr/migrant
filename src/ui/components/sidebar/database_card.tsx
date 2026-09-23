@@ -29,7 +29,7 @@ export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCar
       {/* Connected Databases Section */}
       <Box flexDirection="column">
         <Text color={theme.brand} bold>
-          🗄 Connected Databases
+          🗄  Connected Databases
         </Text>
 
         {databases.length === 0 ? (
@@ -40,7 +40,7 @@ export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCar
           <Box flexDirection="column" marginTop={1}>
             {databases.map((dbName) => (
               <Box key={dbName}>
-                <Text color={theme.success}>● </Text>
+                <Text color={theme.success}>●  </Text>
                 <Text color={theme.textPrimary} bold>{dbName}</Text>
               </Box>
             ))}

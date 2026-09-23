@@ -1,4 +1,4 @@
-export const SYS_DEFAULT_MODEL = 'deepseek/deepseek-chat';
+export const SYS_DEFAULT_MODEL = 'deepseek-v4-flash';
 
 export const SYS_DEFAULT_EMBEDDING_MODEL = 'text-embedding-3-small';
 

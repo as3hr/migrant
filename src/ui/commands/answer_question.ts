@@ -30,16 +30,21 @@ export async function answerQuestion(
 
       if (!payload) return;
 
-        await appContext.services.memoryService.ensureActiveSession(question);
+      const userMessage = await appContext.services.memoryService.ensureActiveSession(question);
+      if (userMessage && ctx.output) {
+        ctx.output({ type: "user", content: userMessage });
+      }
+
       const context = await appContext.services.contextManager.getContext(payload.userPrompt);
 
+      let savedAssistantMsg: any = null;
       let response = "";
       const stream = appContext.services.llmService.streamLlm(
           payload.systemPrompt,
           context,
           appContext.selectedModel.modelId,
-          (result) => {
-              appContext.services.memoryService.saveTurnToMemory(result, output.targetAgent);
+          async (result) => {
+              savedAssistantMsg = await appContext.services.memoryService.saveTurnToMemory(result, output.targetAgent);
           }
       );
         
@@ -47,11 +52,15 @@ export async function answerQuestion(
       for await (const chunk of stream) {
           response += chunk;
           if (firstChunk) {
-              ctx.log(response);
+              ctx.replaceLast(response);
               firstChunk = false;
           } else {
               ctx.replaceLast(response);
           }
+      }
+
+      if (savedAssistantMsg && ctx.replaceLastWithItem) {
+          ctx.replaceLastWithItem({ type: "assistant", content: savedAssistantMsg });
       }
       await fileService.writeDataToFile(response, `./logs/answer.txt`);
     } catch (error: any) {

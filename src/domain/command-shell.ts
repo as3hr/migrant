@@ -22,6 +22,8 @@ export interface CommandDefinition {
     ask(label: string, options?: AskOptions): Promise<string>;
     log(text: string): void;
     replaceLast(text: string): void;
+    replaceLastWithItem?(item: any): void;
+    output?(item: any): void;
     success(text: string): void;
     error(text: string): void;
     clear(): void;

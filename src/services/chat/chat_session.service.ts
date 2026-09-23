@@ -1,5 +1,6 @@
 import { appContext } from "../../domain/index.ts";
 import { tblChatMessage, tblChatSessions, type IChatMessageModel, type IChatSessionsModel } from "../../infrastructure/index.ts";
+import { appEmitter } from "../../utils/index.ts";
 
 export class ChatSessionService {
 
@@ -33,5 +34,17 @@ export class ChatSessionService {
 
     async getSession(sessionId: string): Promise<IChatSessionsModel | undefined> {
         return tblChatSessions.getChatSessionById(sessionId);
+    }
+
+    async switchSession(sessionId: string): Promise<IChatSessionsModel | undefined> {
+        const session = tblChatSessions.getChatSessionById(sessionId);
+        if (session) {
+            appContext.currentChatSessionId = session.id;
+            appEmitter.emit('update-session', {
+                updatedSession: session,
+                isSwitch: true,
+            });
+        }
+        return session;
     }
 }

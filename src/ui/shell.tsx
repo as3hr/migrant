@@ -45,12 +45,10 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     activeModel,
   } = useShell(onExit);
 
-  
   const listRef = useRef<ScrollListRef>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [session, setCurrentSession] = useState<IChatSessionsModel>();
   
-
   useEffect(() => {
     const activeSessionId = appContext.currentChatSessionId;
     if (activeSessionId) {
@@ -102,9 +100,11 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   const isHeroView = outputs.length <= 2 && run.kind === "idle";
   const activeDb = databases?.[0];
   
+  const availableWidth = Math.max(20, dimensions.width - 4);
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
-  const mainWidth = dimensions.width - (isHeroView ? 0 : sidebarWidth);
+  const mainWidth = availableWidth - (isHeroView ? 0 : sidebarWidth);
   const atBottom = selectedIndex >= totalItems - 1;
+
 
   if (auth.authStatus === "checking") {
     return <AuthCheckingView />;
@@ -141,10 +141,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           backgroundColor={theme.bgCanvas}
         >
           <HeroLogo />
-
-          <Box marginBottom={1}>
-            <Text color={theme.accent}>[Schema RAG · DeepSeek V3]</Text>
-          </Box>
 
           <Box width={Math.min(80, dimensions.width - 4)}>
             {activePopup ? (
@@ -219,7 +215,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
             </Box>
 
             <Box width={mainWidth} flexShrink={0}>
-              {activePopup ? (
+              {activePopup != null ? (
                 <CommandParameterPopup
                   command={activePopup}
                   onSubmit={handleParameterSubmit}
@@ -227,7 +223,8 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
                   databases={databases}
                   sessions={sessions}
                 />
-              ) : run.kind === "idle" ? (
+                ) :
+                  run.kind === "idle" ? (
                 <Prompt
                   value={input}
                   onChange={setInput}
@@ -264,7 +261,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
 
 
      <StatusBar
-        cwd={process.cwd()}
         activeDb={activeDb}
         modelName={activeModel}
         version="1.0.0"

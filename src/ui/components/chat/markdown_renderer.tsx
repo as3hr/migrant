@@ -41,10 +41,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps): JSX.Elemen
         }
 
         return (
-          <Text key={idx} color={theme.textPrimary}>
+          <Text key={idx} color={theme.textPrimary} wrap="wrap">
             {block.text}
           </Text>
         );
+
       })}
     </Box>
   );

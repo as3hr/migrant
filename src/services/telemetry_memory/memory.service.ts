@@ -3,18 +3,18 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "node:vm";
 import { appContext } from "../../domain/index.ts";
 import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure/index.ts";
-import { tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
+import { getModelById, tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
 import { appEmitter } from "../../utils/emitter.ts";
 
 export class MemoryService {
     async saveTurnToMemory(
         response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>,
         targetAgent?: string
-    ) {
+    ): Promise<IChatMessageModel | undefined> {
         try {
             const user = await appContext.services.authService.getCurrentUser();
             const sessionId = appContext.currentChatSessionId;
-            if (!user || !sessionId) return;
+            if (!user || !sessionId) return undefined;
 
             const promptTokens = response.usage.inputTokens ?? 0;
             const completionTokens = response.usage.outputTokens ?? 0;
@@ -58,27 +58,27 @@ export class MemoryService {
                 appEmitter.emit('update-session', {
                     updatedSession,
                 });
-
             }
+            return assistantMessage;
         } catch (error) {
             console.error("Error saving chat memory:", error);
+            return undefined;
         }
     }
 
-    async ensureActiveSession(question: string) {
+    async ensureActiveSession(question: string): Promise<IChatMessageModel | undefined> {
         const user = await appContext.services.authService.getCurrentUser();
-        if (!user) return;
+        if (!user) return undefined;
 
         let sessionId = appContext.currentChatSessionId;
         if (!sessionId) {
-            const title = await appContext.services.llmService.generateTitle(question);
-
-            const tokenLimit = appContext.services.contextManager.getHistoryTokenBudget(appContext.selectedModel.modelId);
+            const fallbackTitle = "Untitled Session";
+            const tokenLimit = getModelById(appContext.selectedModel.modelId)?.contextWindow ?? 0;
 
             const newSession: IChatSessionsModel = {
                 id: randomUUID(),
                 user_id: user.id,
-                title: title,
+                title: fallbackTitle,
                 session_token_limit: tokenLimit,
                 session_token_used: 0,
                 created_at: new Date().toISOString(),
@@ -93,8 +93,11 @@ export class MemoryService {
                 appEmitter.emit('update-session', {
                     updatedSession: session,
                 });
+
+                this.generateAndUpdateSessionTitle(question, sessionId);
             }
         }
+
         if (sessionId) {
             const userMessage: IChatMessageModel = {
                 id: randomUUID(),
@@ -112,6 +115,31 @@ export class MemoryService {
                 created_at: new Date().toISOString(),
             };
             tblChatMessage.setChatMessage(userMessage);
+            return userMessage;
         }
+
+        return undefined;
+    }
+
+    generateAndUpdateSessionTitle(question: string, sessionId: string) {
+        void appContext.services.llmService.generateTitle(question).then((generatedTitle) => {
+            if (generatedTitle) {
+                const existing = tblChatSessions.getChatSessionById(sessionId);
+                if (existing) {
+                    const updated = tblChatSessions.setChatSession({
+                        ...existing,
+                        title: generatedTitle,
+                        updated_at: new Date().toISOString(),
+                    });
+                    if (updated) {
+                        appEmitter.emit('update-session', {
+                            updatedSession: updated,
+                        });
+                    }
+                }
+            }
+        }).catch((err) => {
+            console.error("Error generating session title in background:", err);
+        });
     }
 }

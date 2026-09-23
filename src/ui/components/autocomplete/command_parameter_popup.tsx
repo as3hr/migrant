@@ -2,6 +2,7 @@ import { Box, Text, useInput } from "ink";
 import TextInput from "ink-text-input";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
+import { appContext } from "../../../domain/app_context.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
 
@@ -48,6 +49,7 @@ export function CommandParameterPopup({
       } else if (key.return) {
         if (activeSessions.length > 0) {
           const selectedSession = activeSessions[selectedIndex];
+          appContext.commandCtx?.log(`CommandParameterPopup: selected session: ${selectedSession?.id}`);
           if (selectedSession) onSubmit(selectedSession.id);
         }
       }

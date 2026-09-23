@@ -67,10 +67,18 @@ export function useShell(onExit: () => void): UseShellReturn {
 
   const replaceLast = (text: string) =>
     setOutputs((prev) => {
-      if (prev.length === 0) return [{ type: "text", text }];
+      if (prev.length === 0) return [{ type: "stream", content: text }];
       const last = prev[prev.length - 1]!;
-      if (last.type === "text") return [...prev.slice(0, -1), { type: "text", text }];
-      return [...prev, { type: "text", text }];
+      if (last.type === "stream") return [...prev.slice(0, -1), { type: "stream", content: text }];
+      return [...prev, { type: "stream", content: text }];
+    });
+
+  const replaceLastWithItem = (item: OutputItem) =>
+    setOutputs((prev) => {
+      if (prev.length === 0) return [item];
+      const last = prev[prev.length - 1]!;
+      if (last.type === "stream") return [...prev.slice(0, -1), item];
+      return [...prev, item];
     });
 
   const startRunning = (label: string) => {
@@ -105,6 +113,8 @@ export function useShell(onExit: () => void): UseShellReturn {
       }),
     log: (text) => append({ type: "text", text }),
     replaceLast,
+    replaceLastWithItem: (item: OutputItem) => replaceLastWithItem(item),
+    output: (item: OutputItem) => append(item),
     success: (text) => append({ type: "success", text }),
     error: (text) => append({ type: "error", text }),
     clear: () => setOutputs([]),
@@ -151,9 +161,9 @@ export function useShell(onExit: () => void): UseShellReturn {
     if (!activePopup) return;
     const cmdName = activePopup;
     setActivePopup(null);
-
     const fullCommand = `/${cmdName} ${paramValue}`;
-    append({ type: "command", line: fullCommand });
+
+    appContext.commandCtx?.log(`handleParameterSubmit: paramValue: ${paramValue}, cmdName: ${cmdName}, activePopup: ${activePopup}, fullCommand: ${fullCommand}`);
     void executeInput(fullCommand);
   };
 
@@ -184,7 +194,6 @@ export function useShell(onExit: () => void): UseShellReturn {
       return;
     }
 
-    append({ type: "command", line: value });
     void executeInput(value);
   };
 
@@ -196,6 +205,27 @@ export function useShell(onExit: () => void): UseShellReturn {
     appEmitter.on('update-model', handler);
     return () => {
       appEmitter.off('update-model', handler);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleUpdateSession = async (data?: { updatedSession?: IChatSessionsModel; isSwitch?: boolean }) => {
+      void refreshStatus();
+      if (data?.isSwitch && data.updatedSession) {
+        const messages = await appContext.services.chatSessionService.getSessionMessages(data.updatedSession.id);
+        const mappedOutputs: OutputItem[] = messages.map((msg) => {
+          if (msg.role === "user") {
+            return { type: "user", content: msg };
+          }
+          return { type: "assistant", content: msg };
+        });
+        setOutputs(mappedOutputs);
+      }
+    };
+
+    appEmitter.on("update-session", handleUpdateSession);
+    return () => {
+      appEmitter.off("update-session", handleUpdateSession);
     };
   }, []);
 

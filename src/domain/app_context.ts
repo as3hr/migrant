@@ -11,6 +11,7 @@ import {
 } from "../services/index.ts";
 import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, sessionsCommand } from "../ui/commands/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
+import { appEmitter } from "../utils/emitter.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
@@ -64,6 +65,9 @@ class AppContext {
         if (user) {
             setProviderToLocal("openrouter", "OPENROUTER_API_KEY", user.id);
         }
+        appEmitter.emit('update-model', {
+            model: SYS_DEFAULT_MODEL,
+        })
 
         return new AppContext(providerSdk, services);
     }

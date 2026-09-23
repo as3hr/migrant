@@ -3,7 +3,6 @@ import type { JSX } from "react";
 import { theme } from "../../theme.ts";
 
 export interface StatusBarProps {
-  cwd?: string | undefined;
   activeDb?: string | undefined;
   modelName?: string | undefined;
   version?: string | undefined;
@@ -11,23 +10,16 @@ export interface StatusBarProps {
 }
 
 export function StatusBar({
-  cwd = process.cwd(),
   activeDb,
   modelName = "deepseek-chat",
   version = "1.0.0",
 }: StatusBarProps): JSX.Element {
-  const displayCwd =
-    cwd.length > 35 ? `...${cwd.slice(cwd.length - 32)}` : cwd;
 
   return (
     <Box
       justifyContent="space-between"
       backgroundColor={theme.bgCanvas}
     >
-      <Box>
-        <Text color={theme.textDim}>{displayCwd}</Text>
-      </Box>
-
       <Box>
         {activeDb ? (
           <Text color={theme.success}>

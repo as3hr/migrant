@@ -14,7 +14,7 @@ export function HeroLogo(): JSX.Element {
         `}
       </Text>
       <Box marginTop={1}>
-        <Text color={theme.textSecondary}>
+        <Text color={theme.accent} bold>
           PostgreSQL Schema Intelligence & Agent System
         </Text>
       </Box>

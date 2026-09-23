@@ -6,12 +6,11 @@ export const sessionsCommand: CommandDefinition = {
   busyLabel: "Switching session...",
   requiresAuth: true,
   execute: async (args, ctx) => {
-    const sessionId = args[0];
+    const sessionId = args;
     if (sessionId) {
-      const session = await appContext.services.chatSessionService.getSession(sessionId);
+      const session = await appContext.services.chatSessionService.switchSession(sessionId);
       if (session) {
-        appContext.setCurrentChatSessionId(session.id);
-        ctx.success(`Switched to chat session: "${session.title}" (${session.id})`);
+        ctx.success(`Switched to session: "${session.title}"`);
       } else {
         ctx.error(`Session not found: ${sessionId}`);
       }
