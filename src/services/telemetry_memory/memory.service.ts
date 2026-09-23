@@ -72,7 +72,7 @@ export class MemoryService {
 
         let sessionId = appContext.currentChatSessionId;
         if (!sessionId) {
-            const fallbackTitle = "Untitled Session";
+            const fallbackTitle = "";
             const tokenLimit = getModelById(appContext.selectedModel.modelId)?.contextWindow ?? 0;
 
             const newSession: IChatSessionsModel = {

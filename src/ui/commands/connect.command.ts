@@ -8,20 +8,16 @@ export const connectCommand: CommandDefinition = {
   description: "Connect and Scan the PostgreSQL database",
   busyLabel: "Connecting...",
   requiresAuth: true,
-  execute: async (_args, ctx) => {
-    await connectDb(ctx);
+  execute: async (args, ctx) => {
+    await connectDb(args, ctx);
   },
 };
 
-async function connectDb(ctx: CommandContext) {
-  const connectionString =
-    (await ctx.ask("Connection String", { placeholder: "postgres://username:password@host:port/database" })).trim() ||
-    "localhost";
-    
+async function connectDb(args: string, ctx: CommandContext) {
+  const connectionString = args;  
   const isDbExists = appContext.workspace.dbExists(connectionString);
   if (isDbExists) {
     ctx.error('This database is already connected!');
-    await connectDb(ctx);
     return;
   }
   
@@ -32,26 +28,10 @@ async function connectDb(ctx: CommandContext) {
 
   try {
     ctx.success(`Connected to ${database}`);
-    await askForMoreConnections(ctx);
   } catch (error) {
     if (db) {
       pool.close(db);
     }
     throw new Error(`Connection failed: ${errorMessage(error)}`);
-  }
-}
-
-async function askForMoreConnections(ctx: CommandContext,) {
-  let userInput = await ctx.ask("Would you like to add more databases?", { placeholder: '[Type Y OR N]' });
-  await checkYorN(ctx, userInput); 
-}
-
-async function checkYorN(ctx: CommandContext, userInput: string) {
-  if(userInput === 'N') {
-    ctx.success("Scanned Available Databases!!");
-  } else if (userInput !== 'Y' && userInput !== 'N') {
-    await askForMoreConnections(ctx);
-  } else {
-    await connectDb(ctx);
   }
 }
