@@ -4,7 +4,7 @@ import { theme } from "../../theme.ts";
 
 export interface SessionOverviewCardProps {
   databases?: string[] | undefined;
-  sessionName: string;
+  sessionName?: string | undefined;
 }
 
 export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCardProps): JSX.Element {
@@ -17,15 +17,17 @@ export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCar
       borderColor={theme.borderPrimary}
     >
       {/* Session Title Section */}
-      <Box flexDirection="column" marginBottom={1}>
-        <Text color={theme.accent} bold>
-          💬 Active Session
-        </Text>
-        <Text color={theme.brandLight} bold wrap="truncate">
-          {sessionName}
-        </Text>
-      </Box>
-
+      {sessionName && (
+        <Box flexDirection="column" marginBottom={1}>
+          <Text color={theme.accent} bold>
+            💬 Active Session
+          </Text>
+          <Text color={theme.brandLight} bold wrap="truncate">
+            {sessionName}
+          </Text>
+        </Box>
+      )}
+      
       {/* Connected Databases Section */}
       <Box flexDirection="column">
         <Text color={theme.brand} bold>

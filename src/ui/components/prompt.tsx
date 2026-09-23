@@ -34,6 +34,7 @@ export function Prompt(props: PromptProps): JSX.Element {
   const handleSelect = (completedText: string) => {
     const cmdName = completedText.trim().replace("/", "") as ParameterCommandType;
     if (PARAM_COMMANDS.includes(cmdName) && props.onTriggerPopup) {
+      props.onChange("");
       props.onTriggerPopup(cmdName);
     } else {
       props.onChange(completedText);
@@ -50,10 +51,12 @@ export function Prompt(props: PromptProps): JSX.Element {
     if (isPartialSlash && !isExactFullCommand && highlightedText) {
       const cmdName = highlightedText.trim().replace("/", "") as ParameterCommandType;
       if (PARAM_COMMANDS.includes(cmdName) && props.onTriggerPopup) {
+        props.onChange("");
         props.onTriggerPopup(cmdName);
         return;
       }
-      props.onChange(highlightedText);
+      props.onChange("");
+      props.onSubmit(highlightedText);
       return;
     }
 

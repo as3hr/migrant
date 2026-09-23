@@ -1,3 +1,4 @@
+import type { User } from "@supabase/supabase-js";
 import { appContext, type CommandContext, type DatabaseCollection } from "../../domain/index.ts";
 import { getSchemaFingerprint } from "../../infrastructure/index.ts";
 import { appMemo } from "../../utils/index.ts";
@@ -19,17 +20,38 @@ interface AgentPayload {
     userPrompt: string;
 }
 
+function buildSystemPromptWithContext(
+    basePrompt: string,
+    user: User | null,
+    databases: string[]
+): string {
+    const userEmail = user?.email || "Not logged in";
+    const userName = user?.email ? user.email.split("@")[0] : "Developer";
+    const dbList = databases.length > 0 ? databases.join(", ") : "None connected";
+
+    return `${basePrompt.trim()}
+
+### Active Environment Context:
+- Talking to User: ${userName} (${userEmail})
+- Connected Databases (${databases.length}): ${dbList}`;
+}
+
 export async function resolveAgentPayload(
     targetAgent: RouterIntent,
     query: string,
-    ctx: CommandContext
+    ctx: CommandContext,
+    user: User | null,
+    databases: string[]
 ): Promise<AgentPayload | null> {
+    const systemPrompt = (basePrompt: string) =>
+        buildSystemPromptWithContext(basePrompt, user, databases);
+
     switch (targetAgent) {
         case "schema-rag": {
             const ragContext = await buildRagContext(query, ctx);
             if (!ragContext) return null;
             return {
-                systemPrompt: SCHEMA_RAG_SYSTEM_PROMPT,
+                systemPrompt: systemPrompt(SCHEMA_RAG_SYSTEM_PROMPT),
                 userPrompt: buildSchemaRagPrompt(query, ragContext),
             };
         }
@@ -38,21 +60,21 @@ export async function resolveAgentPayload(
             const dbOverviewContext = await buildDbOverviewContext(query, ctx);
             if (!dbOverviewContext) return null;
             return {
-                systemPrompt: DB_OVERVIEW_PROMPT,
+                systemPrompt: systemPrompt(DB_OVERVIEW_PROMPT),
                 userPrompt: buildDbOverviewPrompt(query, dbOverviewContext),
             };
         }
 
         case "general-db": {
             return {
-                systemPrompt: GENERAL_DB_SYSTEM_PROMPT,
+                systemPrompt: systemPrompt(GENERAL_DB_SYSTEM_PROMPT),
                 userPrompt: buildGeneralDbPrompt(query),
             };
         }
 
         case "conversational": {
             return {
-                systemPrompt: CONVERSATIONAL_SYSTEM_PROMPT,
+                systemPrompt: systemPrompt(CONVERSATIONAL_SYSTEM_PROMPT),
                 userPrompt: buildConversationalPrompt(query),
             };
         }

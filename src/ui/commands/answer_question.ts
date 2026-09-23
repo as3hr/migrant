@@ -25,8 +25,10 @@ export async function answerQuestion(
           maxOutputTokens: 200,
           prompt: question,
       });
+        const user = await appContext.services.authService.getCurrentUser();
+        const databases = appContext.workspace.activeDbs.map((db) => db.name);  
 
-      const payload = await resolveAgentPayload(output.targetAgent, question, ctx);
+        const payload = await resolveAgentPayload(output.targetAgent, question, ctx, user, databases);
 
       if (!payload) return;
 

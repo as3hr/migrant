@@ -87,7 +87,13 @@ export function useShell(onExit: () => void): UseShellReturn {
     }
   }, [chatOutputs.outputs.length]);
 
+  const openPopup = (type: ParameterCommandType) => {
+    commandExecutor.setInput("");
+    popupState.openPopup(type);
+  };
+
   const handleParameterSubmit = (paramValue: string) => {
+    commandExecutor.setInput("");
     popupState.handleParameterSubmit(paramValue, (fullCommand) => {
       if (fullCommand.startsWith("/sessions")) {
         setViewMode("chat");
@@ -108,7 +114,7 @@ export function useShell(onExit: () => void): UseShellReturn {
     currentSession: workspaceStatus.currentSession,
     activeModel: workspaceStatus.activeModel,
     activePopup: popupState.activePopup,
-    openPopup: popupState.openPopup,
+    openPopup,
     closePopup: popupState.closePopup,
     handleParameterSubmit,
     spinnerVisible: commandExecutor.spinnerVisible,

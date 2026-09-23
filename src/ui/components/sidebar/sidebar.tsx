@@ -20,7 +20,7 @@ export function Sidebar({
 
   return (
     <Box flexDirection="column" width={width} paddingLeft={1} backgroundColor={theme.bgCanvas}>
-      <DatabaseCard databases={databases} sessionName={session?.title || "Untitled Session"} />
+      <DatabaseCard databases={databases} sessionName={session?.title} />
       <TelemetryCard
         tokensUsed={session?.session_token_used || 0}
         maxTokens={session?.session_token_limit || 0}
