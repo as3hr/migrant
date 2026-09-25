@@ -28,6 +28,7 @@ export interface MainChatViewProps {
   databases?: string[] | undefined;
   sessions: IChatSessionsModel[];
   session?: IChatSessionsModel | undefined;
+  activeModel?: string | undefined;
   input: string;
   onChangeInput: (value: string) => void;
   onSubmitInput: (value: string) => void;
@@ -52,6 +53,7 @@ export function MainChatView({
   databases,
   sessions,
   session,
+  activeModel,
   input,
   onChangeInput,
   onSubmitInput,
@@ -139,6 +141,7 @@ export function MainChatView({
       <Sidebar
         databases={databases}
         session={session}
+        activeModel={activeModel}
         width={sidebarWidth}
       />
     </Box>

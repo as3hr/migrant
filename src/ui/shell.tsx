@@ -24,6 +24,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     databases,
     sessions,
     currentSession,
+    activeModel,
     activePopup,
     openPopup,
     closePopup,
@@ -103,6 +104,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           databases={databases}
           sessions={sessions}
           session={currentSession}
+          activeModel={activeModel}
           input={input}
           onChangeInput={setInput}
           onSubmitInput={handleSubmit}

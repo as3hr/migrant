@@ -19,7 +19,9 @@ export function useWorkspaceStatus(auth: UseAuthReturn): UseWorkspaceStatusRetur
   const [databases, setDatabases] = useState<string[]>();
   const [sessions, setSessions] = useState<IChatSessionsModel[]>([]);
   const [currentSession, setCurrentSession] = useState<IChatSessionsModel>();
-  const [activeModel, setActiveModel] = useState<string>(SYS_DEFAULT_MODEL);
+  const [activeModel, setActiveModel] = useState<string>(
+    appContext.selectedModel?.modelId || SYS_DEFAULT_MODEL
+  );
 
   const refreshStatus = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
