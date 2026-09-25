@@ -1,12 +1,10 @@
-import { Box, Text } from "ink";
-import TextInput from "ink-text-input";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { useEffect, useState } from "react";
 import { theme } from "../theme.ts";
 import { AutocompletePopup, SLASH_COMMANDS } from "./autocomplete/autocomplete_popup.tsx";
 import type { ParameterCommandType } from "./popups/index.ts";
 
-interface PromptProps {
+export interface PromptProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
@@ -22,7 +20,7 @@ interface PromptProps {
 
 const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions", "models"];
 
-export function Prompt(props: PromptProps): JSX.Element {
+export function Prompt(props: PromptProps) {
   const placeholder = props.placeholder ?? "Ask anything about your schema...";
   const [highlightedText, setHighlightedText] = useState<string | null>(null);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -64,7 +62,7 @@ export function Prompt(props: PromptProps): JSX.Element {
   };
 
   return (
-    <Box flexDirection="column" width="100%" marginBottom={1}>
+    <box style={{ flexDirection: "column", width: "100%", marginBottom: 1 }}>
       {!isDismissed && (
         <AutocompletePopup
           input={props.value}
@@ -73,22 +71,34 @@ export function Prompt(props: PromptProps): JSX.Element {
           onClose={() => setIsDismissed(true)}
         />
       )}
-      <Box
-        width="100%"
-        backgroundColor={theme.borderPrimary}
-        paddingX={1}
-        paddingY={1}
+      <box
+        style={{
+          width: "100%",
+          backgroundColor: theme.borderPrimary,
+          paddingLeft: 1,
+          paddingRight: 1,
+          paddingTop: 1,
+          paddingBottom: 1,
+          flexDirection: "row",
+          alignItems: "center",
+        }}
       >
-        <Text color={"white"} bold>{"❯ "}</Text>
-        <TextInput
+        <text style={{ fg: "white" }}>
+          <strong>{"❯ "}</strong>
+        </text>
+        <input
+          style={{ flexGrow: 1 }}
+          textColor={theme.textPrimary}
           value={props.value}
-          focus
+          focused
           onChange={props.onChange}
-          onSubmit={handleSubmit}
+          onSubmit={(val: any) => {
+            const finalVal = typeof val === "string" ? val : props.value;
+            handleSubmit(finalVal);
+          }}
           placeholder={placeholder}
-          {...(props.mask !== undefined ? { mask: props.mask } : {})}
         />
-      </Box>
-    </Box>
+      </box>
+    </box>
   );
 }

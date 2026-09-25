@@ -1,53 +1,52 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 
 export interface MarkdownRendererProps {
   content: string;
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps): JSX.Element {
-  if (!content) return <Text color={theme.textDim}>...</Text>;
+export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  if (!content) return <text style={{ fg: theme.textDim }}>...</text>;
 
   const blocks = parseMarkdownBlocks(content);
 
   return (
-    <Box flexDirection="column" gap={1}>
+    <box style={{ flexDirection: "column", gap: 1 }}>
       {blocks.map((block, idx) => {
         if (block.type === "code") {
           return (
-            <Box
+            <box
               key={idx}
-              flexDirection="column"
-              paddingX={1}
-              paddingY={0}
+              style={{
+                flexDirection: "column",
+                paddingLeft: 1,
+                paddingRight: 1,
+              }}
             >
-              <Box justifyContent="space-between" marginBottom={0}>
-                <Text color={theme.brandLight} bold>
-                  [{block.language ? block.language.toUpperCase() : "SQL"}]
-                </Text>
-              </Box>
-              <Text color={theme.accent}>{block.code}</Text>
-            </Box>
+              <box style={{ justifyContent: "space-between", marginBottom: 0 }}>
+                <text style={{ fg: theme.brandLight }}>
+                  <strong>[{block.language ? block.language.toUpperCase() : "SQL"}]</strong>
+                </text>
+              </box>
+              <text style={{ fg: theme.accent }} content={block.code} />
+            </box>
           );
         }
 
         if (block.type === "table") {
           return (
-            <Box key={idx} flexDirection="column" marginY={0}>
-              <Text color={theme.brandLight}>{block.rawTable}</Text>
-            </Box>
+            <box key={idx} style={{ flexDirection: "column" }}>
+              <text style={{ fg: theme.brandLight }} content={block.rawTable} />
+            </box>
           );
         }
 
         return (
-          <Text key={idx} color={theme.textPrimary} wrap="wrap">
-            {block.text}
-          </Text>
+          <text key={idx} style={{ fg: theme.textPrimary }} wrapMode="word" content={block.text} />
         );
 
       })}
-    </Box>
+    </box>
   );
 }
 

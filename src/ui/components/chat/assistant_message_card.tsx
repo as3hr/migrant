@@ -1,5 +1,4 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 import { MarkdownRenderer } from "./markdown_renderer.tsx";
 
@@ -11,7 +10,7 @@ export interface AssistantMessageCardProps {
 export function AssistantMessageCard({
   response,
   thoughtTime,
-}: AssistantMessageCardProps): JSX.Element {
+}: AssistantMessageCardProps) {
   const accentIndex = Math.abs(response.length) % theme.thinkingAccents.length;
   const accentColor = theme.thinkingAccents[accentIndex] ?? theme.accent;
 
@@ -19,39 +18,45 @@ export function AssistantMessageCard({
 
   if (isRoutingLog) {
     return (
-      <Box
-        flexDirection="row"
-        paddingX={1}
-        paddingY={0}
-        marginBottom={1}
+      <box
+        style={{
+          flexDirection: "row",
+          paddingLeft: 1,
+          paddingRight: 1,
+          marginBottom: 1,
+        }}
       >
-        <Text color={accentColor} bold>
-          ⚡ LOG:{" "}
-        </Text>
-        <Text color={theme.textPrimary}>{response}</Text>
-      </Box>
+        <text style={{ fg: accentColor }}>
+          <strong>⚡ LOG:{" "}</strong>
+        </text>
+        <text style={{ fg: theme.textPrimary }} content={response} />
+      </box>
     );
   }
 
   return (
-    <Box
-      flexDirection="column"
-      paddingX={1}
-      paddingY={0}
-      marginBottom={1}
+    <box
+      style={{
+        flexDirection: "column",
+        paddingLeft: 1,
+        paddingRight: 1,
+        marginBottom: 1,
+      }}
     >
       {/* Card Header */}
-      <Box justifyContent="space-between" marginBottom={1}>
-        <Text color={theme.brandLight} bold>
-          ◆ Migrant Intelligence
-        </Text>
+      <box style={{ justifyContent: "space-between", marginBottom: 1 }}>
+        <text style={{ fg: theme.brandLight }}>
+          <strong>◆ Migrant Intelligence</strong>
+        </text>
         {thoughtTime ? (
-          <Text color={accentColor} bold>+ Thought: {thoughtTime}</Text>
+          <text style={{ fg: accentColor }}>
+            <strong>+ Thought: {thoughtTime}</strong>
+          </text>
         ) : null}
-      </Box>
+      </box>
 
       {/* Rendered Markdown Body */}
       <MarkdownRenderer content={response} />
-    </Box>
+    </box>
   );
 }

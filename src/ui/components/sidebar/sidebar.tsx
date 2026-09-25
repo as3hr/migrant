@@ -1,4 +1,4 @@
-import { Box } from "ink";
+/** @jsxImportSource @opentui/react */
 import type { JSX } from "react";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
@@ -18,9 +18,16 @@ export function Sidebar({
   session,
   activeModel,
   width = 34,
-}: SidebarProps): JSX.Element {
+}: SidebarProps) {
   return (
-    <Box flexDirection="column" width={width} paddingLeft={1} backgroundColor={theme.bgCanvas}>
+    <box
+      style={{
+        flexDirection: "column",
+        width,
+        paddingLeft: 1,
+        backgroundColor: theme.bgCanvas,
+      }}
+    >
       <DatabaseCard databases={databases} sessionName={session?.title} />
       <TelemetryCard
         activeModel={activeModel}
@@ -28,6 +35,6 @@ export function Sidebar({
         maxTokens={session?.session_token_limit || 0}
       />
       <ShortcutsCard />
-    </Box>
+    </box>
   );
 }

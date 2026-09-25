@@ -1,33 +1,34 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 
 export interface UserMessageCardProps {
   prompt: string;
 }
 
-export function UserMessageCard({ prompt }: UserMessageCardProps): JSX.Element {
+export function UserMessageCard({ prompt }: UserMessageCardProps) {
   return (
-    <Box
-      flexDirection="column"
-      paddingX={1}
-      paddingY={0}
-      marginBottom={1}
+    <box
+      style={{
+        flexDirection: "column",
+        paddingLeft: 1,
+        paddingRight: 1,
+        marginBottom: 1,
+      }}
     >
-      <Box justifyContent="space-between" marginBottom={0}>
-        <Text color={theme.brandLight} bold>
-          ❯ USER PROMPT
-        </Text>
-      </Box>
+      <box style={{ justifyContent: "space-between", marginBottom: 0 }}>
+        <text style={{ fg: theme.brandLight }}>
+          <strong>❯ USER PROMPT</strong>
+        </text>
+      </box>
 
-      <Box marginTop={0}>
-        <Text color={theme.brandLight} bold>
-          {"> "}
-        </Text>
-        <Text color={theme.textPrimary} bold>
-          {prompt}
-        </Text>
-      </Box>
-    </Box>
+      <box style={{ marginTop: 0 }}>
+        <text style={{ fg: theme.brandLight }}>
+          <strong>{"> "}</strong>
+        </text>
+        <text style={{ fg: theme.textPrimary }}>
+          <strong>{prompt}</strong>
+        </text>
+      </box>
+    </box>
   );
 }

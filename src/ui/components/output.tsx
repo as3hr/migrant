@@ -1,5 +1,4 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import type { IChatMessageModel } from "../../infrastructure/index.ts";
 import { theme } from "../theme.ts";
 import { AssistantMessageCard } from "./chat/assistant_message_card.tsx";
@@ -13,7 +12,7 @@ export type OutputItem = { type: "stream"; id?: string; content: string }
   | { type: "error"; text: string }
   | { type: "blank" };
 
-export function Output({ item }: { item: OutputItem }): JSX.Element {
+export function Output({ item }: { item: OutputItem }) {
   switch (item.type) {
     case "user":
       return <UserMessageCard prompt={item.content.content} />;
@@ -31,28 +30,28 @@ export function Output({ item }: { item: OutputItem }): JSX.Element {
 
     case "text":
       return (
-        <Box paddingX={1}>
-          <Text color={theme.textPrimary}>{item.text}</Text>
-        </Box>
+        <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+          <text style={{ fg: theme.textPrimary }}>{item.text}</text>
+        </box>
       );
 
     case "success":
       return (
-        <Box paddingX={1}>
-          <Text color={theme.success}>{"✓ "}</Text>
-          <Text color={theme.textPrimary}>{item.text}</Text>
-        </Box>
+        <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+          <text style={{ fg: theme.success }}>{"✓ "}</text>
+          <text style={{ fg: theme.textPrimary }}>{item.text}</text>
+        </box>
       );
 
     case "error":
       return (
-        <Box paddingX={1}>
-          <Text color={theme.error}>{"✗ "}</Text>
-          <Text color={theme.textPrimary}>{item.text}</Text>
-        </Box>
+        <box style={{ paddingLeft: 1, paddingRight: 1 }}>
+          <text style={{ fg: theme.error }}>{"✗ "}</text>
+          <text style={{ fg: theme.textPrimary }}>{item.text}</text>
+        </box>
       );
 
     case "blank":
-      return <Text> </Text>;
+      return <text> </text>;
   }
 }

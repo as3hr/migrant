@@ -1,5 +1,4 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 
 export interface SessionOverviewCardProps {
@@ -7,48 +6,55 @@ export interface SessionOverviewCardProps {
   sessionName?: string | undefined;
 }
 
-export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCardProps): JSX.Element {
+export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCardProps) {
   return (
-    <Box
-      flexDirection="column"
-      paddingX={1}
-      paddingY={1}
-      marginBottom={1}
-      borderColor={theme.borderPrimary}
+    <box
+      style={{
+        flexDirection: "column",
+        paddingLeft: 1,
+        paddingRight: 1,
+        paddingTop: 1,
+        paddingBottom: 1,
+        marginBottom: 1,
+        border: true,
+        borderColor: theme.borderPrimary,
+      }}
     >
       {/* Session Title Section */}
       {sessionName && (
-        <Box flexDirection="column" marginBottom={1}>
-          <Text color={theme.accent} bold>
-            💬 Active Session
-          </Text>
-          <Text color={theme.brandLight} bold wrap="truncate">
-            {sessionName}
-          </Text>
-        </Box>
+        <box style={{ flexDirection: "column", marginBottom: 1 }}>
+          <text style={{ fg: theme.accent }}>
+            <strong>💬 Active Session</strong>
+          </text>
+          <text style={{ fg: theme.brandLight, truncate: true }}>
+            <strong>{sessionName}</strong>
+          </text>
+        </box>
       )}
       
       {/* Connected Databases Section */}
-      <Box flexDirection="column">
-        <Text color={theme.brand} bold>
-          🗄  Connected Databases
-        </Text>
+      <box style={{ flexDirection: "column" }}>
+        <text style={{ fg: theme.brand }}>
+          <strong>🗄  Connected Databases</strong>
+        </text>
 
         {databases.length === 0 ? (
-          <Box marginTop={1}>
-            <Text color={theme.textDim}>No active PostgreSQL pool</Text>
-          </Box>
+          <box style={{ marginTop: 1 }}>
+            <text style={{ fg: theme.textDim }}>No active PostgreSQL pool</text>
+          </box>
         ) : (
-          <Box flexDirection="column" marginTop={1}>
+          <box style={{ flexDirection: "column", marginTop: 1 }}>
             {databases.map((dbName) => (
-              <Box key={dbName}>
-                <Text color={theme.success}>●  </Text>
-                <Text color={theme.textPrimary} bold>{dbName}</Text>
-              </Box>
+              <box key={dbName} style={{ flexDirection: "row" }}>
+                <text style={{ fg: theme.success }}>●  </text>
+                <text style={{ fg: theme.textPrimary }}>
+                  <strong>{dbName}</strong>
+                </text>
+              </box>
             ))}
-          </Box>
+          </box>
         )}
-      </Box>
-    </Box>
+      </box>
+    </box>
   );
 }

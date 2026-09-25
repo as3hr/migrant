@@ -1,23 +1,22 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 
-export function HeroLogo(): JSX.Element {
+export function HeroLogo() {
   return (
-    <Box flexDirection="column" alignItems="center" marginBottom={1}>
-      <Text color={theme.brand} bold>
-        {`
+    <box style={{ flexDirection: "column", alignItems: "center", marginBottom: 1 }}>
+      <text style={{ fg: theme.brand }}>
+        <strong>{`
    __  ___ ________  ___  ___  _  ______
   /  |/  //  _/ ___// _ \\/ _ \\/ |/ /_  __/
  / /|_/ /_/ // (_ / /_/ / __ /    / / /   
 /_/  /_//___/\\___/\\____/_/ |_/_/|_/ /_/    
-        `}
-      </Text>
-      <Box marginTop={1}>
-        <Text color={theme.accent} bold>
-          PostgreSQL Schema Intelligence & Agent System
-        </Text>
-      </Box>
-    </Box>
+        `}</strong>
+      </text>
+      <box style={{ marginTop: 1 }}>
+        <text style={{ fg: theme.accent }}>
+          <strong>PostgreSQL Schema Intelligence & Agent System</strong>
+        </text>
+      </box>
+    </box>
   );
 }

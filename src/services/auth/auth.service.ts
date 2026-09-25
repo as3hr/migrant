@@ -153,7 +153,7 @@ export class AuthService {
       }
 
       const row = tblUserSession.getUserSession();
-      appContext.commandCtx?.log(`Auth Sessions: ${JSON.stringify(row)}`);
+
       if (!row) {
         return null;
       }

@@ -1,6 +1,4 @@
-import { Box, Text } from "ink";
-import { ScrollList, type ScrollListRef } from "ink-scroll-list";
-import type { JSX, RefObject } from "react";
+/** @jsxImportSource @opentui/react */
 import type { AskOptions } from "../../../domain/index.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
@@ -17,7 +15,6 @@ export interface MainChatViewProps {
   outputs: OutputItem[];
   selectedIndex: number;
   atBottom: boolean;
-  listRef: RefObject<ScrollListRef | null>;
   runKind: "idle" | "running" | "form";
   runLabel?: string | undefined;
   spinnerVisible: boolean;
@@ -42,7 +39,6 @@ export function MainChatView({
   outputs,
   selectedIndex,
   atBottom,
-  listRef,
   runKind,
   runLabel,
   spinnerVisible,
@@ -59,50 +55,65 @@ export function MainChatView({
   onSubmitInput,
   user,
   formInputProps = {},
-}: MainChatViewProps): JSX.Element {
+}: MainChatViewProps) {
   return (
-    <Box
-      flexDirection="row"
-      flexGrow={1}
-      overflow="hidden"
-      backgroundColor={theme.bgCanvas}
+    <box
+      style={{
+        flexDirection: "row",
+        flexGrow: 1,
+        overflow: "hidden",
+        backgroundColor: theme.bgCanvas,
+      }}
     >
-      <Box
-        flexDirection="column"
-        width={mainWidth}
-        overflow="hidden"
-        backgroundColor={theme.bgCanvas}
+      <box
+        style={{
+          flexDirection: "column",
+          width: mainWidth,
+          overflow: "hidden",
+          backgroundColor: theme.bgCanvas,
+        }}
       >
         {!atBottom && (
-          <Box width={mainWidth} justifyContent="center" flexShrink={0}>
-            <Text color={theme.textDim}>
+          <box style={{ width: mainWidth, justifyContent: "center", flexShrink: 0 }}>
+            <text style={{ fg: theme.textDim }}>
               ↑ PageUp · PageDown ↓ · (at bottom: auto-scrolls)
-            </Text>
-          </Box>
+            </text>
+          </box>
         )}
 
-        <Box flexGrow={1}>
-          <ScrollList
-            ref={listRef}
-            selectedIndex={selectedIndex}
-            scrollAlignment="auto"
-            backgroundColor={theme.bgCanvas}
+        <box style={{ flexGrow: 1 }}>
+          <scrollbox
+            focused
+            style={{
+              flexGrow: 1,
+              rootOptions: { backgroundColor: theme.bgCanvas },
+              wrapperOptions: { backgroundColor: theme.bgCanvas },
+              viewportOptions: { backgroundColor: theme.bgCanvas },
+              contentOptions: { backgroundColor: theme.bgCanvas },
+              scrollbarOptions: {
+                showArrows: true,
+                trackOptions: {
+                  foregroundColor: theme.brandLight,
+                  backgroundColor: theme.borderPrimary,
+                },
+              },
+            }}
           >
             {outputs.map((item, index) => (
-              <Box key={index} width={mainWidth} flexShrink={0}>
+              <box key={index} style={{ width: mainWidth, flexShrink: 0 }}>
                 <Output item={item} />
-              </Box>
+              </box>
             ))}
 
             {runKind === "running" && spinnerVisible && (
-              <Box width={mainWidth} marginTop={1} flexShrink={0}>
+              <box style={{ width: mainWidth, marginTop: 1, flexShrink: 0 }}>
                 <Spinner label={runLabel ?? "Working"} />
-              </Box>
+              </box>
             )}
-          </ScrollList>
-        </Box>
+          </scrollbox>
+        </box>
 
-        <Box width={mainWidth} flexShrink={0}>
+        <box style={{ width: mainWidth, flexShrink: 0 }}>
           {activePopup != null ? (
             <CommandParameterPopup
               command={activePopup}
@@ -135,8 +146,8 @@ export function MainChatView({
                 : {})}
             />
           ) : null}
-        </Box>
-      </Box>
+        </box>
+      </box>
 
       <Sidebar
         databases={databases}
@@ -144,6 +155,6 @@ export function MainChatView({
         activeModel={activeModel}
         width={sidebarWidth}
       />
-    </Box>
+    </box>
   );
 }

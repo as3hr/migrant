@@ -1,14 +1,14 @@
-import { render, useApp } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
+import { createCliRenderer } from "@opentui/core";
+import { createRoot } from "@opentui/react";
 import { Shell } from "./shell.tsx";
 
-export default function App(): JSX.Element {
-  const { exit } = useApp();
+const renderer = await createCliRenderer({ exitOnCtrlC: true });
 
-  return <Shell onExit={() => exit()} />;
+function exit() {
+  renderer.stop();
+  process.exit(0);
 }
 
-render(<App />, {
-  alternateScreen: true,
-  exitOnCtrlC: true,
-});
+const root = createRoot(renderer);
+root.render(<Shell onExit={exit} />);

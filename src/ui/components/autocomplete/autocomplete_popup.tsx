@@ -1,5 +1,5 @@
-import { Box, Text, useInput } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
+import { useKeyboard } from "@opentui/react";
 import { useEffect, useState } from "react";
 
 export interface SlashCommandItem {
@@ -41,7 +41,6 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
   },
 ];
 
-
 export interface AutocompletePopupProps {
   input: string;
   onSelect: (completedText: string) => void;
@@ -54,7 +53,7 @@ export function AutocompletePopup({
   onSelect,
   onHighlight,
   onClose,
-}: AutocompletePopupProps): JSX.Element | null {
+}: AutocompletePopupProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const isSlashInput = input.startsWith("/");
@@ -85,68 +84,64 @@ export function AutocompletePopup({
     }
   }, [input, selectedIndex, filteredCommands.length, isSlashInput]);
 
-  useInput(
-    (_, key) => {
-      if (!filteredCommands.length) return;
+  useKeyboard((key) => {
+    if (!isSlashInput || filteredCommands.length === 0) return;
 
-      if (key.upArrow) {
-        setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : filteredCommands.length - 1
-        );
-      } else if (key.downArrow) {
-        setSelectedIndex((prev) =>
-          prev < filteredCommands.length - 1 ? prev + 1 : 0
-        );
-      } else if (key.tab || key.return) {
-        const selected = filteredCommands[selectedIndex];
-        if (selected) {
-          onSelect(`/${selected.name} `);
-        }
-      } else if (key.escape) {
-        onClose?.();
+    if (key.name === "up") {
+      setSelectedIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredCommands.length - 1
+      );
+    } else if (key.name === "down") {
+      setSelectedIndex((prev) =>
+        prev < filteredCommands.length - 1 ? prev + 1 : 0
+      );
+    } else if (key.name === "tab" || key.name === "enter") {
+      const selected = filteredCommands[selectedIndex];
+      if (selected) {
+        onSelect(`/${selected.name} `);
       }
-    },
-    { isActive: isSlashInput && filteredCommands.length > 0 }
-  );
+    } else if (key.name === "escape") {
+      onClose?.();
+    }
+  });
 
   if (!input.startsWith("/") || filteredCommands.length === 0) {
     return null;
   }
 
   return (
-    <Box
-      flexDirection="column"
-      borderStyle="round"
-      borderColor="#3d7a5c"
-      paddingX={1}
-      paddingY={0}
-      marginBottom={1}
+    <box
+      style={{
+        flexDirection: "column",
+        border: true,
+        borderColor: "#3d7a5c",
+        paddingLeft: 1,
+        paddingRight: 1,
+        marginBottom: 1,
+      }}
     >
-      <Box marginBottom={1}>
-        <Text color="#5a5a5a" dimColor>
+      <box style={{ marginBottom: 1 }}>
+        <text style={{ fg: "#5a5a5a" }}>
           Use ↑/↓ to navigate, Tab to complete
-        </Text>
-      </Box>
+        </text>
+      </box>
 
       {filteredCommands.map((cmd, index) => {
         const isSelected = index === selectedIndex;
         return (
-          <Box key={cmd.name} justifyContent="space-between" width="100%">
-            <Box>
-              <Text color={isSelected ? "#3d7a5c" : "#7a7a7a"} bold={isSelected}>
-                {isSelected ? "► " : "  "}
-                {`/${cmd.name}`}
-              </Text>
+          <box key={cmd.name} style={{ justifyContent: "space-between", width: "100%" }}>
+            <box>
+              <text style={{ fg: isSelected ? "#3d7a5c" : "#7a7a7a" }}>
+                {isSelected ? <strong>{`► /${cmd.name}`}</strong> : `  /${cmd.name}`}
+              </text>
               {cmd.argsHint ? (
-                <Text color="#5a5a5a"> {cmd.argsHint}</Text>
+                <text style={{ fg: "#5a5a5a" }} content={` ${cmd.argsHint}`} />
               ) : null}
-            </Box>
-            <Text color={isSelected ? "#e8e8e8" : "#5a5a5a"}>
-              {cmd.description}
-            </Text>
-          </Box>
+            </box>
+            <text style={{ fg: isSelected ? "#e8e8e8" : "#5a5a5a" }} content={cmd.description} />
+          </box>
         );
       })}
-    </Box>
+    </box>
   );
 }

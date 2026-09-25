@@ -1,4 +1,4 @@
-import { Box } from "ink";
+/** @jsxImportSource @opentui/react */
 import type { JSX } from "react";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
@@ -21,17 +21,21 @@ export function CommandParameterPopup({
   onSubmit,
   onClose,
   sessions = [],
-}: CommandParameterPopupProps): JSX.Element {
+}: CommandParameterPopupProps) {
   return (
-    <Box
-      flexDirection="column"
-      borderStyle="round"
-      borderColor={theme.borderFocused}
-      backgroundColor={theme.bgCanvas}
-      paddingX={1}
-      paddingY={1}
-      marginBottom={1}
-      width="100%"
+    <box
+      style={{
+        flexDirection: "column",
+        border: true,
+        borderColor: theme.borderFocused,
+        backgroundColor: theme.bgCanvas,
+        paddingLeft: 1,
+        paddingRight: 1,
+        paddingTop: 1,
+        paddingBottom: 1,
+        marginBottom: 1,
+        width: "100%",
+      }}
     >
       {command === "connect" && (
         <ConnectPopup onSubmit={onSubmit} onClose={onClose} />
@@ -42,6 +46,6 @@ export function CommandParameterPopup({
       {command === "models" && (
         <ModelsPopup onSubmit={onSubmit} onClose={onClose} />
       )}
-    </Box>
+    </box>
   );
 }

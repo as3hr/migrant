@@ -1,4 +1,4 @@
-import { useInput } from "ink";
+import { useKeyboard } from "@opentui/react";
 
 export interface UseHotkeysOptions {
     onExit?: () => void;
@@ -12,8 +12,8 @@ export interface UseHotkeysOptions {
 }
 
 export function useHotkeys(options: UseHotkeysOptions): void {
-    useInput((input, key) => {
-        if (key.ctrl && input.toLowerCase() === "c") {
+    useKeyboard((key) => {
+        if (key.ctrl && key.name === "c") {
             if (options.isStreaming && options.onCancelStream) {
                 options.onCancelStream();
             } else if (options.onExit) {
@@ -22,27 +22,27 @@ export function useHotkeys(options: UseHotkeysOptions): void {
             return;
         }
 
-        if (key.ctrl && input.toLowerCase() === "l") {
+        if (key.ctrl && key.name === "l") {
             options.onClear?.();
             return;
         }
 
-        if (key.ctrl && input.toLowerCase() === "p") {
+        if (key.ctrl && key.name === "p") {
             options.onTogglePalette?.();
             return;
         }
 
-        if (key.ctrl && input.toLowerCase() === "d") {
+        if (key.ctrl && key.name === "d") {
             options.onToggleDatabases?.();
             return;
         }
 
-        if (key.upArrow) {
+        if (key.name === "up") {
             options.onScrollUp?.();
             return;
         }
 
-        if (key.downArrow) {
+        if (key.name === "down") {
             options.onScrollDown?.();
             return;
         }

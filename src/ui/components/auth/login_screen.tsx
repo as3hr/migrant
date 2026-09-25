@@ -1,5 +1,5 @@
-import { Box, Text, useInput } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
+import { useKeyboard } from "@opentui/react";
 import { useStdoutDimensions } from "../../hooks/index.ts";
 import { theme } from "../../theme.ts";
 import { HeroLogo } from "../hero/hero_logo.tsx";
@@ -18,73 +18,82 @@ export function LoginScreen({
   isLoggingIn,
   loginError,
   width = 80,
-}: LoginScreenProps): JSX.Element {
+}: LoginScreenProps) {
    const dimensions = useStdoutDimensions();
-  useInput((input, key) => {
+  
+  useKeyboard((key) => {
     if (isLoggingIn) return;
 
-    if (key.return) {
+    if (key.name === "enter") {
       onLogin();
-    } else if (key.escape || (key.ctrl && input.toLowerCase() === "c")) {
+    } else if (key.name === "escape" || (key.ctrl && key.name === "c")) {
       onExit();
     }
   });
 
   return (
-    <Box
-      height={dimensions.height}
-      width={dimensions.width}
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      flexGrow={1}
-      backgroundColor={theme.bgCanvas}
+    <box
+      style={{
+        height: dimensions.height,
+        width: dimensions.width,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        flexGrow: 1,
+        backgroundColor: theme.bgCanvas,
+      }}
     >
       <HeroLogo />
 
-      <Box marginBottom={1}>
-        <Text color={theme.accent}>Let's get started.</Text>
-      </Box>
+      <box style={{ marginBottom: 1 }}>
+        <text style={{ fg: theme.accent }}>Let's get started.</text>
+      </box>
       
-      <Box
-        flexDirection="column"
-        borderStyle="round"
-        borderColor={theme.brandLight}
-        paddingX={2}
-        paddingY={1}
-        width={Math.min(76, width - 4)}
-        backgroundColor={theme.bgCanvas}
+      <box
+        style={{
+          flexDirection: "column",
+          border: true,
+          borderColor: theme.brandLight,
+          paddingLeft: 2,
+          paddingRight: 2,
+          paddingTop: 1,
+          paddingBottom: 1,
+          width: Math.min(76, width - 4),
+          backgroundColor: theme.bgCanvas,
+        }}
       >
-        <Box justifyContent="center" marginBottom={1}>
-          <Text color={theme.brand} bold>
-            Welcome to Migrant CLI
-          </Text>
-        </Box>
+        <box style={{ justifyContent: "center", marginBottom: 1 }}>
+          <text style={{ fg: theme.brand }}>
+            <strong>Welcome to Migrant CLI</strong>
+          </text>
+        </box>
 
         {isLoggingIn ? (
-          <Box marginTop={1} justifyContent="center" flexDirection="column" alignItems="center">
-            <Text color={theme.purple}>Waiting for browser login...</Text>
-          </Box>
+          <box style={{ marginTop: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+            <text style={{ fg: theme.purple }}>Waiting for browser login...</text>
+          </box>
         ) : (
-          <Box marginTop={1} justifyContent="center">
-            <Text color={theme.borderFocused} bold>
-              [ Press ENTER to Login via Browser ]
-            </Text>
-          </Box>
+          <box style={{ marginTop: 1, justifyContent: "center" }}>
+            <text style={{ fg: theme.borderFocused }}>
+              <strong>[ Press ENTER to Login via Browser ]</strong>
+            </text>
+          </box>
         )}
 
         {loginError ? (
-          <Box marginTop={1} justifyContent="center">
-            <Text color={theme.error}>✗ {loginError}</Text>
-          </Box>
+          <box style={{ marginTop: 1, justifyContent: "center" }}>
+            <text style={{ fg: theme.error }}>✗ {loginError}</text>
+          </box>
         ) : null}
-      </Box>
+      </box>
 
-      <Box marginTop={1}>
-        <Text color={theme.textDim}>
-          Press <Text color={theme.textSecondary}>Esc</Text> or <Text color={theme.textSecondary}>Ctrl+C</Text> to exit.
-        </Text>
-      </Box>
-    </Box>
+      <box style={{ marginTop: 1, flexDirection: "row" }}>
+        <text style={{ fg: theme.textDim }}>Press </text>
+        <text style={{ fg: theme.textSecondary }}>Esc</text>
+        <text style={{ fg: theme.textDim }}> or </text>
+        <text style={{ fg: theme.textSecondary }}>Ctrl+C</text>
+        <text style={{ fg: theme.textDim }}> to exit.</text>
+      </box>
+    </box>
   );
 }

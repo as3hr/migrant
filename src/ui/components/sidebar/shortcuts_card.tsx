@@ -1,45 +1,49 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import { theme } from "../../theme.ts";
 
-export function ShortcutsCard(): JSX.Element {
+export function ShortcutsCard() {
   return (
-    <Box
-      flexDirection="column"
-      paddingX={1}
-      paddingY={1}
-      borderColor={theme.borderPrimary}
+    <box
+      style={{
+        flexDirection: "column",
+        paddingLeft: 1,
+        paddingRight: 1,
+        paddingTop: 1,
+        paddingBottom: 1,
+        border: true,
+        borderColor: theme.borderPrimary,
+      }}
     >
-      <Text color={theme.purple} bold>
-        ⌨ Commands & Keys
-      </Text>
+      <text style={{ fg: theme.purple }}>
+        <strong>⌨ Commands & Keys</strong>
+      </text>
 
-      <Box flexDirection="column" marginTop={1}>
-        <Box justifyContent="space-between">
-          <Text color={theme.brandLight} bold>/connect</Text>
-          <Text color={theme.textDim}>Connect DB Pool</Text>
-        </Box>
-        <Box justifyContent="space-between">
-          <Text color={theme.brandLight} bold>/sessions</Text>
-          <Text color={theme.textDim}>Switch Session</Text>
-        </Box>
-        <Box justifyContent="space-between">
-          <Text color={theme.brandLight} bold>/login</Text>
-          <Text color={theme.textDim}>Sign In Account</Text>
-        </Box>
-        <Box justifyContent="space-between">
-          <Text color={theme.brandLight} bold>/logout</Text>
-          <Text color={theme.textDim}>Sign Out</Text>
-        </Box>
-        <Box justifyContent="space-between">
-          <Text color={theme.brandLight} bold>/help</Text>
-          <Text color={theme.textDim}>All Commands</Text>
-        </Box>
-        <Box justifyContent="space-between" marginTop={1}>
-          <Text color={theme.textSecondary}>Ctrl + C</Text>
-          <Text color={theme.textDim}>Quit CLI</Text>
-        </Box>
-      </Box>
-    </Box>
+      <box style={{ flexDirection: "column", marginTop: 1 }}>
+        <box style={{ justifyContent: "space-between" }}>
+          <text style={{ fg: theme.brandLight }}><strong>/connect</strong></text>
+          <text style={{ fg: theme.textDim }}>Connect DB Pool</text>
+        </box>
+        <box style={{ justifyContent: "space-between" }}>
+          <text style={{ fg: theme.brandLight }}><strong>/sessions</strong></text>
+          <text style={{ fg: theme.textDim }}>Switch Session</text>
+        </box>
+        <box style={{ justifyContent: "space-between" }}>
+          <text style={{ fg: theme.brandLight }}><strong>/login</strong></text>
+          <text style={{ fg: theme.textDim }}>Sign In Account</text>
+        </box>
+        <box style={{ justifyContent: "space-between" }}>
+          <text style={{ fg: theme.brandLight }}><strong>/logout</strong></text>
+          <text style={{ fg: theme.textDim }}>Sign Out</text>
+        </box>
+        <box style={{ justifyContent: "space-between" }}>
+          <text style={{ fg: theme.brandLight }}><strong>/help</strong></text>
+          <text style={{ fg: theme.textDim }}>All Commands</text>
+        </box>
+        <box style={{ justifyContent: "space-between", marginTop: 1 }}>
+          <text style={{ fg: theme.textSecondary }}>Ctrl + C</text>
+          <text style={{ fg: theme.textDim }}>Quit CLI</text>
+        </box>
+      </box>
+    </box>
   );
 }

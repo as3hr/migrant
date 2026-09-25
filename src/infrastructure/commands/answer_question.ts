@@ -1,7 +1,7 @@
 import { generateText, Output } from "ai";
 import { appContext, type CommandContext } from "../../domain/index.ts";
-import { openRouter } from "../../infrastructure/index.ts";
 import { resolveAgentPayload, ROUTER_SYSTEM_PROMPT, routerOutputSchema } from "../../services/index.ts";
+import { openRouter } from "../index.ts";
 import { requireAuth } from "./command_helpers.ts";
 
 export async function answerQuestion(

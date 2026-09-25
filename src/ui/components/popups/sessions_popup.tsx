@@ -1,5 +1,5 @@
-import { Box, Text, useInput } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
+import { useKeyboard } from "@opentui/react";
 import { useState } from "react";
 import { appContext } from "../../../domain/app_context.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
@@ -15,25 +15,25 @@ export function SessionsPopup({
   sessions = [],
   onSubmit,
   onClose,
-}: SessionsPopupProps): JSX.Element {
+}: SessionsPopupProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activeSessions = sessions ?? [];
 
-  useInput((_, key) => {
-    if (key.escape) {
+  useKeyboard((key) => {
+    if (key.name === "escape") {
       onClose();
       return;
     }
 
-    if (key.upArrow) {
+    if (key.name === "up") {
       setSelectedIndex((prev) =>
         prev > 0 ? prev - 1 : Math.max(0, activeSessions.length - 1)
       );
-    } else if (key.downArrow) {
+    } else if (key.name === "down") {
       setSelectedIndex((prev) =>
         prev < activeSessions.length - 1 ? prev + 1 : 0
       );
-    } else if (key.return) {
+    } else if (key.name === "enter") {
       if (activeSessions.length > 0) {
         const selectedSession = activeSessions[selectedIndex];
         appContext.commandCtx?.log(
@@ -45,54 +45,53 @@ export function SessionsPopup({
   });
 
   return (
-    <Box flexDirection="column">
-      <Box marginBottom={1}>
-        <Text color={theme.brandLight} bold>
-          📜 Select Chat Session
-        </Text>
-      </Box>
+    <box style={{ flexDirection: "column" }}>
+      <box style={{ marginBottom: 1 }}>
+        <text style={{ fg: theme.brandLight }}>
+          <strong>📜 Select Chat Session</strong>
+        </text>
+      </box>
       {activeSessions.length === 0 ? (
-        <Box flexDirection="column">
-          <Text color={theme.textSecondary}>No past sessions recorded.</Text>
-        </Box>
+        <box style={{ flexDirection: "column" }}>
+          <text style={{ fg: theme.textSecondary }}>No past sessions recorded.</text>
+        </box>
       ) : (
-        <Box flexDirection="column">
-          <Box marginBottom={1}>
-            <Text color={theme.textSecondary}>
+        <box style={{ flexDirection: "column" }}>
+          <box style={{ marginBottom: 1 }}>
+            <text style={{ fg: theme.textSecondary }}>
               Select a session to switch history:
-            </Text>
-          </Box>
+            </text>
+          </box>
           {activeSessions.map((sess, index) => {
             const isSelected = index === selectedIndex;
             return (
-              <Box
+              <box
                 key={sess.id}
-                justifyContent="space-between"
-                width="100%"
-                paddingX={1}
+                style={{
+                  justifyContent: "space-between",
+                  width: "100%",
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                }}
               >
-                <Box>
-                  <Text
-                    color={isSelected ? theme.brandLight : theme.textSecondary}
-                    bold={isSelected}
-                  >
-                    {isSelected ? "► " : "  "}
-                    {sess.title || "Untitled Session"}
-                  </Text>
-                </Box>
-                <Text color={isSelected ? theme.textPrimary : theme.textDim}>
+                <box>
+                  <text style={{ fg: isSelected ? theme.brandLight : theme.textSecondary }}>
+                    {isSelected ? <strong>{`► ${sess.title || "Untitled Session"}`}</strong> : `  ${sess.title || "Untitled Session"}`}
+                  </text>
+                </box>
+                <text style={{ fg: isSelected ? theme.textPrimary : theme.textDim }}>
                   {sess.session_token_used} tokens
-                </Text>
-              </Box>
+                </text>
+              </box>
             );
           })}
-        </Box>
+        </box>
       )}
-      <Box marginTop={1}>
-        <Text color={theme.textDim}>
+      <box style={{ marginTop: 1 }}>
+        <text style={{ fg: theme.textDim }}>
           Use ↑/↓ to navigate · [Enter] to switch · [Esc] to cancel
-        </Text>
-      </Box>
-    </Box>
+        </text>
+      </box>
+    </box>
   );
 }

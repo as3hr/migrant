@@ -1,7 +1,4 @@
-import { Box } from "ink";
-import type { ScrollListRef } from "ink-scroll-list";
-import type { JSX } from "react";
-import { useRef } from "react";
+/** @jsxImportSource @opentui/react */
 import { AuthCheckingView } from "./components/auth/auth_checking_view.tsx";
 import { LoginScreen } from "./components/auth/login_screen.tsx";
 import { HeroView } from "./components/shell/hero_view.tsx";
@@ -9,11 +6,11 @@ import { MainChatView } from "./components/shell/main_chat_view.tsx";
 import { useShell } from "./hooks/index.ts";
 import { theme } from "./theme.ts";
 
-interface ShellProps {
+export interface ShellProps {
   onExit: () => void;
 }
 
-export function Shell({ onExit }: ShellProps): JSX.Element {
+export function Shell({ onExit }: ShellProps) {
   const {
     outputs,
     input,
@@ -38,7 +35,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     atBottom,
   } = useShell(onExit);
 
-  const listRef = useRef<ScrollListRef>(null);
 
   const availableWidth = Math.max(20, dimensions.width - 4);
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
@@ -62,12 +58,17 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
   }
 
   return (
-    <Box
-      flexDirection="column"
-      height={dimensions.height}
-      overflow="hidden"
-      backgroundColor={theme.bgCanvas}
-      padding={2}
+    <box
+      style={{
+        flexDirection: "column",
+        height: dimensions.height,
+        overflow: "hidden",
+        backgroundColor: theme.bgCanvas,
+        paddingLeft: 2,
+        paddingRight: 2,
+        paddingTop: 2,
+        paddingBottom: 2,
+      }}
     >
       {isHero ? (
         <HeroView
@@ -94,7 +95,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           outputs={outputs}
           selectedIndex={selectedIndex}
           atBottom={atBottom}
-          listRef={listRef}
           runKind={run.kind}
           runLabel={run.kind !== "idle" ? run.label : undefined}
           spinnerVisible={spinnerVisible}
@@ -113,6 +113,6 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
           formInputProps={formInputProps}
         />
       )}
-    </Box>
+    </box>
   );
 }

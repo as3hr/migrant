@@ -1,5 +1,4 @@
-import { Box, Text } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
 import type { AskOptions } from "../../../domain/index.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
@@ -42,20 +41,22 @@ export function HeroView({
   runLabel,
   formInputProps = {},
   activeModel,
-}: HeroViewProps): JSX.Element {
+}: HeroViewProps) {
   return (
-    <Box
-      flexDirection="column"
-      width={dimensions.width}
-      flexGrow={1}
-      alignItems="center"
-      justifyContent="center"
-      overflow="hidden"
-      backgroundColor={theme.bgCanvas}
+    <box
+      style={{
+        flexDirection: "column",
+        width: dimensions.width,
+        flexGrow: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        backgroundColor: theme.bgCanvas,
+      }}
     >
       <HeroLogo />
 
-      <Box width={Math.min(80, dimensions.width - 4)}>
+      <box style={{ width: Math.min(80, dimensions.width - 4) }}>
         {activePopup ? (
           <CommandParameterPopup
             command={activePopup}
@@ -88,19 +89,17 @@ export function HeroView({
             {...(databases !== undefined ? { databases } : {})}
           />
         )}
-      </Box>
+      </box>
 
-      <Box marginTop={1}>
-        <Text color={theme.warning}>● </Text>
-        <Text color={theme.textDim}>
-          Tip: Run{" "}
-          <Text color={theme.brandLight}>/connect</Text> to add a
-          PostgreSQL database pool
-        </Text>
-      </Box>
-      <Box marginTop={1} flexDirection="column" alignItems="center" justifyContent="center">
-        <Text color={theme.success}>{user} - {activeModel}</Text>
-      </Box>
-    </Box>
+      <box style={{ marginTop: 1, flexDirection: "row" }}>
+        <text style={{ fg: theme.warning }}>● </text>
+        <text style={{ fg: theme.textDim }}>Tip: Run </text>
+        <text style={{ fg: theme.brandLight }}>/connect</text>
+        <text style={{ fg: theme.textDim }}> to add a PostgreSQL database pool</text>
+      </box>
+      <box style={{ marginTop: 1, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <text style={{ fg: theme.success }}>{`${user ?? ""} - ${activeModel ?? ""}`}</text>
+      </box>
+    </box>
   );
 }

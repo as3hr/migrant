@@ -1,17 +1,24 @@
-import { Text, useAnimation } from "ink";
-import type { JSX } from "react";
+/** @jsxImportSource @opentui/react */
+import { useEffect, useState } from "react";
 
-// Dot-pulse frames — quieter than braille, fits a database tool
 const FRAMES = ["·  ", "·· ", "···", " ··", "  ·", "   "];
 
-export function Spinner({ label }: { label: string }): JSX.Element {
-  const { frame } = useAnimation({ interval: 120 });
-  const frameChar = FRAMES[frame % FRAMES.length] ?? FRAMES[0]!;
+export function Spinner({ label }: { label: string }) {
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame((f) => (f + 1) % FRAMES.length);
+    }, 120);
+    return () => clearInterval(interval);
+  }, []);
+
+  const frameChar = FRAMES[frame];
 
   return (
-    <Text>
-      <Text color="#3d7a5c">{frameChar}</Text>
-      {label ? <Text color="#5a5a5a"> {label}...</Text> : null}
-    </Text>
+    <box style={{ flexDirection: "row" }}>
+      <text style={{ fg: "#3d7a5c" }}>{frameChar}</text>
+      {label ? <text style={{ fg: "#5a5a5a" }}> {label}...</text> : null}
+    </box>
   );
 }
