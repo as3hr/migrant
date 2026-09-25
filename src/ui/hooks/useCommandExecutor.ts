@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { appContext, type AskOptions, type CommandContext } from "../../domain/index.ts";
-import {
-  errorMessage,
-  parseCommandInput,
-  runCommand
-} from "../commands/command_helpers.ts";
-import { answerQuestion } from "../commands/index.ts";
+import { answerQuestion, errorMessage, parseCommandInput, runCommand } from "../../infrastructure/commands/index.ts";
 import type { OutputItem } from "../components/output.tsx";
 import type { ParameterCommandType } from "../components/popups/index.ts";
 

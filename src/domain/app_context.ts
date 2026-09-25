@@ -1,4 +1,7 @@
-import { appConfig, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../infrastructure/commands/index.ts";
+import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
+import { appConfig, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import { credentialStore } from "../infrastructure/security/credential_store.ts";
 import {
     AuthService,
     ChatSessionService,
@@ -9,9 +12,6 @@ import {
     MemoryService,
     RagService
 } from "../services/index.ts";
-import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../ui/commands/index.ts";
-import { credentialStore } from "../infrastructure/security/credential_store.ts";
-import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { appEmitter } from "../utils/emitter.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
@@ -53,6 +53,7 @@ class AppContext {
         this.selectedModel = initialModel;
         this.commandRegistry = this.buildCommandRegistry();
         this.workspace = new WorkSpace();
+        this.setSelectedModel(initialModel.modelId, initialModel.providerId);
     }
 
     static async create(): Promise<AppContext> {
@@ -65,6 +66,7 @@ class AppContext {
             apiKey = await credentialStore.get(savedProvider.api_key_env);
             if (apiKey) {
                 providerId = savedProvider.id;
+                modelId = savedProvider.selected_model_id;
             }
         }
 
@@ -76,8 +78,14 @@ class AppContext {
         const providerSdk = await setProvider(providerId, apiKey);
         const services = this.createServices();
         const user = await services.authService.getCurrentUser();
-        if (user && providerId === "openrouter") {
-            setProviderToLocal("openrouter", "OPENROUTER_API_KEY", user.id);
+        if (!savedProvider && user) {
+            const providerConfig = PROVIDERS.find((p) => p.id === providerId);
+            setProviderToLocal({
+                id: providerId,
+                user_id: user.id,
+                api_key_env: providerConfig?.apiKeyEnv || "OPENROUTER_API_KEY",
+                selected_model_id: modelId
+            });
         }
 
         appEmitter.emit('update-model', {

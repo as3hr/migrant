@@ -23,6 +23,7 @@ export class LlmService {
 
             return text;
         } catch (llmE) {
+            appContext.commandCtx?.log(`Error in LLM query ${llmE}`);
             return null;
         }
     }
@@ -48,7 +49,9 @@ export class LlmService {
                     yield chunk;
                 }
             }
-        } catch (llmE) {}
+        } catch (llmE) {
+            appContext.commandCtx?.log(`Error in stream llm: ${llmE}`);
+        }
     }
 
     async generateTitle(question: string): Promise<string> {

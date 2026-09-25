@@ -28,17 +28,20 @@ export class PoolConnector {
         query: string,
         params?: unknown[]
     ): Promise<QueryResult<T>> {
-        if (!this.pools[dbId]) {
-            const db = appContext.workspace.getDb(dbId);
-            if (db?.connectionString) {
-                this.pools[dbId] = new Pool({ connectionString: db.connectionString });
-            } else {
-                throw new Error(`Database ${dbId} is not connected.`);
+        try {
+            if (!this.pools[dbId]) {
+                const db = appContext.workspace.getDb(dbId);
+                if (db?.connectionString) {
+                    this.pools[dbId] = new Pool({ connectionString: db.connectionString });
+                } else {
+                    throw new Error(`Database ${dbId} is not connected.`);
+                }
             }
+            const pool = this.pools[dbId];
+            return pool.query<T>(query, params);
+        } catch (err) {
+            throw err;
         }
-
-        const pool = this.pools[dbId];
-        return pool.query<T>(query, params);
     }        
 }
 

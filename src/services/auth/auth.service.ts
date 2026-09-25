@@ -3,7 +3,7 @@ import getPort from "get-port";
 import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
-import { credentialStore, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
+import { credentialStore, resetDb, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
 import { appEmitter, BASE_URL } from "../../utils/index.ts";
 
 export class AuthService {
@@ -207,15 +207,9 @@ export class AuthService {
       connectionKeys.map((key: string) => credentialStore.delete(key))
     );
 
-    for (const db of appContext.workspace.databases) {
-      tblDatabases.deleteLocalWorkspaceDb(db.id);
-    }
-  
-    tblUserSession.deleteSession(user.id);
+    resetDb();
     await supabase.auth.signOut();
-  
     appContext.workspace.databases = [];
-
     appEmitter.emit('logout');
   }
 }

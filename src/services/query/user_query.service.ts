@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { appContext, type CommandContext, type DatabaseCollection } from "../../domain/index.ts";
-import { getSchemaFingerprint } from "../../infrastructure/index.ts";
-import { appMemo } from "../../utils/index.ts";
+import { getSchemaFingerprint } from "../../infrastructure/db/index.ts";
+import { appMemo } from "../../utils/cache.ts";
 import { getDatabaseContextForUserQuery, startScan } from "../index.ts";
 import {
     buildConversationalPrompt,
@@ -100,7 +100,6 @@ async function buildRagContext(query: string, ctx: CommandContext) {
     );
     const validResults = semanticResult.filter((r): r is NonNullable<typeof r> => Boolean(r?.context));
     if (validResults.length === 0) {
-        ctx.log("Could not find relevant schema context for this query.");
         return null;
     }
     const context = validResults.map(r => `### Database: ${r.database.name}\n${r.context}`).join("\n\n");
@@ -132,25 +131,25 @@ async function ensureIndexFresh(
   database: DatabaseCollection,
   ctx: CommandContext
 ): Promise<void> {
-  const liveFingerprint = await appMemo.getOrFetch(database.id, () =>
-    getSchemaFingerprint(database.id)
-  );
-  
-  const isStale =
-    database.indexStatus !== "ready" ||
-    database.schemaFingerprint !== liveFingerprint;
+    try {
+        const liveFingerprint = await appMemo.getOrFetch(database.id, () =>
+            getSchemaFingerprint(database.id)
+        );
 
-  if (!isStale) return;
+        const isStale =
+            database.indexStatus !== "ready" ||
+            database.schemaFingerprint !== liveFingerprint;
 
-  appMemo.invalidate(database.id);
-  ctx.log(`Updating knowledge for ${database.name}...`);
-  await appContext.services.databaseConnectionService.updateDatabase(database.id, {
-    indexStatus: "indexing",
-  });
+        if (!isStale) return;
 
-  try {
-    await startScan(ctx, database.id);
-  } catch (err) {
-    throw err;
-  }
+        appMemo.invalidate(database.id);
+        ctx.log(`Updating knowledge for ${database.name}...`);
+        await appContext.services.databaseConnectionService.updateDatabase(database.id, {
+            indexStatus: "indexing",
+        });
+        appContext.commandCtx?.log(`Starting scan for ${database.name}...`);
+        await startScan(ctx, database.id);
+    } catch (err) {
+        throw err;
+    }
 }

@@ -28,7 +28,7 @@ Get Functions: ${getFunctionsQuery()}
 Get FingerPrint: ${getSchemaFingerprintQuery()}
 `;
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 interface ValidationResult {
     valid: boolean;
@@ -118,7 +118,6 @@ async function executeIntrospectionWorkflow(
                     content: `Generate a system introspection SQL query for: ${userQuery}`,
                 }
             ],
-            "deepseek/deepseek-chat",
         );
 
         if (!output) {
@@ -154,7 +153,6 @@ async function executeIntrospectionWorkflow(
 }
 
 export function validateGeneratedSql(sql: string): ValidationResult {
-    // 1. Clean markdown formatting and whitespace
     let cleanSql = sql
         .replace(/```sql/gi, "")
         .replace(/```/g, "")
@@ -166,7 +164,6 @@ export function validateGeneratedSql(sql: string): ValidationResult {
 
     const lowerSql = cleanSql.toLowerCase();
 
-    // 2. Must start with SELECT or WITH
     if (!lowerSql.startsWith("select") && !lowerSql.startsWith("with")) {
         return {
             valid: false,
@@ -174,7 +171,6 @@ export function validateGeneratedSql(sql: string): ValidationResult {
         };
     }
 
-    // 3. Reject any mutation / DDL keywords
     const forbiddenKeywords = [
         "insert ", "update ", "delete ", "drop ", "alter ", "truncate ",
         "create ", "grant ", "revoke ", "exec ", "execute "
@@ -188,7 +184,6 @@ export function validateGeneratedSql(sql: string): ValidationResult {
         }
     }
 
-    // 4. Strict Privacy Guarantee: Must ONLY query system metadata catalogs/views!
     const systemSources = [
         "information_schema",
         "pg_catalog",

@@ -2,7 +2,6 @@ import { pool } from "../pool.ts";
 
 export async function getSchemaFingerprint(dbId: string): Promise<string> {
   const result = await pool.query(dbId, getSchemaFingerprintQuery());
-
   return result.rows[0]?.fingerprint ?? '';
 }
 

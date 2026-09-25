@@ -14,3 +14,12 @@ tblProvider.initializeTblProvider();
 tblDatabases.initializeTblDatabases();
 tblUserSession.initializeTblUserSessions();
 tblDocuments.initializeTblDocuments();
+
+export function resetDb() {
+    sqlClient.run(`DELETE FROM tbl_databases`);
+    sqlClient.run(`DELETE FROM tbl_chat_sessions`);
+    sqlClient.run(`DELETE FROM tbl_chat_messages`);
+    sqlClient.run(`DELETE FROM tbl_documents`);
+    sqlClient.run(`DELETE FROM tbl_provider`);
+    sqlClient.run(`DELETE FROM tbl_user_sessions`)
+}

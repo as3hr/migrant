@@ -3,9 +3,9 @@ import type { JSX } from "react";
 import type { AskOptions } from "../../../domain/index.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
+import { HeroLogo } from "../hero/hero_logo.tsx";
 import type { ParameterCommandType } from "../popups/index.ts";
 import { CommandParameterPopup } from "../popups/index.ts";
-import { HeroLogo } from "../hero/hero_logo.tsx";
 import { Prompt } from "../prompt.tsx";
 
 export interface HeroViewProps {
@@ -22,6 +22,7 @@ export interface HeroViewProps {
   user?: string | undefined;
   runKind: "idle" | "running" | "form";
   runLabel?: string | undefined;
+  activeModel: string | undefined;
   formInputProps?: AskOptions;
 }
 
@@ -40,6 +41,7 @@ export function HeroView({
   runKind,
   runLabel,
   formInputProps = {},
+  activeModel,
 }: HeroViewProps): JSX.Element {
   return (
     <Box
@@ -95,6 +97,9 @@ export function HeroView({
           <Text color={theme.brandLight}>/connect</Text> to add a
           PostgreSQL database pool
         </Text>
+      </Box>
+      <Box marginTop={1} flexDirection="column" alignItems="center" justifyContent="center">
+        <Text color={theme.success}>{user} - {activeModel}</Text>
       </Box>
     </Box>
   );

@@ -10,6 +10,10 @@ export async function answerQuestion(
 ): Promise<void> {
     await requireAuth();
     try {
+      const userMessage = await appContext.services.memoryService.ensureActiveSession(question);
+      if (userMessage && ctx.output) {
+        ctx.output({ type: "user", content: userMessage });
+      }
       const { output } = await generateText({
           model: openRouter("openai/gpt-4o-mini"),
           output: Output.object({
@@ -25,17 +29,13 @@ export async function answerQuestion(
           maxOutputTokens: 200,
           prompt: question,
       });
-        const user = await appContext.services.authService.getCurrentUser();
-        const databases = appContext.workspace.activeDbs.map((db) => db.name);  
 
-        const payload = await resolveAgentPayload(output.targetAgent, question, ctx, user, databases);
+      const user = await appContext.services.authService.getCurrentUser();
+      const databases = appContext.workspace.activeDbs.map((db) => db.name);
+
+      const payload = await resolveAgentPayload(output.targetAgent, question, ctx, user, databases);
 
       if (!payload) return;
-
-      const userMessage = await appContext.services.memoryService.ensureActiveSession(question);
-      if (userMessage && ctx.output) {
-        ctx.output({ type: "user", content: userMessage });
-      }
 
       const context = await appContext.services.contextManager.getContext(payload.userPrompt);
 
@@ -80,6 +80,6 @@ export async function answerQuestion(
           });
       }
     } catch (error: any) {
-        ctx.error(`${error}`);
+        ctx.error(`Error in Answer Question:- ${error}`);
     }
 }

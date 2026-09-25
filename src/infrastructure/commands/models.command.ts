@@ -80,7 +80,7 @@ export const modelsCommand: CommandDefinition = {
     const user = await appContext.services.authService.getCurrentUser();
     const sdk = await setProvider(providerId, apiKey);
     if (user) {
-      setProviderToLocal(providerId, providerConfig.apiKeyEnv, user.id);
+      setProviderToLocal({id: providerId, user_id: user.id, api_key_env: providerConfig.apiKeyEnv, selected_model_id: modelConfig.id});
     }
 
     appContext.providerSdk = sdk;

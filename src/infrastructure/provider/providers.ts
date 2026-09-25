@@ -5,7 +5,7 @@ import type { MistralProvider } from '@ai-sdk/mistral';
 import type { OpenAIProvider } from '@ai-sdk/openai';
 import type { XaiProvider } from '@ai-sdk/xai';
 import type { OpenRouterProvider } from '@openrouter/ai-sdk-provider';
-import { tblProvider } from '../db/index.ts';
+import { tblProvider, type IProvider } from '../db/index.ts';
 import { credentialStore } from '../security/credential_store.ts';
 
 export type ProviderId =
@@ -91,8 +91,8 @@ export async function setProvider(id: ProviderId, apiKey: string) {
   return providerSdk;
 }
 
-export function setProviderToLocal(id: ProviderId, apiKeyEnv: string, userId: string) {
-  tblProvider.setProvider({ id, user_id: userId, api_key_env: apiKeyEnv });
+export function setProviderToLocal(provider: IProvider) {
+  tblProvider.setProvider(provider);
 }
 
 export function getModels(id: ProviderId): ModelConfig[] {

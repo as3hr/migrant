@@ -10,7 +10,7 @@ class TblDatabases {
 
     initializeTblDatabases() {
         sqlClient.run(`
-            CREATE TABLE IF NOT EXISTS databases (
+            CREATE TABLE IF NOT EXISTS tbl_databases (
               id TEXT PRIMARY KEY,
               userId TEXT,
               name TEXT,
@@ -24,16 +24,16 @@ class TblDatabases {
         `);
 
         this.databasesDbInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT OR REPLACE INTO tbl_databases (id, userId, name, connectionStringKey, schemaFingerprint, type, lastScannedAt, indexStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
         this.databasesDbSelectStmt = sqlClient.prepare(
-            'SELECT * FROM databases WHERE userId = ?'
+            'SELECT * FROM tbl_databases WHERE userId = ?'
         );
         this.databasesDbDeleteStmt = sqlClient.prepare(
-            'DELETE FROM databases WHERE id = ?'
+            'DELETE FROM tbl_databases WHERE id = ?'
         );
         this.databasesDbSelectByIdStmt = sqlClient.prepare(
-            'SELECT * FROM databases WHERE id = ?'
+            'SELECT * FROM tbl_databases WHERE id = ?'
         );
     }
 

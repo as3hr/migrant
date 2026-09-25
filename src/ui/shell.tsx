@@ -71,6 +71,7 @@ export function Shell({ onExit }: ShellProps): JSX.Element {
     >
       {isHero ? (
         <HeroView
+          activeModel={activeModel}
           dimensions={dimensions}
           activePopup={activePopup}
           onParameterSubmit={handleParameterSubmit}

@@ -12,7 +12,7 @@ export class TblUserSession {
 
     initializeTblUserSessions() {
         sqlClient.run(`
-            CREATE TABLE IF NOT EXISTS user_sessions (
+            CREATE TABLE IF NOT EXISTS tbl_user_sessions (
               user_id TEXT PRIMARY KEY,
               session_data TEXT NOT NULL,
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -20,13 +20,13 @@ export class TblUserSession {
         `);
 
         this.sessionInsertStmt = sqlClient.prepare(
-            'INSERT OR REPLACE INTO user_sessions (user_id, session_data) VALUES (?, ?)'
+            'INSERT OR REPLACE INTO tbl_user_sessions (user_id, session_data) VALUES (?, ?)'
         );
         this.sessionSelectStmt = sqlClient.prepare(
-            'SELECT * FROM user_sessions'
+            'SELECT * FROM tbl_user_sessions'
         );
         this.sessionDeleteStmt = sqlClient.prepare(
-            'DELETE FROM user_sessions WHERE user_id = ?'
+            'DELETE FROM tbl_user_sessions WHERE user_id = ?'
         );
     }
 
