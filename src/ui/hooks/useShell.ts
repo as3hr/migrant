@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { AskOptions } from "../../domain/index.ts";
 import type { IChatSessionsModel } from "../../infrastructure/index.ts";
-import type { ParameterCommandType } from "../components/autocomplete/command_parameter_popup.tsx";
 import type { OutputItem } from "../components/output.tsx";
+import type { ParameterCommandType } from "../components/popups/index.ts";
 import { useAuth, type UseAuthReturn } from "./useAuth.ts";
 import { useChatOutputs } from "./useChatOutputs.ts";
 import { useCommandExecutor, type RunState } from "./useCommandExecutor.ts";

@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { theme } from "../theme.ts";
 import { AutocompletePopup, SLASH_COMMANDS } from "./autocomplete/autocomplete_popup.tsx";
-import type { ParameterCommandType } from "./autocomplete/command_parameter_popup.tsx";
+import type { ParameterCommandType } from "./popups/index.ts";
 
 interface PromptProps {
   value: string;

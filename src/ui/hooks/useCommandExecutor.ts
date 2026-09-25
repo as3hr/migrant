@@ -6,8 +6,8 @@ import {
   runCommand
 } from "../commands/command_helpers.ts";
 import { answerQuestion } from "../commands/index.ts";
-import type { ParameterCommandType } from "../components/autocomplete/command_parameter_popup.tsx";
 import type { OutputItem } from "../components/output.tsx";
+import type { ParameterCommandType } from "../components/popups/index.ts";
 
 export type RunState =
   | { kind: "idle" }

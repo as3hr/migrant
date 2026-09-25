@@ -1,9 +1,8 @@
 import { appContext, type CommandDefinition } from "../../domain/index.ts";
 import {
-  appConfig,
   getModelById,
-  PROVIDERS,
   PROVIDER_MODELS,
+  PROVIDERS,
   setProvider,
   setProviderToLocal,
   tblChatSessions,
@@ -18,7 +17,10 @@ export const modelsCommand: CommandDefinition = {
   busyLabel: "Configuring Model...",
   requiresAuth: true,
   execute: async (args, ctx) => {
-    const selectedArg = args.trim();
+    const parts = args.trim().split(/\s+/);
+    const selectedArg = parts[0] || "";
+    const passedApiKey = parts[1] || "";
+
     if (!selectedArg) {
       ctx.log("Usage: /models or select from popup");
       return;
@@ -52,26 +54,13 @@ export const modelsCommand: CommandDefinition = {
       return;
     }
 
-    // 1. Get stored key or ask user
-    let apiKey: string | null = await credentialStore.get(providerConfig.apiKeyEnv);
-    if (!apiKey && providerId === "openrouter" && appConfig.openRouterApiKey) {
-      apiKey = appConfig.openRouterApiKey;
-    }
+    const apiKey: string | null = passedApiKey || (await credentialStore.get(providerConfig.apiKeyEnv));
 
     if (!apiKey) {
-      apiKey = await ctx.ask(`Enter API Key for ${providerConfig.name} (${providerConfig.apiKeyEnv})`, {
-        mask: "*",
-        placeholder: `Paste ${providerConfig.name} API key...`,
-      });
-      apiKey = apiKey.trim();
-    }
-
-    if (!apiKey) {
-      ctx.error(`API Key required for ${providerConfig.name}. Setup cancelled.`);
+      ctx.error(`API Key required for ${providerConfig.name}. Please select the model from the /models popup to enter your key.`);
       return;
     }
 
-    // 2. Validate API Key with test probe
     ctx.busy(`Validating ${providerConfig.name} API key...`);
     try {
       const testSdk = await providerConfig.create(apiKey);
@@ -87,7 +76,6 @@ export const modelsCommand: CommandDefinition = {
       return;
     }
 
-    // 3. Key valid! Save & apply
     ctx.busy("Applying model configuration...");
     const user = await appContext.services.authService.getCurrentUser();
     const sdk = await setProvider(providerId, apiKey);
@@ -98,7 +86,6 @@ export const modelsCommand: CommandDefinition = {
     appContext.providerSdk = sdk;
     appContext.setSelectedModel(modelConfig.id, providerId);
 
-    // 4. Update session token limit if active
     const currentSessionId = appContext.currentChatSessionId;
     if (currentSessionId) {
       const currentSession = tblChatSessions.getChatSessionById(currentSessionId);
@@ -114,9 +101,7 @@ export const modelsCommand: CommandDefinition = {
       }
     }
 
-    // 5. Emit update-model event
     appEmitter.emit("update-model", { model: modelConfig.id });
-
     ctx.success(`Active AI model set to: ${modelConfig.name} (${modelConfig.id})`);
   },
 };

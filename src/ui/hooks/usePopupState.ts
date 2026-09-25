@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ParameterCommandType } from "../components/autocomplete/command_parameter_popup.tsx";
+import type { ParameterCommandType } from "../components/popups/index.ts";
 
 export interface UsePopupStateReturn {
   activePopup: ParameterCommandType | null;

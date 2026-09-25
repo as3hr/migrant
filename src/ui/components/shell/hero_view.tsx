@@ -3,8 +3,8 @@ import type { JSX } from "react";
 import type { AskOptions } from "../../../domain/index.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
-import type { ParameterCommandType } from "../autocomplete/command_parameter_popup.tsx";
-import { CommandParameterPopup } from "../autocomplete/command_parameter_popup.tsx";
+import type { ParameterCommandType } from "../popups/index.ts";
+import { CommandParameterPopup } from "../popups/index.ts";
 import { HeroLogo } from "../hero/hero_logo.tsx";
 import { Prompt } from "../prompt.tsx";
 
