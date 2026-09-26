@@ -129,16 +129,16 @@ export function AutocompletePopup({
       {filteredCommands.map((cmd, index) => {
         const isSelected = index === selectedIndex;
         return (
-          <box key={cmd.name} style={{ justifyContent: "space-between", width: "100%" }}>
-            <box>
+          <box key={cmd.name} style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+            <box style={{ flexDirection: "row" }}>
               <text style={{ fg: isSelected ? "#3d7a5c" : "#7a7a7a" }}>
-                {isSelected ? <strong>{`► /${cmd.name}`}</strong> : `  /${cmd.name}`}
+                {isSelected ? `► /${cmd.name}` : `  /${cmd.name}`}
               </text>
               {cmd.argsHint ? (
-                <text style={{ fg: "#5a5a5a" }} content={` ${cmd.argsHint}`} />
+                <text style={{ fg: "#5a5a5a" }}>{` ${cmd.argsHint}`}</text>
               ) : null}
             </box>
-            <text style={{ fg: isSelected ? "#e8e8e8" : "#5a5a5a" }} content={cmd.description} />
+            <text style={{ fg: isSelected ? "#e8e8e8" : "#5a5a5a" }}>{cmd.description}</text>
           </box>
         );
       })}

@@ -62,7 +62,7 @@ export function ModelsPopup({ onSubmit, onClose }: ModelsPopupProps) {
         setSelectedIndex((prev) =>
           prev < FLAT_MODELS.length - 1 ? prev + 1 : 0
         );
-      } else if (key.name === "enter") {
+      } else if (key.name === "return" || key.name == "enter") {
         const selected = FLAT_MODELS[selectedIndex];
         if (selected) {
           credentialStore.get(selected.apiKeyEnv).then((apiKey: string | null) => {
@@ -109,15 +109,15 @@ export function ModelsPopup({ onSubmit, onClose }: ModelsPopupProps) {
                   </text>
                 </box>
               )}
-              <box style={{ justifyContent: "space-between", width: "100%", paddingLeft: 1, paddingRight: 1 }}>
-                <box>
+              <box style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingLeft: 1, paddingRight: 1 }}>
+                <box style={{ flexDirection: "row" }}>
                   <text style={{ fg: isSelected ? theme.brandLight : theme.textSecondary }}>
-                    {isSelected ? <strong>{`► ${item.model.name}`}</strong> : `  ${item.model.name}`}
+                    {isSelected ? `► ${item.model.name}` : `  ${item.model.name}`}
                   </text>
                   <text style={{ fg: theme.textDim }}> ({item.model.id})</text>
                 </box>
                 <text style={{ fg: isSelected ? theme.textPrimary : theme.textDim }}>
-                  {Math.round(item.model.contextWindow / 1000)}k ctx
+                  {`${Math.round(item.model.contextWindow / 1000)}k ctx`}
                 </text>
               </box>
             </box>

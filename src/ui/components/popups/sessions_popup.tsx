@@ -33,7 +33,7 @@ export function SessionsPopup({
       setSelectedIndex((prev) =>
         prev < activeSessions.length - 1 ? prev + 1 : 0
       );
-    } else if (key.name === "enter") {
+    } else if (key.name === "return" || key.name == "enter") {
       if (activeSessions.length > 0) {
         const selectedSession = activeSessions[selectedIndex];
         appContext.commandCtx?.log(
@@ -68,19 +68,20 @@ export function SessionsPopup({
               <box
                 key={sess.id}
                 style={{
+                  flexDirection: "row",
                   justifyContent: "space-between",
                   width: "100%",
                   paddingLeft: 1,
                   paddingRight: 1,
                 }}
               >
-                <box>
+                <box style={{ flexDirection: "row" }}>
                   <text style={{ fg: isSelected ? theme.brandLight : theme.textSecondary }}>
-                    {isSelected ? <strong>{`► ${sess.title || "Untitled Session"}`}</strong> : `  ${sess.title || "Untitled Session"}`}
+                    {isSelected ? `► ${sess.title || "Untitled Session"}` : `  ${sess.title || "Untitled Session"}`}
                   </text>
                 </box>
                 <text style={{ fg: isSelected ? theme.textPrimary : theme.textDim }}>
-                  {sess.session_token_used} tokens
+                  {`${sess.session_token_used} tokens`}
                 </text>
               </box>
             );

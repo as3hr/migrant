@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import { useEffect, useState } from "react";
 import { theme } from "../theme.ts";
-import { AutocompletePopup, SLASH_COMMANDS } from "./autocomplete/autocomplete_popup.tsx";
+import { AutocompletePopup, SLASH_COMMANDS } from "./popups/autocomplete_popup.tsx";
 import type { ParameterCommandType } from "./popups/index.ts";
 
 export interface PromptProps {
@@ -91,7 +91,7 @@ export function Prompt(props: PromptProps) {
           textColor={theme.textPrimary}
           value={props.value}
           focused
-          onChange={props.onChange}
+          onInput={props.onChange}
           onSubmit={(val: any) => {
             const finalVal = typeof val === "string" ? val : props.value;
             handleSubmit(finalVal);

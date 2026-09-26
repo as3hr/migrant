@@ -22,9 +22,6 @@ export function UserMessageCard({ prompt }: UserMessageCardProps) {
       </box>
 
       <box style={{ marginTop: 0 }}>
-        <text style={{ fg: theme.brandLight }}>
-          <strong>{"> "}</strong>
-        </text>
         <text style={{ fg: theme.textPrimary }}>
           <strong>{prompt}</strong>
         </text>

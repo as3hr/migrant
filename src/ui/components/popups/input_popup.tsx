@@ -67,7 +67,7 @@ export function InputPopup({
           textColor={theme.textPrimary}
           value={textValue}
           focused
-          onChange={setTextValue}
+          onInput={setTextValue}
           onSubmit={handleTextSubmit}
           {...(placeholder !== undefined ? { placeholder } : {})}
         />
