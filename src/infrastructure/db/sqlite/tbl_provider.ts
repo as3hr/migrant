@@ -1,4 +1,4 @@
-import type { ProviderId } from "../../index.ts";
+import type { ProviderId } from "../../provider/providers.ts";
 import { sqlClient } from "./sqlite.client.ts";
 
 export interface IProvider {

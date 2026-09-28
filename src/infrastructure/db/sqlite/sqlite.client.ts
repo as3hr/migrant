@@ -8,12 +8,14 @@ import { tblUserSession } from "./tbl_user_session.ts";
 
 export const sqlClient: Database = new Database('migrant.db');
 
-tblChatMessage.initializeTblChatMessage();
-tblChatSessions.initializeTblChatSessions();
-tblProvider.initializeTblProvider();
-tblDatabases.initializeTblDatabases();
-tblUserSession.initializeTblUserSessions();
-tblDocuments.initializeTblDocuments();
+export function initializeDatabase() {
+    tblChatMessage.initializeTblChatMessage();
+    tblChatSessions.initializeTblChatSessions();
+    tblProvider.initializeTblProvider();
+    tblDatabases.initializeTblDatabases();
+    tblUserSession.initializeTblUserSessions();
+    tblDocuments.initializeTblDocuments();
+}
 
 export function resetDb() {
     sqlClient.run(`DELETE FROM tbl_databases`);
