@@ -4,6 +4,24 @@ Migrant is being built as an engineering intelligence layer that keeps databases
 
 ---
 
+## Installation
+
+The fastest way to install Migrant is via our standalone binary (zero dependencies required):
+
+**macOS & Linux (Instant Install):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/as3hr/migrant/main/install.sh | bash
+```
+
+**Node.js / NPM (Alternative):**
+```bash
+npm install -g migrant-cli
+```
+
+*Note: Windows users should download the `.exe` directly from the [GitHub Releases page](https://github.com/as3hr/migrant/releases).*
+
+---
+
 ## The Problem
 
 Modern applications rarely rely on a single source of truth. As engineering systems grow, developers end up managing multiple databases (production, staging, analytics), microservices, background workers, and codebases in different languages—all interacting with the same underlying data.
