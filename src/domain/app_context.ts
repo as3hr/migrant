@@ -1,6 +1,6 @@
 import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../infrastructure/commands/index.ts";
 import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
-import { appConfig, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import { getKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
 import { credentialStore } from "../infrastructure/security/credential_store.ts";
 import {
     AuthService,
@@ -71,7 +71,7 @@ class AppContext {
         }
 
         if (!apiKey) {
-            apiKey = appConfig.openRouterApiKey;
+            apiKey = await getKey();
             providerId = "openrouter";
         }
 
