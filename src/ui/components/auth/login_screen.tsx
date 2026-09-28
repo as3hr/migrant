@@ -24,7 +24,7 @@ export function LoginScreen({
   useKeyboard((key) => {
     if (isLoggingIn) return;
 
-    if (key.name === "enter") {
+    if (key.name === "enter" || key.name =="return") {
       onLogin();
     } else if (key.name === "escape" || (key.ctrl && key.name === "c")) {
       onExit();

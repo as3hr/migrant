@@ -1,13 +1,12 @@
 {
-  "name": "migrant",
-  "version": "1.0.0",
+  "name": "migrant-cli",
+  "version": "1.0.1",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun --watch src/ui/index.tsx",
     "start": "bun run src/ui/index.tsx",
-    "build": "bun build ./src/ui/index.tsx --compile --outfile dist/migrant",
-    "generate": "supabase gen types typescript --project-id lfltdltmvornmozprvco > src/types/database.types.ts"
+    "build": "bun build ./src/ui/index.tsx --compile --outfile dist/migrant"
   },
   "bin": {
     "migrant": "./src/cli.ts"

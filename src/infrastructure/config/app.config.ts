@@ -1,11 +1,9 @@
 interface AppConfig {
   supabaseUrl: string;
   supabaseKey: string;
-  openRouterApiKey: string;
 }
 
 export const appConfig: AppConfig = {
-  supabaseUrl: process.env.SUPABASE_URL!,
-  supabaseKey: process.env.SUPABASE_KEY!,
-  openRouterApiKey: process.env.OPENROUTER_API_KEY!,
+  supabaseUrl: "https://lfltdltmvornmozprvco.supabase.co",
+  supabaseKey: "sb_publishable_M8mCFxo8j1ixXplmhknn_Q_unXXZfF3",
 };
