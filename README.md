@@ -1,51 +1,53 @@
 # Migrant
 
-Migrant is being built as an engineering intelligence layer that keeps databases and codebases in sync.
+Migrant is an AI-powered engineering intelligence CLI designed to help you understand, optimize, and interrogate your PostgreSQL databases.
 
 ---
 
 ## Installation
 
-The fastest way to install Migrant is via our standalone binary (zero dependencies required):
+The easiest way to install Migrant is via our ultra-fast standalone binaries. No dependencies (like Node, Bun, or NPM) are required.
 
 **macOS & Linux (Instant Install):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/as3hr/migrant/main/install.sh | bash
 ```
 
-**Node.js / NPM (Alternative):**
-```bash
-npm install -g migrant-cli
-```
+**Windows:**
+Download the `.exe` directly from the [GitHub Releases page](https://github.com/as3hr/migrant/releases).
+*(Note: Windows SmartScreen may show a "Windows protected your PC" prompt because the executable is not digitally signed yet by a Microsoft developer account. Click "More info" and then "Run anyway" to bypass this and use the CLI.)*
 
-*Note: Windows users should download the `.exe` directly from the [GitHub Releases page](https://github.com/as3hr/migrant/releases).*
+---
+
+## 100% Local & Secure
+
+Your database credentials and schema data never leave your machine. Migrant connects directly from your local terminal and stores all context locally. No cloud sync, no middleman servers.
 
 ---
 
 ## The Problem
 
-Modern applications rarely rely on a single source of truth. As engineering systems grow, developers end up managing multiple databases (production, staging, analytics), microservices, background workers, and codebases in different languages—all interacting with the same underlying data.
+As data infrastructure grows, developers end up managing multiple databases (production, staging, analytics) with increasingly complex schemas.
 
-Understanding how these fragmented systems connect is painful and manual:
-
+Understanding and optimizing these systems is painful and manual:
 * **What tables, columns, and relationships exist** across different databases?
-* **Which specific codebase or microservice depends** on a particular table or column?
-* **What happens if a column or constraint is changed or removed?** Will it silently break a service?
+* **What happens if a column or constraint is changed or removed?**
 * **Are production, staging, and dev schemas actually consistent?**
 * **How do access controls and RLS policies** protect data across tables?
 
-Existing database tools only inspect or query a single database in isolation. They don't understand the surrounding engineering context, the applications consuming the data, or the relationships across multiple environments.
+Existing database tools only allow you to write static queries. They don't provide an intelligent, context-aware layer that actually understands your schema relationships and helps you optimize them.
 
 ---
 
 ## What's Built
 
-The initial foundation of Migrant focuses on deep database introspection and natural language retrieval directly in the CLI:
+Migrant focuses on deep database introspection and natural language retrieval directly in your terminal:
 
-* **Interactive Terminal Interface:** Built with React + Ink for a fast, responsive CLI experience.
+* **100% Local Architecture:** Your data never touches a cloud server. Database connections happen securely from your own machine, and all vector embeddings are stored entirely locally.
+* **Interactive Terminal Interface:** Built with Bun + OpenTUI for a blazingly fast, responsive CLI experience.
 * **Authentication & Keyring Integration:** Secure web login flow via Supabase, with sessions stored locally in SQLite and database credentials saved directly in OS credential keychains.
 * **PostgreSQL Schema Scanner:** Deep extraction of database schemas, tables, columns, data types, primary keys, foreign key relationships, and constraints.
-* **Knowledge Indexing & RAG:** Structuring schema data into searchable knowledge representations and vector embeddings using `pgvector` and vector search.
+* **Knowledge Indexing & RAG:** Structuring schema data into searchable knowledge representations and vector embeddings.
 * **Natural Language Query Engine:** Ask natural language questions in the CLI about connected database structures and relationships, powered by multi-provider LLM integrations (OpenAI, Anthropic, DeepSeek, Groq, OpenRouter).
 * **Multi-Database Workspaces:** Support for connecting, persisting, and switching between multiple databases (e.g., `production`, `staging`) inside a single local workspace.
 
@@ -53,19 +55,32 @@ The initial foundation of Migrant focuses on deep database introspection and nat
 
 ## Roadmap & Next Steps
 
-Migrant is evolving from pure schema QA into systemic engineering intelligence:
+Migrant is evolving to become a complete AI DBA in your terminal:
 
-* **Query Routing:** Smart classification of user queries to route between direct schema lookups, live database queries, multi-database comparisons, and LLM reasoning.
+* **Query Routing & Optimization:** Smart classification of user queries to route between direct schema lookups, live database queries, and AI-driven analysis of slow queries.
 * **Schema Freshness & Drift Detection:** Automatically detecting schema changes in connected databases and re-indexing knowledge without requiring manual rescans.
 * **Multi-Database Intelligence:** Answering comparative queries across environments (e.g., *"Compare the users table schema between production and staging"*).
-* **Codebase & Service Graph Integration:** Scanning application codebases (TypeScript, Go, Python, etc.) to map exact code references, queries, and ORM models to database tables and columns.
-* **Impact Analysis:** Pre-evaluating schema migrations to show what breaks before applying a change (e.g., *"Which services will break if I rename user_id?"*).
+* **Impact Analysis:** Pre-evaluating schema migrations to show exactly what relationships break before applying a change.
 * **Security & Policy Audit:** Introspecting PostgreSQL Row Level Security (RLS) policies and permissions to explain who can access what data.
 
 ---
 
 ## The Goal
 
-The goal for Migrant is to serve as the unified brain between data infrastructure and application code.
+The goal for Migrant is to serve as the ultimate, intelligent companion for your databases.
 
-Instead of developers manually digging through migrations, scattered ORMs, microservice repositories, and database tools, Migrant maintains a living map of how databases and codebases depend on each other—keeping your entire engineering system connected, understood, and in sync.
+Instead of manually digging through ERDs, writing complex join queries to understand relationships, or guessing why a query is slow, Migrant provides a living, intelligent map of your database architecture—keeping your data systems understood, optimized, and instantly queryable in plain English.
+
+---
+
+## Contributing
+
+We welcome contributions! Whether you're fixing bugs, adding new LLM providers, or improving schema parsing, your help is appreciated.
+
+1. Fork the repository
+2. Clone your fork locally: `git clone https://github.com/as3hr/migrant.git`
+3. Install dependencies: `bun install`
+4. Run locally: `bun dev`
+5. Create a new branch, make your changes, and submit a Pull Request!
+
+For major feature additions, please open an issue first to discuss the implementation.

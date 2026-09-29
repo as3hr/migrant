@@ -1,9 +1,0 @@
-node_modules
-dist
-creds.txt
-scan.sh
-logs/*
-.local
-migrant.db*
-context.md
-backend/*
