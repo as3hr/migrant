@@ -18,7 +18,7 @@ export interface PromptProps {
   mask?: string;
 }
 
-const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions", "models"];
+const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions", "models", "info"];
 
 export function Prompt(props: PromptProps) {
   const placeholder = props.placeholder ?? "Ask anything about your schema...";

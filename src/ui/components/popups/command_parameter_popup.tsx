@@ -5,8 +5,9 @@ import { theme } from "../../theme.ts";
 import { ConnectPopup } from "./connect_popup.tsx";
 import { ModelsPopup } from "./models_popup.tsx";
 import { SessionsPopup } from "./sessions_popup.tsx";
+import { InfoPopup } from "./info_popup.tsx";
 
-export type ParameterCommandType = "connect" | "sessions" | "models";
+export type ParameterCommandType = "connect" | "sessions" | "models" | "info";
 
 export interface CommandParameterPopupProps {
   command: ParameterCommandType;
@@ -14,13 +15,18 @@ export interface CommandParameterPopupProps {
   onClose: () => void;
   databases?: string[] | undefined;
   sessions?: IChatSessionsModel[] | undefined;
+  session?: IChatSessionsModel | undefined;
+  activeModel?: string | undefined;
 }
 
 export function CommandParameterPopup({
   command,
   onSubmit,
   onClose,
+  databases,
   sessions = [],
+  session,
+  activeModel,
 }: CommandParameterPopupProps) {
   return (
     <box
@@ -45,6 +51,9 @@ export function CommandParameterPopup({
       )}
       {command === "models" && (
         <ModelsPopup onSubmit={onSubmit} onClose={onClose} />
+      )}
+      {command === "info" && (
+        <InfoPopup databases={databases} session={session} activeModel={activeModel} onClose={onClose} />
       )}
     </box>
   );

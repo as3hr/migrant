@@ -20,6 +20,11 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     description: "List & switch past chat sessions",
   },
   {
+    name: "info",
+    argsHint: "",
+    description: "View system status and active databases",
+  },
+  {
     name: "models",
     argsHint: "",
     description: "Select AI Provider & Model",

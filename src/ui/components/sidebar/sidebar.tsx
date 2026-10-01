@@ -1,9 +1,7 @@
 /** @jsxImportSource @opentui/react */
-import type { JSX } from "react";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
 import { DatabaseCard } from "./database_card.tsx";
-import { ShortcutsCard } from "./shortcuts_card.tsx";
 import { TelemetryCard } from "./telemetry_card.tsx";
 
 export interface SidebarProps {
@@ -34,7 +32,6 @@ export function Sidebar({
         tokensUsed={session?.session_token_used || 0}
         maxTokens={session?.session_token_limit || 0}
       />
-      <ShortcutsCard />
     </box>
   );
 }

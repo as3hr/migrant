@@ -1,6 +1,6 @@
 import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../infrastructure/commands/index.ts";
-import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
 import { initializeDatabase } from "../infrastructure/db/sqlite/sqlite.client.ts";
+import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
 import { getKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
 import { credentialStore } from "../infrastructure/security/credential_store.ts";
 import {

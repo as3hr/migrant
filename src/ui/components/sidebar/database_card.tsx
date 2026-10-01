@@ -24,7 +24,7 @@ export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCar
       {sessionName && (
         <box style={{ flexDirection: "column", marginBottom: 1 }}>
           <text style={{ fg: theme.accent }}>
-            <strong>💬 Active Session</strong>
+            <strong>Active Session</strong>
           </text>
           <text style={{ fg: theme.brandLight, truncate: true }}>
             <strong>{sessionName}</strong>
@@ -35,7 +35,7 @@ export function DatabaseCard({ databases = [], sessionName }: SessionOverviewCar
       {/* Connected Databases Section */}
       <box style={{ flexDirection: "column" }}>
         <text style={{ fg: theme.brand }}>
-          <strong>🗄  Connected Databases</strong>
+          <strong>Connected Databases</strong>
         </text>
 
         {databases.length === 0 ? (

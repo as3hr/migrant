@@ -4,3 +4,4 @@ export { ConnectPopup, type ConnectPopupProps } from "./connect_popup.tsx";
 export { InputPopup, type InputPopupProps } from "./input_popup.tsx";
 export { ModelsPopup, type ModelsPopupProps } from "./models_popup.tsx";
 export { SessionsPopup, type SessionsPopupProps } from "./sessions_popup.tsx";
+export { InfoPopup, type InfoPopupProps } from "./info_popup.tsx";

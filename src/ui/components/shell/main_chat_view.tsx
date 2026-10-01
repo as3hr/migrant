@@ -31,6 +31,7 @@ export interface MainChatViewProps {
   onSubmitInput: (value: string) => void;
   user?: string | undefined;
   formInputProps?: AskOptions;
+  isCompact?: boolean;
 }
 
 export function MainChatView({
@@ -55,6 +56,7 @@ export function MainChatView({
   onSubmitInput,
   user,
   formInputProps = {},
+  isCompact = false,
 }: MainChatViewProps) {
   return (
     <box
@@ -73,14 +75,6 @@ export function MainChatView({
           backgroundColor: theme.bgCanvas,
         }}
       >
-        {!atBottom && (
-          <box style={{ width: mainWidth, justifyContent: "center", flexShrink: 0 }}>
-            <text style={{ fg: theme.textDim }}>
-              ↑ PageUp · PageDown ↓ · (at bottom: auto-scrolls)
-            </text>
-          </box>
-        )}
-
         <box style={{ flexGrow: 1 }}>
           <scrollbox
             focused
@@ -113,7 +107,7 @@ export function MainChatView({
           </scrollbox>
         </box>
 
-        <box style={{ width: mainWidth, flexShrink: 0 }}>
+        <box style={{ width: mainWidth, flexShrink: 0, flexDirection: "column" }}>          
           {activePopup != null ? (
             <CommandParameterPopup
               command={activePopup}
@@ -121,6 +115,8 @@ export function MainChatView({
               onClose={onClosePopup}
               databases={databases}
               sessions={sessions}
+              session={session}
+              activeModel={activeModel}
             />
           ) : runKind === "idle" ? (
             <Prompt
@@ -130,7 +126,7 @@ export function MainChatView({
               onTriggerPopup={onTriggerPopup}
               {...(user !== undefined ? { user } : {})}
               {...(databases !== undefined ? { databases } : {})}
-            />
+              />
           ) : runKind === "form" ? (
             <Prompt
               value={input}
@@ -146,15 +142,24 @@ export function MainChatView({
                 : {})}
             />
           ) : null}
+          {isCompact && runKind === "idle" && activePopup == null && (
+            <box style={{ flexDirection: "row", justifyContent: "space-between", paddingLeft: 1, paddingRight: 1, marginBottom: 1, borderColor: theme.borderPrimary, paddingTop: 1 }}>
+              <text style={{ fg: theme.badgeModel }}>
+                {`[ Active DBs: ${databases?.length || 0} ] | [ Model: ${activeModel || "Unknown"} ] | [ Type /info ]`}
+              </text>
+            </box>
+          )}
         </box>
       </box>
 
-      <Sidebar
-        databases={databases}
-        session={session}
-        activeModel={activeModel}
-        width={sidebarWidth}
-      />
+      {!isCompact && (
+        <Sidebar
+          databases={databases}
+          session={session}
+          activeModel={activeModel}
+          width={sidebarWidth}
+        />
+      )}
     </box>
   );
 }

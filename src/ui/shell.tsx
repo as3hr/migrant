@@ -37,9 +37,10 @@ export function Shell({ onExit }: ShellProps) {
 
 
   const availableWidth = Math.max(20, dimensions.width - 4);
+  const isCompact = availableWidth < 190;
   const sidebarWidth = Math.min(34, Math.floor(dimensions.width * 0.3));
   const isHero = viewMode === "hero";
-  const mainWidth = availableWidth - (isHero ? 0 : sidebarWidth);
+  const mainWidth = availableWidth - (isHero || isCompact ? 0 : sidebarWidth);
 
   if (auth.authStatus === "checking") {
     return <AuthCheckingView />;
@@ -111,6 +112,7 @@ export function Shell({ onExit }: ShellProps) {
           onSubmitInput={handleSubmit}
           user={user}
           formInputProps={formInputProps}
+          isCompact={isCompact}
         />
       )}
     </box>
