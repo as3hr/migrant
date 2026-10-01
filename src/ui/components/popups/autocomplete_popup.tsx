@@ -11,7 +11,7 @@ export interface SlashCommandItem {
 export const SLASH_COMMANDS: SlashCommandItem[] = [
   {
     name: "connect",
-    argsHint: "<connection_string>",
+    argsHint: "",
     description: "Connect & scan PostgreSQL database",
   },
   {
