@@ -29,11 +29,7 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     argsHint: "",
     description: "Select AI Provider & Model",
   },
-  {
-    name: "login",
-    argsHint: "",
-    description: "Authenticate your Migrant account",
-  },
+
   {
     name: "logout",
     argsHint: "",

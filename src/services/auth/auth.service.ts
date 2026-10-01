@@ -28,14 +28,15 @@ export class AuthService {
   
   private async startLocalCallbackServer(port: number): Promise<void> {
     return new Promise((resolve, reject) => {
+      let timeoutId: ReturnType<typeof setTimeout>;
+
       const server = http.createServer(async (req, res) => {
         const origin = req.headers.origin;
   
-        if (origin === BASE_URL) {
-          res.setHeader(
-            "Access-Control-Allow-Origin",
-            BASE_URL
-          );
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+        } else {
+          res.setHeader("Access-Control-Allow-Origin", "*");
         }
   
         res.setHeader(
@@ -119,6 +120,7 @@ export class AuthService {
             );
   
             server.close();
+            clearTimeout(timeoutId);
             resolve();
           } catch (error) {
             console.error("CLI callback error:", error);
@@ -134,29 +136,39 @@ export class AuthService {
             );
   
             server.close();
+            clearTimeout(timeoutId);
             reject(error);
           }
         });
       });
   
-      server.listen(port, "127.0.0.1", () => { });
+      server.listen(port, "127.0.0.1", () => {
+        timeoutId = setTimeout(() => {
+          server.close();
+          reject(new Error("Login timed out. No response received from browser."));
+        }, 5 * 60 * 1000);
+      });
   
-      server.on("error", reject);
+      server.on("error", (err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      });
     });
   }
 
   async checkLoginGuard(): Promise<User | null> {
     try {
-      const { data: activeData } = await supabase.auth.getSession();
-      if (activeData.session) {
-        return activeData.session.user;
-      }
-
       const row = tblUserSession.getUserSession();
 
       if (!row) {
         return null;
       }
+
+      const { data: activeData } = await supabase.auth.getSession();
+      if (activeData.session) {
+        return activeData.session.user;
+      }
+
 
       const sessionData = JSON.parse(row.session_data);
       const { data, error } = await supabase.auth.setSession({
@@ -208,7 +220,6 @@ export class AuthService {
     );
 
     resetDb();
-    await supabase.auth.signOut();
     appContext.workspace.databases = [];
     appEmitter.emit('logout');
   }
