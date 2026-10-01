@@ -29,7 +29,6 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     argsHint: "",
     description: "Select AI Provider & Model",
   },
-
   {
     name: "logout",
     argsHint: "",
