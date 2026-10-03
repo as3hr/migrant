@@ -1,6 +1,6 @@
 /** @jsxImportSource @opentui/react */
 import { useKeyboard } from "@opentui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   credentialStore,
   PROVIDER_MODELS,
@@ -24,24 +24,25 @@ interface FlatModelItem {
   isFirstInGroup: boolean;
 }
 
-const FLAT_MODELS: FlatModelItem[] = (() => {
-  const result: FlatModelItem[] = [];
-  for (const provider of PROVIDERS) {
-    const models = PROVIDER_MODELS[provider.id] || [];
-    models.forEach((m, idx) => {
-      result.push({
-        providerId: provider.id,
-        providerName: provider.name,
-        apiKeyEnv: provider.apiKeyEnv,
-        model: m,
-        isFirstInGroup: idx === 0,
-      });
-    });
-  }
-  return result;
-})();
 
 export function ModelsPopup({ onSubmit, onClose }: ModelsPopupProps) {
+  const FLAT_MODELS = useMemo(() => {
+    const result: FlatModelItem[] = [];
+    for (const provider of PROVIDERS) {
+      const models = PROVIDER_MODELS[provider.id] || [];
+      models.forEach((m, idx) => {
+        result.push({
+          providerId: provider.id,
+          providerName: provider.name,
+          apiKeyEnv: provider.apiKeyEnv,
+          model: m,
+          isFirstInGroup: idx === 0,
+        });
+      });
+    }
+    return result;
+  }, []);
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [pendingModel, setPendingModel] = useState<FlatModelItem | null>(null);
 

@@ -96,40 +96,6 @@ export const PROVIDER_MODELS: Record<ProviderId, ModelConfig[]> = {
   ],
 };
 
-export async function setProvider(id: ProviderId, apiKey: string) {
-  const provider = PROVIDERS.find((p) => p.id === id);
-  if (!provider) throw new Error(`Unknown provider: ${id}`);
-  await credentialStore.set(provider.apiKeyEnv, apiKey);
-  const providerSdk = await provider.create(apiKey);
-  return providerSdk;
-}
-
-export function setProviderToLocal(provider: IProvider) {
-  tblProvider.setProvider(provider);
-}
-
-export function getModels(id: ProviderId): ModelConfig[] {
-  return PROVIDER_MODELS[id];
-}
-
-export function getModelById(id: string): ModelConfig | undefined {
-  return Object.values(PROVIDER_MODELS).flat().find((m) => m.id === id);
-}
-
-export function getModelLabel(model: ModelConfig): string {
-  if (!model.name) {
-    return model.id;
-  }
-  return `${model.name} (${model.id})`;
-}
-
-export function getProviderLabel(provider: ProviderConfig): string {
-  if (!provider.name) {
-    return provider.id;
-  }
-  return `${provider.name} (${provider.id})`;
-}
-
 export const PROVIDERS: ProviderConfig[] = [
   {
     id: 'anthropic',
@@ -208,4 +174,38 @@ export const PROVIDERS: ProviderConfig[] = [
       return createOpenRouter({ apiKey });
     },
   },
-];
+];export function getModels(id: ProviderId): ModelConfig[] {
+  return PROVIDER_MODELS[id];
+}
+
+export function getModelById(id: string): ModelConfig | undefined {
+  return Object.values(PROVIDER_MODELS).flat().find((m) => m.id === id);
+}
+
+export function getModelLabel(model: ModelConfig): string {
+  if (!model.name) {
+    return model.id;
+  }
+  return `${model.name} (${model.id})`;
+}
+
+export function getProviderLabel(provider: ProviderConfig): string {
+  if (!provider.name) {
+    return provider.id;
+  }
+  return `${provider.name} (${provider.id})`;
+}
+
+export async function setProvider(id: ProviderId, apiKey: string) {
+  const provider = PROVIDERS.find((p) => p.id === id);
+  if (!provider) throw new Error(`Unknown provider: ${id}`);
+  await credentialStore.set(provider.apiKeyEnv, apiKey);
+  const providerSdk = await provider.create(apiKey);
+  return providerSdk;
+}
+
+export function setProviderToLocal(provider: IProvider) {
+  tblProvider.setProvider(provider);
+}
+
+
