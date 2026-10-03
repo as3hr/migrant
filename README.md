@@ -8,7 +8,12 @@ Migrant is an AI-powered engineering intelligence CLI designed to help you under
 
 The easiest way to install Migrant is via our ultra-fast standalone binaries. No dependencies (like Node, Bun, or NPM) are required.
 
-**macOS & Linux (Instant Install):**
+**macOS & Linux (Homebrew):**
+```bash
+brew install migrantt/tap/migrant
+```
+
+**macOS & Linux (Direct Script):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/as3hr/migrant/main/install.sh | bash
 ```
