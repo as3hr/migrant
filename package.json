@@ -1,12 +1,12 @@
 {
   "name": "migrant-cli",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun --watch src/ui/index.tsx",
-    "start": "bun run src/ui/index.tsx",
-    "build": "bun build ./src/ui/index.tsx --compile --outfile dist/migrant"
+    "dev": "bun --watch src/cli.ts",
+    "start": "bun run src/cli.ts",
+    "build": "bun build ./src/cli.ts --compile --outfile dist/migrant"
   },
   "bin": {
     "migrant": "./src/cli.ts"

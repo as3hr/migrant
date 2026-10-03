@@ -15,7 +15,8 @@ import {
 } from "../services/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
 import { emitEvent } from "../utils/emitter.ts";
-import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
+import { CommandRegistry, type CommandContext } from "./command-shell.ts";
+import { WorkSpace } from "./workspace.ts";
 
 interface AppServices {
     authService: AuthService;

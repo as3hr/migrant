@@ -1,4 +1,5 @@
-import { appContext, type CommandDefinition } from "../../domain/index.ts";
+import { appContext } from "../../domain/app_context.ts";
+import type { CommandDefinition } from "../../domain/command-shell.ts";
 import {
   getModelById,
   PROVIDER_MODELS,
