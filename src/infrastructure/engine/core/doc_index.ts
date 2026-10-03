@@ -1,6 +1,5 @@
-import { appContext, type DatabaseCollection } from "../../domain/index.ts";
-import { tblDocuments } from "../../infrastructure/db/sqlite/tbl_documents.ts";
-import type { Json } from "../../types/database.types.ts";
+import { appContext, type DatabaseCollection } from "../../../domain/index.ts";
+import { tblDocuments } from "../../db/sqlite/tbl_documents.ts";
 
 interface SemanticSearchResult {
     id: string;
@@ -9,7 +8,7 @@ interface SemanticSearchResult {
     database_id: string;
     embedding_model: string;
     distance: number;
-    metadata: Json;
+    metadata: Record<string, any>;
 }
 
 interface SemanticSearchResponse {
@@ -18,7 +17,7 @@ interface SemanticSearchResponse {
     documentsData: SemanticSearchResult[];
 }
 
-export class RagService {
+export class DocIndex {
     async performSemanticSearch(query: string, database: DatabaseCollection, match_count?: number): Promise<SemanticSearchResponse | null> {
         try { 
             const embedding = await appContext.services.embeddingService.createSingleEmbedding([query]);

@@ -9,9 +9,3 @@ export * from "./knowledge/knowledge-document.service.ts";
 
 export * from "./telemetry_memory/context_manager.ts";
 export * from "./telemetry_memory/memory.service.ts";
-
-export * from "./query/db_overview.service.ts";
-export * from "./query/llm.service.ts";
-export * from "./query/prompts/index.ts";
-export * from "./query/rag.service.ts";
-export * from "./query/user_query.service.ts";

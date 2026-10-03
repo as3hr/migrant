@@ -5,3 +5,6 @@ export { InputPopup, type InputPopupProps } from "./input_popup.tsx";
 export { ModelsPopup, type ModelsPopupProps } from "./models_popup.tsx";
 export { SessionsPopup, type SessionsPopupProps } from "./sessions_popup.tsx";
 export { InfoPopup, type InfoPopupProps } from "./info_popup.tsx";
+export { DisconnectPopup, type DisconnectPopupProps } from "./disconnect_popup.tsx";
+export { RenameDbPopup, type RenameDbPopupProps } from "./rename_db_popup.tsx";
+export { RenameSessionPopup, type RenameSessionPopupProps } from "./rename_session_popup.tsx";

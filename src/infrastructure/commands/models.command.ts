@@ -9,7 +9,7 @@ import {
   type ProviderId,
 } from "../../infrastructure/index.ts";
 import { credentialStore } from "../../infrastructure/security/credential_store.ts";
-import { appEmitter } from "../../utils/emitter.ts";
+import { emitEvent } from "../../utils/emitter.ts";
 
 export const modelsCommand: CommandDefinition = {
   name: "models",
@@ -96,12 +96,12 @@ export const modelsCommand: CommandDefinition = {
           updated_at: new Date().toISOString(),
         });
         if (updatedSession) {
-          appEmitter.emit("update-session", { updatedSession });
+          emitEvent.emit("update-session", { updatedSession });
         }
       }
     }
 
-    appEmitter.emit("update-model", { model: modelConfig.id });
+    emitEvent.emit("update-model", { model: modelConfig.id });
     ctx.success(`Active AI model set to: ${modelConfig.name} (${modelConfig.id})`);
   },
 };

@@ -1,6 +1,6 @@
 import { appContext } from "../../domain/index.ts";
 import { tblChatMessage, tblChatSessions, type IChatMessageModel, type IChatSessionsModel } from "../../infrastructure/index.ts";
-import { appEmitter } from "../../utils/index.ts";
+import { emitEvent } from "../../utils/index.ts";
 
 export class ChatSessionService {
 
@@ -19,6 +19,14 @@ export class ChatSessionService {
             throw new Error("Failed to create local chat session");
         }
         return created;
+    }
+
+    async updateSession(sessionId: string, patch: Partial<IChatSessionsModel>): Promise<IChatSessionsModel | undefined> {
+        const session = tblChatSessions.getChatSessionById(sessionId);
+        if (!session) return undefined;
+
+        const updated = { ...session, ...patch, updated_at: new Date().toISOString() };
+        return tblChatSessions.setChatSession(updated);
     }
 
     async setChatMessage(sessionId: string, message: IChatMessageModel): Promise<boolean> {
@@ -40,7 +48,7 @@ export class ChatSessionService {
         const session = tblChatSessions.getChatSessionById(sessionId);
         if (session) {
             appContext.currentChatSessionId = session.id;
-            appEmitter.emit('update-session', {
+            emitEvent.emit('update-session', {
                 updatedSession: session,
                 isSwitch: true,
             });

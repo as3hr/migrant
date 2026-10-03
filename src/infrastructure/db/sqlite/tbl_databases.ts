@@ -1,4 +1,5 @@
-import type { DatabaseCollection, DatabaseType } from "../../../domain/index.ts";
+import { type DatabaseCollection, type DatabaseType } from "../../../domain/index.ts";
+import { withErrorHandler } from "../../../utils/exception_handler.ts";
 import { credentialStore } from "../../security/credential_store.ts";
 import { sqlClient } from "./sqlite.client.ts";
 
@@ -86,8 +87,7 @@ class TblDatabases {
         return data.filter((row) => row != null);
     }
 
-
-    async getLocalDbById(id: string): Promise<DatabaseCollection | null> {
+    getLocalDbById = withErrorHandler(async (id: string): Promise<DatabaseCollection | null> => {
         const row = this.databasesDbSelectByIdStmt.get(id) as DatabaseCollection;
         if (!row) return null;
         const value = await credentialStore.get(row.connectionStringKey);
@@ -101,11 +101,11 @@ class TblDatabases {
             type: row.type as DatabaseType,
             schemaFingerprint: row.schemaFingerprint,
             lastScannedAt: row.lastScannedAt
-              ? new Date(row.lastScannedAt)
-              : undefined,
-            indexStatus: row.indexStatus as 'none' | 'indexing' |'ready' | 'failed',
+                ? new Date(row.lastScannedAt)
+                : undefined,
+            indexStatus: row.indexStatus as 'none' | 'indexing' | 'ready' | 'failed',
         }
-    }
+    });
 
     getLocalDbsConnectionKeys(user_id: string): string[] {
         const rows = this.databasesDbSelectStmt.all(user_id) as DatabaseCollection[];

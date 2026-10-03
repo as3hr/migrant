@@ -6,8 +6,11 @@ import { ConnectPopup } from "./connect_popup.tsx";
 import { ModelsPopup } from "./models_popup.tsx";
 import { SessionsPopup } from "./sessions_popup.tsx";
 import { InfoPopup } from "./info_popup.tsx";
+import { DisconnectPopup } from "./disconnect_popup.tsx";
+import { RenameDbPopup } from "./rename_db_popup.tsx";
+import { RenameSessionPopup } from "./rename_session_popup.tsx";
 
-export type ParameterCommandType = "connect" | "sessions" | "models" | "info";
+export type ParameterCommandType = "connect" | "sessions" | "models" | "info" | "disconnect" | "rename-db" | "rename";
 
 export interface CommandParameterPopupProps {
   command: ParameterCommandType;
@@ -54,6 +57,15 @@ export function CommandParameterPopup({
       )}
       {command === "info" && (
         <InfoPopup databases={databases} session={session} activeModel={activeModel} onClose={onClose} />
+      )}
+      {command === "disconnect" && (
+        <DisconnectPopup databases={databases} onSubmit={onSubmit} onClose={onClose} />
+      )}
+      {command === "rename-db" && (
+        <RenameDbPopup databases={databases} onSubmit={onSubmit} onClose={onClose} />
+      )}
+      {command === "rename" && (
+        <RenameSessionPopup onSubmit={onSubmit} onClose={onClose} />
       )}
     </box>
   );

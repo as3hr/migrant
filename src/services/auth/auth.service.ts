@@ -3,8 +3,8 @@ import getPort from "get-port";
 import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
-import { credentialStore, resetDb, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
-import { appEmitter, BASE_URL } from "../../utils/index.ts";
+import { credentialStore, pool, resetDb, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
+import { BASE_URL, emitEvent } from "../../utils/index.ts";
 
 export class AuthService {
 
@@ -220,7 +220,13 @@ export class AuthService {
     );
 
     resetDb();
-    appContext.workspace.databases = [];
-    appEmitter.emit('logout');
+
+    appContext.workspace.databases.map(async (db) => {
+      try {
+        await pool.close(db.id);
+      } catch (e) { }
+    });
+
+    emitEvent.emit('logout');
   }
 }

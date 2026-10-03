@@ -1,7 +1,9 @@
-import { connectCommand, createHelpCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, sessionsCommand } from "../infrastructure/commands/index.ts";
+import { connectCommand, createHelpCommand, disconnectCommand, exitCommand, loginCommand, logoutCommand, modelsCommand, newSessionCommand, renameDbCommand, renameSessionCommand, sessionsCommand } from "../infrastructure/commands/index.ts";
 import { initializeDatabase } from "../infrastructure/db/sqlite/sqlite.client.ts";
 import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
-import { getKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import { DocIndex } from "../infrastructure/engine/core/doc_index.ts";
+import { LlmService } from "../infrastructure/engine/core/llm.ts";
+import { defaultApiKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
 import { credentialStore } from "../infrastructure/security/credential_store.ts";
 import {
     AuthService,
@@ -9,12 +11,10 @@ import {
     ContextManager,
     DatabaseConnectionService,
     EmbeddingService,
-    LlmService,
     MemoryService,
-    RagService
 } from "../services/index.ts";
 import { SYS_DEFAULT_MODEL } from "../utils/constants.ts";
-import { appEmitter } from "../utils/emitter.ts";
+import { emitEvent } from "../utils/emitter.ts";
 import { CommandRegistry, WorkSpace, type CommandContext } from "./index.ts";
 
 interface AppServices {
@@ -23,8 +23,8 @@ interface AppServices {
     chatSessionService: ChatSessionService;
     databaseRegistryService: DatabaseConnectionService;
     databaseService: ChatSessionService;
-    ragService: RagService;
-    llmService: LlmService;
+    docIndex: DocIndex;
+    llm: LlmService;
     embeddingService: EmbeddingService;
     memoryService: MemoryService;
     contextManager: ContextManager;
@@ -74,7 +74,7 @@ class AppContext {
         }
 
         if (!apiKey) {
-            apiKey = await getKey();
+            apiKey = defaultApiKey;
             providerId = "openrouter";
         }
 
@@ -91,7 +91,7 @@ class AppContext {
             });
         }
 
-        appEmitter.emit('update-model', {
+        emitEvent.emit('update-model', {
             model: modelId,
         });
 
@@ -119,6 +119,10 @@ class AppContext {
       registry.register(logoutCommand);
       registry.register(sessionsCommand);
       registry.register(modelsCommand);
+        registry.register(disconnectCommand);
+        registry.register(newSessionCommand);
+        registry.register(renameSessionCommand);
+        registry.register(renameDbCommand);
       registry.register(createHelpCommand(registry));
     
       return registry;
@@ -134,8 +138,8 @@ class AppContext {
             chatSessionService,
             databaseRegistryService: databaseConnectionService,
             databaseService: chatSessionService,
-            ragService: new RagService(),
-            llmService: new LlmService(),
+            docIndex: new DocIndex(),
+            llm: new LlmService(),
             embeddingService: new EmbeddingService(),
             memoryService: new MemoryService(),
             contextManager: new ContextManager()

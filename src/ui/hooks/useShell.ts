@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { AskOptions } from "../../domain/index.ts";
 import type { IChatSessionsModel } from "../../infrastructure/index.ts";
+import { emitEvent } from "../../utils/index.ts";
 import type { OutputItem } from "../components/output.tsx";
 import type { ParameterCommandType } from "../components/popups/index.ts";
 import { useAuth, type UseAuthReturn } from "./useAuth.ts";
@@ -58,6 +59,19 @@ export function useShell(onExit: () => void): UseShellReturn {
     }
   });
 
+  useEffect(() => {
+    const handleUpdateSession = async (data?: { updatedSession?: IChatSessionsModel; isSwitch?: boolean }) => {
+      if (!data?.updatedSession || data.updatedSession == null) {
+        setViewMode('hero');
+        chatOutputs.clearOutputs();
+      }
+    };
+    emitEvent.on("update-session", handleUpdateSession);
+    return () => {
+      emitEvent.off("update-session", handleUpdateSession);
+    };
+  }, []);
+
   const commandExecutor = useCommandExecutor({
     onExit,
     appendOutput: chatOutputs.appendOutput,
@@ -66,7 +80,11 @@ export function useShell(onExit: () => void): UseShellReturn {
     clearOutputs: chatOutputs.clearOutputs,
     openPopup: popupState.openPopup,
     refreshStatus: workspaceStatus.refreshStatus,
-    onCommandSubmitted: () => {
+    onCommandSubmitted: (commandName?: string) => {
+      const stayInHeroCommands = ["connect", "disconnect", "rename-db", "rename", "new", "login", "logout"];
+      if (commandName && stayInHeroCommands.includes(commandName)) {
+        return;
+      }
       setViewMode("chat");
     },
   });
@@ -80,12 +98,6 @@ export function useShell(onExit: () => void): UseShellReturn {
     onScrollUp: scrollState.scrollUp,
     onScrollDown: scrollState.scrollDown,
   });
-
-  useEffect(() => {
-    if (chatOutputs.outputs.length > 2) {
-      setViewMode("chat");
-    }
-  }, [chatOutputs.outputs.length]);
 
   const openPopup = (type: ParameterCommandType) => {
     commandExecutor.setInput("");

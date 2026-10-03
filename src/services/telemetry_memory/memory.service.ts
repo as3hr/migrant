@@ -4,7 +4,7 @@ import type { Context } from "node:vm";
 import { appContext } from "../../domain/index.ts";
 import type { IChatMessageModel, IChatSessionsModel } from "../../infrastructure/index.ts";
 import { getModelById, tblChatMessage, tblChatSessions } from "../../infrastructure/index.ts";
-import { appEmitter } from "../../utils/emitter.ts";
+import { emitEvent } from "../../utils/emitter.ts";
 
 export class MemoryService {
     async saveTurnToMemory(
@@ -57,7 +57,7 @@ export class MemoryService {
                     updated_at: new Date().toISOString(),
                 });
 
-                appEmitter.emit('update-session', {
+                emitEvent.emit('update-session', {
                     updatedSession,
                 });
             }
@@ -74,7 +74,8 @@ export class MemoryService {
 
         let sessionId = appContext.currentChatSessionId;
         if (!sessionId) {
-            const fallbackTitle = "";
+            // todays date and time
+            const fallbackTitle = new Date().toLocaleString();
             const tokenLimit = getModelById(appContext.selectedModel.modelId)?.contextWindow ?? 0;
 
             const newSession: IChatSessionsModel = {
@@ -92,11 +93,9 @@ export class MemoryService {
                 sessionId = session.id;
                 appContext.currentChatSessionId = sessionId;
 
-                appEmitter.emit('update-session', {
+                emitEvent.emit('update-session', {
                     updatedSession: session,
                 });
-
-                this.generateAndUpdateSessionTitle(question, sessionId);
             }
         }
 
@@ -121,27 +120,5 @@ export class MemoryService {
         }
 
         return undefined;
-    }
-
-    generateAndUpdateSessionTitle(question: string, sessionId: string) {
-        void appContext.services.llmService.generateTitle(question).then((generatedTitle) => {
-            if (generatedTitle) {
-                const existing = tblChatSessions.getChatSessionById(sessionId);
-                if (existing) {
-                    const updated = tblChatSessions.setChatSession({
-                        ...existing,
-                        title: generatedTitle,
-                        updated_at: new Date().toISOString(),
-                    });
-                    if (updated) {
-                        appEmitter.emit('update-session', {
-                            updatedSession: updated,
-                        });
-                    }
-                }
-            }
-        }).catch((err) => {
-            console.error("Error generating session title in background:", err);
-        });
     }
 }

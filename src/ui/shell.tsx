@@ -31,8 +31,6 @@ export function Shell({ onExit }: ShellProps) {
     handleSubmit,
     auth,
     viewMode,
-    selectedIndex,
-    atBottom,
   } = useShell(onExit);
 
 
@@ -75,6 +73,7 @@ export function Shell({ onExit }: ShellProps) {
         <HeroView
           activeModel={activeModel}
           dimensions={dimensions}
+          outputs={outputs}
           activePopup={activePopup}
           onParameterSubmit={handleParameterSubmit}
           onClosePopup={closePopup}
@@ -94,8 +93,6 @@ export function Shell({ onExit }: ShellProps) {
           mainWidth={mainWidth}
           sidebarWidth={sidebarWidth}
           outputs={outputs}
-          selectedIndex={selectedIndex}
-          atBottom={atBottom}
           runKind={run.kind}
           runLabel={run.kind !== "idle" ? run.label : undefined}
           spinnerVisible={spinnerVisible}

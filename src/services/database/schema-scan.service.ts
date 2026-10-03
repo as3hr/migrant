@@ -1,11 +1,12 @@
-import { appContext, type CommandContext, type DatabaseGraph, type KnowledgeDocument, type SchemaGraph } from "../../domain/index.ts";
+import { appContext, type DatabaseGraph, type KnowledgeDocument, type SchemaGraph } from "../../domain/index.ts";
 import { getEnums, getExtensions, getFunctions, getSchemaFingerprint, getSchemas, getSequences, getTables, getTriggers, getViews } from "../../infrastructure/index.ts";
 import { databaseToKnowledgeDocuments } from "../index.ts";
 
-export async function startScan(ctx: CommandContext, dbId: string): Promise<void> {
+export async function startScan(dbId: string): Promise<boolean> {
   try {
-    const startedAt = Date.now();
-    
+    const startedAt = Date.now();    
+    const ctx = appContext.commandCtx!;
+
     const schemaGraphs: SchemaGraph[] = [];
     const schemas = await getSchemas(dbId);
     ctx.success(`${schemas.length} Schemas Scanned Successfully!`);
@@ -17,8 +18,8 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
     const graphs = await Promise.all(schemas.map((s) => parseSchema(s, dbId)));
     const validGraphs = graphs.filter((g): g is NonNullable<typeof g> => Boolean(g));
     if (validGraphs.length == 0) {
-      ctx.log("No valid graphs found. The database is either empty or not supported yet. Visit https://docs.migrant.ai for more information.");
-      return; 
+      ctx.log("No valid graphs found. The database is either empty or not supported yet. Visit https://migrant.sh for more information.");
+      return false; 
     }
     schemaGraphs.push(...validGraphs);
 
@@ -31,12 +32,11 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
     };
 
     const dbKnowledgeDocuments = databaseToKnowledgeDocuments(result);
-
     const success = await reindexDocuments(dbId, dbKnowledgeDocuments);
 
     if (!success) {
       ctx.error("Failed to reindex documents — scan results were not persisted.");
-      return;
+      return false;
     }
 
     const schemaFingerprint = await getSchemaFingerprint(dbId);
@@ -52,11 +52,14 @@ export async function startScan(ctx: CommandContext, dbId: string): Promise<void
         lastScannedAt: new Date(),
       }
     );
+
+    return true;
   } catch (error) {
     console.error("Error scanning database:", error);
     await appContext.services.databaseConnectionService.updateDatabase(dbId, {
       indexStatus: "failed",
     });
+    return false;
   }
 }
 

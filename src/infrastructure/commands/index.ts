@@ -7,3 +7,7 @@ export * from "./login.command.ts";
 export * from "./logout.command.ts";
 export * from "./models.command.ts";
 export * from "./sessions.command.ts";
+export * from "./disconnect.command.ts";
+export * from "./new-session.command.ts";
+export * from "./rename-session.command.ts";
+export * from "./rename-db.command.ts";

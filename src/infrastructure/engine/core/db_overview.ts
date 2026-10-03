@@ -1,5 +1,5 @@
-import { appContext, type DatabaseCollection } from "../../domain/index.ts";
-import { getCheckConstraintsQuery, getColumnsQuery, getEnumsQuery, getFksQuery, getFunctionsQuery, getIdxsQuery, getPrimaryKeysQuery, getSchemaFingerprintQuery, getTriggersQuery, getUniqueConstraintsQuery, getViewsQuery, pool } from "../../infrastructure/index.ts";
+import { appContext, type DatabaseCollection } from "../../../domain/index.ts";
+import { getCheckConstraintsQuery, getColumnsQuery, getEnumsQuery, getFksQuery, getFunctionsQuery, getIdxsQuery, getPrimaryKeysQuery, getSchemaFingerprintQuery, getTriggersQuery, getUniqueConstraintsQuery, getViewsQuery, pool } from "../../index.ts";
 
 const METADATA_QUERY_SYSTEM_PROMPT = `
 You are a PostgreSQL Schema Introspection Query Generator for Migrant CLI.
@@ -81,7 +81,7 @@ export async function getDatabaseContextForUserQuery(userQuery: string, db: Data
 
         if (attempt > 1) {
             appContext.commandCtx?.log(
-                `Attempt ${attempt}/${MAX_RETRIES}: Retrying SQL generation due to error: ${lastError}`
+                `Analyzing another approach, ${attempt}/${MAX_RETRIES}`
             );
         }
 
@@ -110,7 +110,7 @@ async function executeIntrospectionWorkflow(
     dbId: string
 ): Promise<ExecutionResult> {
     try {
-        const output = await appContext.services.llmService.queryLlm(
+        const output = await appContext.services.llm.queryLlm(
             systemPrompt,
             [
                 {

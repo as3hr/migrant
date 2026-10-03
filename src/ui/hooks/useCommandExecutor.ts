@@ -17,7 +17,7 @@ export interface UseCommandExecutorProps {
   clearOutputs: () => void;
   openPopup: (type: ParameterCommandType) => void;
   refreshStatus: () => Promise<void>;
-  onCommandSubmitted?: () => void;
+  onCommandSubmitted?: (commandName?: string) => void;
 }
 
 export interface UseCommandExecutorReturn {
@@ -72,10 +72,11 @@ export function useCommandExecutor({
   });
 
   const executeInput = async (value: string) => {
-    onCommandSubmitted?.();
+    const parsed = parseCommandInput(value);
+    onCommandSubmitted?.(parsed ? parsed.name : undefined);
+    
     const ctx = createCommandContext();
     appContext.createCommandContext(ctx);
-    const parsed = parseCommandInput(value);
 
     try {
       if (parsed) {
@@ -133,6 +134,21 @@ export function useCommandExecutor({
     if (lower === "/sessions" || lower === "/sessions ") {
       setInput("");
       openPopup("sessions");
+      return;
+    }
+    if (lower === "/disconnect" || lower === "/disconnect ") {
+      setInput("");
+      openPopup("disconnect");
+      return;
+    }
+    if (lower === "/rename-db" || lower === "/rename-db ") {
+      setInput("");
+      openPopup("rename-db");
+      return;
+    }
+    if (lower === "/rename" || lower === "/rename ") {
+      setInput("");
+      openPopup("rename");
       return;
     }
 

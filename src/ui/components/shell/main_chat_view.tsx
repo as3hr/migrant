@@ -13,8 +13,6 @@ export interface MainChatViewProps {
   mainWidth: number;
   sidebarWidth: number;
   outputs: OutputItem[];
-  selectedIndex: number;
-  atBottom: boolean;
   runKind: "idle" | "running" | "form";
   runLabel?: string | undefined;
   spinnerVisible: boolean;
@@ -38,8 +36,6 @@ export function MainChatView({
   mainWidth,
   sidebarWidth,
   outputs,
-  selectedIndex,
-  atBottom,
   runKind,
   runLabel,
   spinnerVisible,

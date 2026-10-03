@@ -6,9 +6,11 @@ import { HeroLogo } from "../hero/hero_logo.tsx";
 import type { ParameterCommandType } from "../popups/index.ts";
 import { CommandParameterPopup } from "../popups/index.ts";
 import { Prompt } from "../prompt.tsx";
+import { Output, type OutputItem } from "../output.tsx";
 
 export interface HeroViewProps {
   dimensions: { width: number; height: number };
+  outputs: OutputItem[];
   activePopup: ParameterCommandType | null;
   onParameterSubmit: (paramValue: string) => void;
   onClosePopup: () => void;
@@ -27,6 +29,7 @@ export interface HeroViewProps {
 
 export function HeroView({
   dimensions,
+  outputs,
   activePopup,
   onParameterSubmit,
   onClosePopup,
@@ -55,6 +58,26 @@ export function HeroView({
       }}
     >
       <HeroLogo />
+
+      <box 
+        style={{ 
+          position: "absolute",
+          top: 1,
+          right: 2,
+          flexDirection: "column",
+          alignItems: "flex-end",
+          zIndex: 10
+        }}
+      >
+        {outputs
+          .filter(o => o.type === "success" || o.type === "error" || o.type === "text")
+          .slice(-3)
+          .map((item, i) => (
+            <box key={`out-${i}`} style={{ marginBottom: 1 }}>
+              <Output item={item} />
+            </box>
+          ))}
+      </box>
 
       <box style={{ width: Math.min(80, dimensions.width - 4) }}>
         {activePopup ? (
@@ -91,12 +114,28 @@ export function HeroView({
         )}
       </box>
 
-      <box style={{ marginTop: 1, flexDirection: "row" }}>
-        <text style={{ fg: theme.warning }}>● </text>
-        <text style={{ fg: theme.textDim }}>Tip: Run </text>
-        <text style={{ fg: theme.brandLight }}>/connect</text>
-        <text style={{ fg: theme.textDim }}> to add a PostgreSQL database pool</text>
+      <box style={{ marginTop: 2, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        {databases && databases.length > 0 ? (
+          <box style={{ flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <text style={{ fg: theme.textSecondary, marginBottom: 1 }}>
+              <strong>Connected Databases</strong>
+            </text>
+            {databases.map((dbName) => (
+              <text key={dbName} style={{ fg: theme.brandLight }}>
+                {dbName}
+              </text>
+            ))}
+          </box>
+        ) : (
+          <box style={{ flexDirection: "row" }}>
+            <text style={{ fg: theme.warning }}>● </text>
+            <text style={{ fg: theme.textDim }}>Tip: Run </text>
+            <text style={{ fg: theme.brandLight }}>/connect</text>
+            <text style={{ fg: theme.textDim }}> to add a database</text>
+          </box>
+        )}
       </box>
+
       <box style={{ marginTop: 1, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         <text style={{ fg: theme.success }}>{`${user ?? ""} - ${activeModel ?? ""}`}</text>
       </box>

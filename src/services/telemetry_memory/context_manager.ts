@@ -2,7 +2,7 @@ import type { ModelMessage } from "ai";
 import { appContext } from "../../domain/index.ts";
 import { tblChatMessage, type IChatMessageModel } from "../../infrastructure/db/sqlite/tbl_chat_message.ts";
 import { getModelById } from "../../infrastructure/index.ts";
-import { appEmitter } from "../../utils/emitter.ts";
+import { emitEvent } from "../../utils/emitter.ts";
 
 export class ContextManager {
     calculateCostUsd(modelName: string, promptTokens: number, completionTokens: number): number {
@@ -65,7 +65,7 @@ export class ContextManager {
                     : msg.content;
                 const messageTokens = this.estimateTokens(content);
                 if (accumulatedTokens + messageTokens > maxHistoryTokenBudget && selectedMessages.length > 0) {
-                    appEmitter.emit('token-limit-breached', {
+                    emitEvent.emit('token-limit-breached', {
                         sessionId: sessionId,
                         current_token_budget: maxHistoryTokenBudget,
                         current_token_used: accumulatedTokens,

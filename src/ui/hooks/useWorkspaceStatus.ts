@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { appContext } from "../../domain/index.ts";
 import { supabase, type IChatSessionsModel } from "../../infrastructure/index.ts";
-import { appEmitter } from "../../utils/emitter.ts";
+import { emitEvent } from "../../utils/emitter.ts";
 import { SYS_DEFAULT_MODEL } from "../../utils/index.ts";
 import type { UseAuthReturn } from "./useAuth.ts";
 
@@ -42,21 +42,36 @@ export function useWorkspaceStatus(auth: UseAuthReturn): UseWorkspaceStatusRetur
       setActiveModel(model);
     };
 
-    appEmitter.on("update-model", handler);
+    emitEvent.on("update-model", handler);
     return () => {
-      appEmitter.off("update-model", handler);
+      emitEvent.off("update-model", handler);
     };
   }, []);
 
   useEffect(() => {
-    const handleUpdateSession = ({ updatedSession }: { updatedSession: IChatSessionsModel }) => {
-      setCurrentSession(updatedSession);
+    const handleUpdateSession = ({ updatedSession }: { updatedSession: IChatSessionsModel | null }) => {
+      if (updatedSession === null) {
+        setCurrentSession(undefined);
+      } else {
+        setCurrentSession(updatedSession);
+      }
       void refreshStatus();
     };
 
-    appEmitter.on("update-session", handleUpdateSession);
+    emitEvent.on("update-session", handleUpdateSession);
     return () => {
-      appEmitter.off("update-session", handleUpdateSession);
+      emitEvent.off("update-session", handleUpdateSession);
+    };
+  }, [refreshStatus]);
+
+  useEffect(() => {
+    const handleUpdateDb = () => {
+      void refreshStatus();
+    };
+
+    emitEvent.on("update-databases", handleUpdateDb);
+    return () => {
+      emitEvent.off("update-databases", handleUpdateDb);
     };
   }, [refreshStatus]);
 
@@ -66,9 +81,9 @@ export function useWorkspaceStatus(auth: UseAuthReturn): UseWorkspaceStatusRetur
     }
 
     const handler = () => auth.checkAuth();
-    appEmitter.on("logout", handler);
+    emitEvent.on("logout", handler);
     return () => {
-      appEmitter.off("logout", handler);
+      emitEvent.off("logout", handler);
     };
   }, [auth.authStatus, refreshStatus]);
 

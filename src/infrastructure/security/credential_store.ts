@@ -16,6 +16,7 @@ export class CredentialStore {
     }
     catch (error) {
       console.error("Error setting credential:", error);
+      throw error;
     }
   }
 
@@ -25,7 +26,7 @@ export class CredentialStore {
     }
     catch (error) {
       console.error("Error getting credential:", error);
-      return null;
+      throw error;
     }
   }
 
@@ -35,6 +36,7 @@ export class CredentialStore {
     }
     catch (error) {
       console.error("Error setting credential:", error);
+      throw error;
     }
   }
 }

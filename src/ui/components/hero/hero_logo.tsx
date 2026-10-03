@@ -14,7 +14,7 @@ export function HeroLogo() {
       </text>
       <box style={{ marginTop: 1 }}>
         <text style={{ fg: theme.accent }}>
-          <strong>PostgreSQL Schema Intelligence & Agent System</strong>
+          <strong>Database Schema Intelligence & Agent System</strong>
         </text>
       </box>
     </box>

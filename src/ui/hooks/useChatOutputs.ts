@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { appContext } from "../../domain/index.ts";
 import type { IChatSessionsModel } from "../../infrastructure/index.ts";
-import { appEmitter } from "../../utils/emitter.ts";
+import { emitEvent } from "../../utils/emitter.ts";
 import type { OutputItem } from "../components/output.tsx";
 
 export interface UseChatOutputsReturn {
@@ -67,9 +67,9 @@ export function useChatOutputs(onSessionMessagesLoaded?: (count: number) => void
       }
     };
 
-    appEmitter.on("update-session", handleUpdateSession);
+    emitEvent.on("update-session", handleUpdateSession);
     return () => {
-      appEmitter.off("update-session", handleUpdateSession);
+      emitEvent.off("update-session", handleUpdateSession);
     };
   }, []);
 

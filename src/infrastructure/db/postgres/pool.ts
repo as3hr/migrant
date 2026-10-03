@@ -1,5 +1,6 @@
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 import { appContext } from "../../../domain/index.ts";
+import { isLocalConnection } from "../../../utils/index.ts";
 
 export class PoolConnector {
     pools: Record<string, Pool> = {};
@@ -7,7 +8,8 @@ export class PoolConnector {
     async setConnection(dbUrl: string): Promise<string | null> {
         const dbId = await appContext.services.databaseConnectionService.registerConnection(dbUrl);
         if (!dbId) return null;
-        this.pools[dbId] = new Pool({ connectionString: dbUrl });
+
+        this.pools[dbId] = this.createPool(dbUrl);
         return dbId;
     }
 
@@ -15,10 +17,10 @@ export class PoolConnector {
         return this.pools[dbId];
     }
 
-    close(dbId: string) {
+    async close(dbId: string) {
         const pool = this.pools[dbId];
         if (!pool) return;
-        pool.end();
+        await pool.end();
         delete this.pools[dbId];
         appContext.workspace.removeDbFromWorkspace(dbId);
     }
@@ -32,7 +34,7 @@ export class PoolConnector {
             if (!this.pools[dbId]) {
                 const db = appContext.workspace.getDb(dbId);
                 if (db?.connectionString) {
-                    this.pools[dbId] = new Pool({ connectionString: db.connectionString });
+                    this.pools[dbId] = this.createPool(db.connectionString);
                 } else {
                     throw new Error(`Database ${dbId} is not connected.`);
                 }
@@ -43,6 +45,15 @@ export class PoolConnector {
             throw err;
         }
     }        
+
+    private createPool(connectionString: string): Pool {
+        const isLocal = isLocalConnection(connectionString);
+        return new Pool({
+            connectionString,
+            ssl: isLocal ? false : { rejectUnauthorized: false },
+            connectionTimeoutMillis: isLocal ? 3000 : 10000,
+        });
+    }
 }
 
 export const pool = new PoolConnector();

@@ -1,8 +1,7 @@
 import { generateText, Output, streamText, type GenerateTextOnEndCallback, type ModelMessage, type ToolSet } from 'ai';
 import type { Context } from 'node:vm';
 import z from "zod";
-import { appContext } from '../../domain/index.ts';
-import { openRouter } from '../../infrastructure/index.ts';
+import { appContext } from '../../../domain/index.ts';
 
 export class LlmService {
     async queryLlm(systemPrompt: string, messages: ModelMessage[], model?: string, onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
@@ -54,10 +53,13 @@ export class LlmService {
         }
     }
 
-    async generateTitle(question: string): Promise<string> {
+    async generateTitle(question: string, model?: string): Promise<string> {
         try {
             const { output } = await generateText({
-                model: openRouter("openai/gpt-4o-mini"),
+                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
+                tools: {
+
+                },
                 output: Output.object({
                     schema: z.object({ title: z.string() }),
                 }),

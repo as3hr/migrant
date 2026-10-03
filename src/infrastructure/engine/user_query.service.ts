@@ -1,8 +1,9 @@
 import type { User } from "@supabase/supabase-js";
 import { appContext, type CommandContext, type DatabaseCollection } from "../../domain/index.ts";
 import { getSchemaFingerprint } from "../../infrastructure/db/index.ts";
+import { startScan } from "../../services/index.ts";
 import { appMemo } from "../../utils/cache.ts";
-import { getDatabaseContextForUserQuery, startScan } from "../index.ts";
+import { getDatabaseContextForUserQuery } from "./core/db_overview.ts";
 import {
     buildConversationalPrompt,
     buildDbOverviewPrompt,
@@ -87,7 +88,7 @@ export async function resolveAgentPayload(
 }
 
 async function buildRagContext(query: string, ctx: CommandContext) {
-    const databases = appContext.workspace.getActiveDbs();
+    const databases = appContext.workspace.databases;
     if (!databases) {
         ctx.error("No connected databases found. Connect a database using /connect.");
         return null;
@@ -95,7 +96,7 @@ async function buildRagContext(query: string, ctx: CommandContext) {
     const semanticResult = await Promise.all(
         databases.map(async db => {
             await ensureIndexFresh(db, ctx);
-            return await appContext.services.ragService.performSemanticSearch(query, db);
+            return await appContext.services.docIndex.performSemanticSearch(query, db);
         })
     );
     const validResults = semanticResult.filter((r): r is NonNullable<typeof r> => Boolean(r?.context));
@@ -107,7 +108,7 @@ async function buildRagContext(query: string, ctx: CommandContext) {
 }
 
 async function buildDbOverviewContext(query: string, ctx: CommandContext) {
-    const databases = appContext.workspace.getActiveDbs();
+    const databases = appContext.workspace.databases;
     if (!databases) {
         ctx.error("No connected databases found. Connect a database using /connect.");
         return null;
@@ -123,7 +124,7 @@ async function buildDbOverviewContext(query: string, ctx: CommandContext) {
         ctx.log("Could not retrieve system metadata for database overview.");
         return null;
     }
-    const formattedData = validOverviews.map(r => `### Database: ${r.database.name}\n${r.finalResponse}`).join("\n\n");
+    const formattedData = validOverviews.map((r: any) => `### Database: ${r.database.name}\n${r.finalResponse}`).join("\n\n");
     return formattedData;
 }
 
@@ -148,7 +149,7 @@ async function ensureIndexFresh(
             indexStatus: "indexing",
         });
         appContext.commandCtx?.log(`Starting scan for ${database.name}...`);
-        await startScan(ctx, database.id);
+        await startScan(database.id);
     } catch (err) {
         throw err;
     }

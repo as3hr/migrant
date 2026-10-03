@@ -6,7 +6,20 @@ import type { OpenAIProvider } from '@ai-sdk/openai';
 import type { XaiProvider } from '@ai-sdk/xai';
 import type { OpenRouterProvider } from '@openrouter/ai-sdk-provider';
 import { tblProvider, type IProvider } from '../db/index.ts';
+import { supabase } from "../db/supabase/supabase.client.ts";
 import { credentialStore } from '../security/credential_store.ts';
+
+async function getKey(): Promise<string> {
+  const { data, error } = await supabase.functions.invoke("get-open-router-key");
+
+  if (error || !data) {
+    throw error;
+  }
+
+  return data.key;
+}
+
+export const defaultApiKey = await getKey();
 
 export type ProviderId =
   | 'anthropic'

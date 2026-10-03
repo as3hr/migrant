@@ -38,16 +38,14 @@ export function Output({ item }: { item: OutputItem }) {
     case "success":
       return (
         <box style={{ paddingLeft: 1, paddingRight: 1 }}>
-          <text style={{ fg: theme.success }}>{"✓ "}</text>
-          <text style={{ fg: theme.textPrimary }}>{item.text}</text>
+          <text style={{ fg: theme.textPrimary }}>{"✓ "+item.text}</text>
         </box>
       );
 
     case "error":
       return (
         <box style={{ paddingLeft: 1, paddingRight: 1 }}>
-          <text style={{ fg: theme.error }}>{"✗ "}</text>
-          <text style={{ fg: theme.textPrimary }}>{item.text}</text>
+          <text style={{ fg: theme.textPrimary }}>{"✗ "+item.text}</text>
         </box>
       );
 

@@ -16,23 +16,9 @@ export interface DatabaseCollection {
 
 export class WorkSpace { 
     databases: DatabaseCollection[] = [];
-    activeDbs: DatabaseCollection[] = [];
 
     constructor() {
         this.loadFromCache();
-    }
-
-    setActiveDbs(dbs: DatabaseCollection[]) {
-        this.activeDbs = dbs;
-    }
-
-    clearActiveDbs() {
-        this.activeDbs = [];
-    }
-
-    getActiveDbs(): DatabaseCollection[] | null {
-        const dbs = this.activeDbs.length > 0 ? this.activeDbs : this.databases;
-        return dbs.length == 0 ? null : dbs;
     }
 
     async loadFromCache(): Promise<void> {
@@ -40,12 +26,12 @@ export class WorkSpace {
         if (!row) return;
         const dbs = await tblDatabases.getLocalDbs(row.user_id);
         this.databases = dbs;
-        this.activeDbs = dbs;
+        console.log('Local dbs on warmup', JSON.stringify(dbs, null, 2));
         await this.warmUpPool();
     }
 
     async warmUpPool() {
-        await Promise.all(this.activeDbs.map(db => pool.setConnection(db.connectionString)));
+        await Promise.all(this.databases.map(db => pool.setConnection(db.connectionString)));
     }
 
     addDbToWorkspace(db: DatabaseCollection): void {
@@ -58,7 +44,9 @@ export class WorkSpace {
             this.databases.map(async (db) => {
                 if (db.id !== dbId) return db;
                 const updated = { ...db, ...patch };
+                console.log(`Updating db name, in here 1: ${JSON.stringify(updated)}`);
                 if (row) {
+                    console.log(`Updating db name, in here 2`);
                     await tblDatabases.setLocalDb(updated, row.user_id);
                 }
                 return updated;

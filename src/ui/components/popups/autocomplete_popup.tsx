@@ -35,6 +35,26 @@ export const SLASH_COMMANDS: SlashCommandItem[] = [
     description: "Logout from your Migrant account",
   },
   {
+    name: "disconnect",
+    argsHint: "",
+    description: "Disconnect an active database",
+  },
+  {
+    name: "rename-db",
+    argsHint: "",
+    description: "Assign a custom label to your database",
+  },
+  {
+    name: "new",
+    argsHint: "",
+    description: "Start a new chat session",
+  },
+  {
+    name: "rename",
+    argsHint: "",
+    description: "Rename the current chat session",
+  },
+  {
     name: "help",
     argsHint: "",
     description: "Show available commands & descriptions",

@@ -4,6 +4,7 @@ type AppEvent = "logout"
     | "login"
     | "workspace_change"
     | "token-limit-breached"
+    | "update-databases"
     | "update-session"
     | "update-model";
 
@@ -23,4 +24,4 @@ class AppEmitter {
     }
 }
 
-export const appEmitter = new AppEmitter();
+export const emitEvent = new AppEmitter();
