@@ -9,6 +9,8 @@ import { emitEvent } from "../../utils/emitter.ts";
 export class MemoryService {
     async saveTurnToMemory(
         response: GenerateTextEndEvent<NoInfer<ToolSet>, NoInfer<Context>>,
+        inputTokens: number,
+        outputTokens: number,
         targetAgent?: string,
         thoughtTime?: string
     ): Promise<IChatMessageModel | undefined> {
@@ -17,9 +19,9 @@ export class MemoryService {
             const sessionId = appContext.currentChatSessionId;
             if (!user || !sessionId) return undefined;
 
-            const promptTokens = response.usage.inputTokens ?? 0;
-            const completionTokens = response.usage.outputTokens ?? 0;
-            const totalTokens = response.usage.totalTokens ?? (promptTokens + completionTokens);
+            const promptTokens = inputTokens ?? 0;
+            const completionTokens = outputTokens ?? 0;
+            const totalTokens = (promptTokens + completionTokens);
 
             const cost = appContext.services.contextManager.calculateCostUsd(
                 response.model.modelId,

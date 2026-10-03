@@ -11,7 +11,16 @@ export function getSchemasQuery(): string {
     SELECT nspname AS schema_name
     FROM pg_namespace
     WHERE nspname NOT LIKE 'pg_%'
-      AND nspname <> 'information_schema'
+      AND nspname NOT IN (
+        'information_schema',
+        'auth',
+        'storage',
+        'realtime',
+        'audit',
+        'vault',
+        'graphql',
+        'pgbouncer'
+      )
     ORDER BY nspname;
   `;
 }

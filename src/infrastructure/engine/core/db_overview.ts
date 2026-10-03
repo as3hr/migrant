@@ -13,6 +13,7 @@ CRITICAL PRIVACY & SECURITY RULES:
 2. NEVER Query User Data: You are STRICTLY FORBIDDEN from querying user data tables directly (e.g. NEVER write "SELECT * FROM users" or access user table rows).
 3. Output Format: Output ONLY the raw SQL query. Do NOT use markdown code blocks (\`\`\`sql). Do NOT include explanations, introduction, or comments.
 4. Read-Only: Only write SELECT or WITH queries.
+5. Hide Internals by Default: By default, ALWAYS add WHERE clauses to exclude system and managed schemas (like 'information_schema', 'pg_catalog', 'auth', 'storage', 'audit', 'realtime', 'vault', 'graphql', 'pgbouncer') from your query results UNLESS the user explicitly asks about them.
 
 Example Introspection Queries:
 Get Columns: ${getColumnsQuery()}
