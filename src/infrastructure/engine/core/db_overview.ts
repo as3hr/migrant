@@ -153,7 +153,7 @@ async function executeIntrospectionWorkflow(
     }
 }
 
-export function validateGeneratedSql(sql: string): ValidationResult {
+export function validateGeneratedSql(sql: string, strictToSys: boolean = true): ValidationResult {
     let cleanSql = sql
         .replace(/```sql/gi, "")
         .replace(/```/g, "")
@@ -185,28 +185,30 @@ export function validateGeneratedSql(sql: string): ValidationResult {
         }
     }
 
-    const systemSources = [
-        "information_schema",
-        "pg_catalog",
-        "pg_tables",
-        "pg_stat_user_tables",
-        "pg_stat_all_tables",
-        "pg_class",
-        "pg_namespace",
-        "pg_attribute",
-        "pg_constraint",
-        "pg_indexes",
-        "pg_size_pretty",
-        "pg_total_relation_size",
-        "pg_relation_size"
-    ];
+    if (strictToSys) {
+        const systemSources = [
+            "information_schema",
+            "pg_catalog",
+            "pg_tables",
+            "pg_stat_user_tables",
+            "pg_stat_all_tables",
+            "pg_class",
+            "pg_namespace",
+            "pg_attribute",
+            "pg_constraint",
+            "pg_indexes",
+            "pg_size_pretty",
+            "pg_total_relation_size",
+            "pg_relation_size"
+        ];
 
-    const hasSystemSource = systemSources.some((source) => lowerSql.includes(source));
-    if (!hasSystemSource) {
-        return {
-            valid: false,
-            error: "SQL Validation Rejected: Query does not reference a valid PostgreSQL system metadata source (information_schema or pg_catalog).",
-        };
+        const hasSystemSource = systemSources.some((source) => lowerSql.includes(source));
+        if (!hasSystemSource) {
+            return {
+                valid: false,
+                error: "SQL Validation Rejected: Query does not reference a valid PostgreSQL system metadata source (information_schema or pg_catalog).",
+            };
+        }
     }
 
     return {

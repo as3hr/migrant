@@ -44,9 +44,7 @@ export class WorkSpace {
             this.databases.map(async (db) => {
                 if (db.id !== dbId) return db;
                 const updated = { ...db, ...patch };
-                console.log(`Updating db name, in here 1: ${JSON.stringify(updated)}`);
                 if (row) {
-                    console.log(`Updating db name, in here 2`);
                     await tblDatabases.setLocalDb(updated, row.user_id);
                 }
                 return updated;

@@ -20,7 +20,7 @@ export const executeQueryTool = tool({
             };
         }
 
-        const validation = validateGeneratedSql(sql);
+        const validation = validateGeneratedSql(sql, false);
         if (!validation.valid || !validation.cleanSql) {
             return { 
                 status: "rejected",
