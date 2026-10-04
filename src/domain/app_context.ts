@@ -3,7 +3,7 @@ import { initializeDatabase } from "../infrastructure/db/sqlite/sqlite.client.ts
 import { tblProvider } from "../infrastructure/db/sqlite/tbl_provider.ts";
 import { DocIndex } from "../infrastructure/engine/core/doc_index.ts";
 import { LlmService } from "../infrastructure/engine/core/llm.ts";
-import { defaultApiKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
+import { getDefaultApiKey, PROVIDERS, setProvider, setProviderToLocal, type ProviderId, type ProviderSDK } from "../infrastructure/index.ts";
 import { credentialStore } from "../infrastructure/security/credential_store.ts";
 import {
     AuthService,
@@ -75,7 +75,7 @@ class AppContext {
         }
 
         if (!apiKey) {
-            apiKey = defaultApiKey;
+            apiKey = await getDefaultApiKey();
             providerId = "openrouter";
         }
 
@@ -148,4 +148,19 @@ class AppContext {
     }
 }
 
-export const appContext = await AppContext.create();
+let _appContext: AppContext | null = null;
+
+export async function initAppContext(): Promise<AppContext> {
+    _appContext = await AppContext.create();
+    appContext = _appContext;
+    return _appContext;
+}
+
+export function getAppContext(): AppContext {
+    if (!_appContext) {
+        throw new Error("AppContext not initialized. Call initAppContext() first.");
+    }
+    return _appContext;
+}
+
+export let appContext: AppContext = null as unknown as AppContext;

@@ -9,17 +9,20 @@ import { tblProvider, type IProvider } from '../db/index.ts';
 import { supabase } from "../db/supabase/supabase.client.ts";
 import { credentialStore } from '../security/credential_store.ts';
 
-async function getKey(): Promise<string> {
+let _defaultApiKey: string = "";
+
+export async function getDefaultApiKey(): Promise<string> {
+  if (_defaultApiKey) return _defaultApiKey;
+
   const { data, error } = await supabase.functions.invoke("get-open-router-key");
 
   if (error || !data) {
     throw error;
   }
 
-  return data.key;
+  _defaultApiKey = data.key;
+  return _defaultApiKey;
 }
-
-export const defaultApiKey = await getKey();
 
 export type ProviderId =
   | 'anthropic'

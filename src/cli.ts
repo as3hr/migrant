@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
-import { appContext, type CommandContext } from "./domain/index.ts";
+import { initAppContext, type CommandContext } from "./domain/index.ts";
 import { answerQuestion, errorMessage, parseCommandInput, runCommand } from "./infrastructure/commands/index.ts";
 
 async function main() {
+    const appContext = await initAppContext();
     const args = process.argv.slice(2);
 
     if (args.length === 0) {
