@@ -15,11 +15,11 @@ brew install migrantt/tap/migrant
 
 **macOS & Linux (Direct Script):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/migrantt/migrant/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/migrant-db/migrant/main/install.sh | bash
 ```
 
 **Windows:**
-Download the `.exe` directly from the [GitHub Releases page](https://github.com/migrantt/migrant/releases).
+Download the `.exe` directly from the [GitHub Releases page](https://github.com/migrant-db/migrant/releases).
 *(Note: Windows SmartScreen may show a "Windows protected your PC" prompt because the executable is not digitally signed yet by a Microsoft developer account. Click "More info" and then "Run anyway" to bypass this and use the CLI.)*
 
 ---
@@ -83,7 +83,7 @@ Instead of manually digging through ERDs, writing complex join queries to unders
 We welcome contributions! Whether you're fixing bugs, adding new LLM providers, or improving schema parsing, your help is appreciated.
 
 1. Fork the repository
-2. Clone your fork locally: `git clone https://github.com/migrantt/migrant.git`
+2. Clone your fork locally: `git clone https://github.com/migrant-db/migrant.git`
 3. Install dependencies: `bun install`
 4. Run locally: `bun dev`
 5. Create a new branch, make your changes, and submit a Pull Request!

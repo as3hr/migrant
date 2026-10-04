@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="migrantt/migrant"
+REPO="migrant-db/migrant"
 VERSION="latest"
 
 echo "Detecting OS and Architecture..."
