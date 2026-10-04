@@ -10,7 +10,7 @@ The easiest way to install Migrant is via our ultra-fast standalone binaries. No
 
 **macOS & Linux (Homebrew):**
 ```bash
-brew install migrantt/tap/migrant
+brew install migrant-db/tap/migrant
 ```
 
 **macOS & Linux (Direct Script):**
