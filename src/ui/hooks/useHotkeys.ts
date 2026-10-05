@@ -1,4 +1,6 @@
-import { useKeyboard } from "@opentui/react";
+import { createClipboard, createHostClipboard, createRendererClipboardAdapter } from "@opentui/core";
+import { useAppContext, useKeyboard } from "@opentui/react";
+import { useMemo } from "react";
 
 export interface UseHotkeysOptions {
     onExit?: () => void;
@@ -12,14 +14,33 @@ export interface UseHotkeysOptions {
 }
 
 export function useHotkeys(options: UseHotkeysOptions): void {
+    const app = useAppContext();
+    const clipboard = useMemo(() => {
+        return createClipboard({
+            host: createHostClipboard(),
+            terminal: createRendererClipboardAdapter(app.renderer as any),
+        });
+    }, [app.renderer]);
+
     useKeyboard((key) => {
-        if (key.ctrl && key.name === "c") {
-            if (options.isStreaming && options.onCancelStream) {
-                options.onCancelStream();
-            } else if (options.onExit) {
-                options.onExit();
+        if (app.renderer) {
+            if (key.ctrl && key.name === "c") {
+                const container = app.renderer.getSelectionContainer();
+                if (container && container.hasSelection()) {
+                    const text = container.getSelectedText();
+                    if (text) {
+                        void clipboard.writeText(text, { destination: "best-available" });
+                        app.renderer.clearSelection();
+                    }
+                    return;
+                }
+                if (options.isStreaming && options.onCancelStream) {
+                    options.onCancelStream();
+                } else if (options.onExit) {
+                    options.onExit();
+                }
+                return;
             }
-            return;
         }
 
         if (key.ctrl && key.name === "l") {

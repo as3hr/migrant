@@ -115,7 +115,7 @@ export function AutocompletePopup({
       setSelectedIndex((prev) =>
         prev < filteredCommands.length - 1 ? prev + 1 : 0
       );
-    } else if (key.name === "tab" || key.name === "enter") {
+    } else if (key.name === "tab" || key.name === "enter" || key.name === "return") {
       const selected = filteredCommands[selectedIndex];
       if (selected) {
         onSelect(`/${selected.name} `);

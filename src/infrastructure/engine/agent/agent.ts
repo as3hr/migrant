@@ -50,6 +50,8 @@ export async function runAgent(query: string, ctx: CommandContext): Promise<void
             maxOutputTokens: 4000,
             onEnd(result) {
                 finalResponse = result;
+            },
+            onError(e) {
             }
         });
 

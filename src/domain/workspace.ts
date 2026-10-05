@@ -26,7 +26,6 @@ export class WorkSpace {
         if (!row) return;
         const dbs = await tblDatabases.getLocalDbs(row.user_id);
         this.databases = dbs;
-        console.log('Local dbs on warmup', JSON.stringify(dbs, null, 2));
         await this.warmUpPool();
     }
 

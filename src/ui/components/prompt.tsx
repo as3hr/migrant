@@ -1,5 +1,7 @@
 /** @jsxImportSource @opentui/react */
-import { useEffect, useState } from "react";
+import { createClipboard, createHostClipboard, createRendererClipboardAdapter } from "@opentui/core";
+import { useAppContext, useKeyboard } from "@opentui/react";
+import { useEffect, useMemo, useState } from "react";
 import { theme } from "../theme.ts";
 import { AutocompletePopup, SLASH_COMMANDS } from "./popups/autocomplete_popup.tsx";
 import type { ParameterCommandType } from "./popups/index.ts";
@@ -28,6 +30,27 @@ export function Prompt(props: PromptProps) {
   useEffect(() => {
     setIsDismissed(false);
   }, [props.value]);
+
+  const app = useAppContext();
+  const clipboard = useMemo(() => {
+    return createClipboard({
+      host: createHostClipboard(),
+      terminal: createRendererClipboardAdapter(app.renderer as any),
+    });
+  }, [app.renderer]);
+
+  useKeyboard(async (key) => {
+    if (key.ctrl && key.name === "v") {
+      try {
+        const result = await clipboard.read({ preferredTypes: ["text/plain"] });
+        if (result.status === "read") {
+          const text = new TextDecoder().decode(result.representation.bytes);
+          props.onChange(props.value + text);
+        }
+      } catch (e) {
+      }
+    }
+  });
 
   const handleSelect = (completedText: string) => {
     const cmdName = completedText.trim().replace("/", "") as ParameterCommandType;
@@ -97,6 +120,12 @@ export function Prompt(props: PromptProps) {
             handleSubmit(finalVal);
           }}
           placeholder={placeholder}
+          keyBindings={[
+            { name: "z", ctrl: true, action: "undo" },
+            { name: "return", action: "submit" },
+            { name: "kpenter", action: "submit" },
+            { name: "linefeed", action: "submit" }
+          ]}
         />
       </box>
     </box>

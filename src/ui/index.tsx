@@ -3,7 +3,7 @@ import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
 import { Shell } from "./shell.tsx";
 
-const renderer = await createCliRenderer({ exitOnCtrlC: true });
+const renderer = await createCliRenderer({ exitOnCtrlC: false });
 
 function exit() {
   renderer.stop();
