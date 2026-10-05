@@ -76,6 +76,8 @@ export function MainChatView({
             focused
             style={{
               flexGrow: 1,
+              stickyScroll: true,
+              stickyStart: "bottom",
               rootOptions: { backgroundColor: theme.bgCanvas },
               wrapperOptions: { backgroundColor: theme.bgCanvas },
               viewportOptions: { backgroundColor: theme.bgCanvas },
