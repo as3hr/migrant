@@ -1,3 +1,5 @@
+import type { OutputItem } from "../ui/components/output.tsx";
+
 export interface CommandDefinition {
     name: string;
     description: string;
@@ -21,9 +23,10 @@ export interface CommandDefinition {
   export interface CommandContext {
     ask(label: string, options?: AskOptions): Promise<string>;
     log(text: string): void;
-    replaceLast(text: string): void;
-    replaceLastWithItem?(item: any): void;
-    output?(item: any): void;
+    startAssistantStream?(): void;
+    updateAssistantStream?(data: { text: string; reasoning: string }): void;
+    replaceLastWithItem?(item: OutputItem): void;
+    output?(item: OutputItem): void;
     success(text: string): void;
     error(text: string): void;
     clear(): void;

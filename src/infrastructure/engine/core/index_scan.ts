@@ -19,11 +19,19 @@ export async function ensureIndexFresh(
         if (!isStale) return false;
 
         appMemo.invalidate(database.id);
-        ctx.log(`Updating knowledge for ${database.name}...`);
+        if (ctx.appendToolCall) {
+            ctx.appendToolCall(`Updating knowledge for ${database.name}...`);
+        } else {
+            ctx.log(`Updating knowledge for ${database.name}...`);
+        }
         await appContext.services.databaseConnectionService.updateDatabase(database.id, {
             indexStatus: "indexing",
         });
-        ctx.log(`Starting scan for ${database.name}...`);
+        if (ctx.appendToolCall) {
+            ctx.appendToolCall(`Starting scan for ${database.name}...`);
+        } else {
+            ctx.log(`Starting scan for ${database.name}...`);
+        }
         await startScan(database.id);
         return true;
     } catch (err) {

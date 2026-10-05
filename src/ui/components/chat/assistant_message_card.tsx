@@ -4,59 +4,63 @@ import { MarkdownRenderer } from "./markdown_renderer.tsx";
 
 export interface AssistantMessageCardProps {
   response: string;
-  thoughtTime?: string | undefined;
+  isStreaming?: boolean;
+  thoughtTime?: string;
+  reasoningStream?: string;
 }
 
 export function AssistantMessageCard({
   response,
+  isStreaming,
   thoughtTime,
+  reasoningStream,
 }: AssistantMessageCardProps) {
-  const accentIndex = Math.abs(response.length) % theme.thinkingAccents.length;
-  const accentColor = theme.thinkingAccents[accentIndex] ?? theme.accent;
-
-  const isRoutingLog = response.startsWith("Routing to target agent") || response.startsWith("Fetching schema");
-
-  if (isRoutingLog) {
-    return (
-      <box
-        style={{
-          flexDirection: "row",
-          paddingLeft: 1,
-          paddingRight: 1,
-          marginBottom: 1,
-        }}
-      >
-        <text style={{ fg: accentColor }}>
-          <strong>⚡ LOG:{" "}</strong>
-        </text>
-        <text style={{ fg: theme.textPrimary }} content={response} />
-      </box>
-    );
-  }
+  const accentColor = theme.thinkingAccents[0] ?? theme.accent;
+  const hasReasoning = reasoningStream && reasoningStream.length > 0;
+  const isThinking = isStreaming && hasReasoning && !response;
 
   return (
-    <box
-      style={{
-        flexDirection: "column",
-        paddingLeft: 1,
-        paddingRight: 1,
-        marginBottom: 1,
-      }}
-    >
-      {/* Card Header */}
+    <box style={{ flexDirection: "column", paddingLeft: 1, paddingRight: 1, marginBottom: 1 }}>
+      
+      {/* Header */}
       <box style={{ justifyContent: "space-between", marginBottom: 1 }}>
         <text style={{ fg: theme.brandLight }}>
           <strong>◆ Migrant Intelligence</strong>
         </text>
-        {thoughtTime ? (
+        {isStreaming && !thoughtTime ? (
+          <text style={{ fg: accentColor }}>
+            <strong>+ Thinking...</strong>
+          </text>
+        ) : thoughtTime ? (
           <text style={{ fg: accentColor }}>
             <strong>+ Thought: {thoughtTime}</strong>
           </text>
         ) : null}
       </box>
 
-      {/* Rendered Markdown Body */}
-      <MarkdownRenderer content={response} />
+      {hasReasoning && (
+        <box
+          style={{
+            flexDirection: "column",
+            marginBottom: 1,
+            paddingLeft: 1,
+            border: ["left"],
+            borderColor: theme.textSubtle,
+          }}
+        >
+          <text style={{ fg: theme.textSubtle, marginBottom: 1 }}>
+            <strong>Reasoning</strong>
+          </text>
+          <text style={{ fg: theme.textSubtle }} content={reasoningStream} />
+        </box>
+      )}
+
+      {response ? (
+        <MarkdownRenderer content={response} />
+      ) : isThinking ? (
+        <text style={{ fg: theme.textSubtle }}>Working...</text>
+      ) : null}
+
     </box>
   );
 }

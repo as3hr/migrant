@@ -7,7 +7,8 @@ import type { OutputItem } from "../components/output.tsx";
 export interface UseChatOutputsReturn {
   outputs: OutputItem[];
   appendOutput: (item: OutputItem) => void;
-  replaceLastStream: (text: string) => void;
+  startAssistantStream: () => void;
+  updateAssistantStream: (data: { text: string; reasoning: string }) => void;
   replaceLastWithItem: (item: OutputItem) => void;
   clearOutputs: () => void;
   setOutputs: React.Dispatch<React.SetStateAction<OutputItem[]>>;
@@ -21,14 +22,31 @@ export function useChatOutputs(onSessionMessagesLoaded?: (count: number) => void
     setOutputs((prev) => [...prev, item]);
   };
 
-  const replaceLastStream = (text: string) => {
+  const startAssistantStream = () => {
+    setOutputs((prev) => [
+      ...prev,
+      {
+        type: "assistant",
+        isStreaming: true,
+      },
+    ]);
+  };
+
+  const updateAssistantStream = (data: { text: string; reasoning: string }) => {
     setOutputs((prev) => {
-      if (prev.length === 0) return [{ type: "stream", content: text }];
+      if (prev.length === 0) return prev;
       const last = prev[prev.length - 1]!;
-      if (last.type === "stream") {
-        return [...prev.slice(0, -1), { type: "stream", content: text }];
+      if (last.type === "assistant" && last.isStreaming) {
+        return [
+          ...prev.slice(0, -1),
+          {
+            ...last,
+            streamText: data.text,
+            reasoningStream: data.reasoning,
+          },
+        ];
       }
-      return [...prev, { type: "stream", content: text }];
+      return prev;
     });
   };
 
@@ -36,7 +54,7 @@ export function useChatOutputs(onSessionMessagesLoaded?: (count: number) => void
     setOutputs((prev) => {
       if (prev.length === 0) return [item];
       const last = prev[prev.length - 1]!;
-      if (last.type === "stream") {
+      if (last.type === "assistant") {
         return [...prev.slice(0, -1), item];
       }
       return [...prev, item];
@@ -76,7 +94,8 @@ export function useChatOutputs(onSessionMessagesLoaded?: (count: number) => void
   return {
     outputs,
     appendOutput,
-    replaceLastStream,
+    startAssistantStream,
+    updateAssistantStream,
     replaceLastWithItem,
     clearOutputs,
     setOutputs,

@@ -30,7 +30,11 @@ export const dbOverviewTool = tool({
             : appContext.workspace.databases;
 
         if (databases.length === 0) return { error: "No connected databases found. Connect a database using /connect." };
-        appContext.commandCtx?.log(`Querying ${databases.map(db => db.name).join(", ")}...`);
+        if (appContext.commandCtx?.appendToolCall) {
+            appContext.commandCtx.appendToolCall(`Querying ${databases.map(db => db.name).join(", ")}...`);
+        } else {
+            appContext.commandCtx?.log(`Querying ${databases.map(db => db.name).join(", ")}...`);
+        }
 
         const results = await Promise.allSettled(databases.map(db => getDatabaseContextForUserQuery(question, db)));
         const successful = results

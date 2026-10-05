@@ -156,11 +156,4 @@ export async function initAppContext(): Promise<AppContext> {
     return _appContext;
 }
 
-export function getAppContext(): AppContext {
-    if (!_appContext) {
-        throw new Error("AppContext not initialized. Call initAppContext() first.");
-    }
-    return _appContext;
-}
-
 export let appContext: AppContext = null as unknown as AppContext;

@@ -12,7 +12,8 @@ export type RunState =
 export interface UseCommandExecutorProps {
   onExit: () => void;
   appendOutput: (item: OutputItem) => void;
-  replaceLastStream: (text: string) => void;
+  startAssistantStream: () => void;
+  updateAssistantStream: (data: { text: string; reasoning: string }) => void;
   replaceLastWithItem: (item: OutputItem) => void;
   clearOutputs: () => void;
   openPopup: (type: ParameterCommandType) => void;
@@ -33,7 +34,8 @@ export interface UseCommandExecutorReturn {
 export function useCommandExecutor({
   onExit,
   appendOutput,
-  replaceLastStream,
+  startAssistantStream,
+  updateAssistantStream,
   replaceLastWithItem,
   clearOutputs,
   openPopup,
@@ -61,7 +63,8 @@ export function useCommandExecutor({
         setRun({ kind: "form", label });
       }),
     log: (text) => appendOutput({ type: "text", text }),
-    replaceLast: replaceLastStream,
+    startAssistantStream,
+    updateAssistantStream,
     replaceLastWithItem,
     output: appendOutput,
     success: (text) => appendOutput({ type: "success", text }),

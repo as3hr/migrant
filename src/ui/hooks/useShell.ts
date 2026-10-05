@@ -75,10 +75,11 @@ export function useShell(onExit: () => void): UseShellReturn {
   const commandExecutor = useCommandExecutor({
     onExit,
     appendOutput: chatOutputs.appendOutput,
-    replaceLastStream: chatOutputs.replaceLastStream,
     replaceLastWithItem: chatOutputs.replaceLastWithItem,
     clearOutputs: chatOutputs.clearOutputs,
     openPopup: popupState.openPopup,
+    startAssistantStream: chatOutputs.startAssistantStream,
+    updateAssistantStream: chatOutputs.updateAssistantStream,
     refreshStatus: workspaceStatus.refreshStatus,
     onCommandSubmitted: (commandName?: string) => {
       const stayInHeroCommands = ["connect", "disconnect", "rename-db", "rename", "new", "login", "logout"];
@@ -133,7 +134,6 @@ export function useShell(onExit: () => void): UseShellReturn {
     formInputProps: commandExecutor.formInputProps,
     handleSubmit: commandExecutor.handleSubmit,
     auth,
-
     viewMode,
     setViewMode,
     selectedIndex: scrollState.selectedIndex,

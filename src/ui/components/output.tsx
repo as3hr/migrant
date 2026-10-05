@@ -4,8 +4,14 @@ import { theme } from "../theme.ts";
 import { AssistantMessageCard } from "./chat/assistant_message_card.tsx";
 import { UserMessageCard } from "./chat/user_message_card.tsx";
 
-export type OutputItem = { type: "stream"; id?: string; content: string }
-  | { type: "assistant"; content: IChatMessageModel }
+export type OutputItem =
+  | {
+      type: "assistant";
+      content?: IChatMessageModel;
+      isStreaming?: boolean;
+      streamText?: string;
+      reasoningStream?: string;    
+    }
   | { type: "user"; content: IChatMessageModel }
   | { type: "text"; text: string }
   | { type: "success"; text: string }
@@ -20,13 +26,12 @@ export function Output({ item }: { item: OutputItem }) {
     case "assistant":
       return (
         <AssistantMessageCard
-          response={item.content.content}
-          thoughtTime={item.content.thought_time}
+          response={item.isStreaming ? (item.streamText ?? '') : (item?.content?.content ?? '')}
+          isStreaming={item.isStreaming ?? false}
+          thoughtTime={item?.content?.thought_time ?? ''}
+          reasoningStream={item.reasoningStream ?? ''}
         />
       );
-
-    case "stream":
-      return <AssistantMessageCard response={item.content} />;
 
     case "text":
       return (

@@ -9,16 +9,28 @@ export async function startScan(dbId: string): Promise<boolean> {
 
     const schemaGraphs: SchemaGraph[] = [];
     const schemas = await getSchemas(dbId);
-    ctx.success(`${schemas.length} Schemas Scanned Successfully!`);
+    if (ctx.appendToolCall) {
+      ctx.appendToolCall(`✓ ${schemas.length} Schemas Scanned Successfully!`);
+    } else {
+      ctx.success(`${schemas.length} Schemas Scanned Successfully!`);
+    }
     
     setTimeout(() => {
-      ctx.busy(`Scanning your database in more depth...`);
+      if (ctx.appendToolCall) {
+        ctx.appendToolCall(`Scanning your database in more depth...`);
+      } else {
+        ctx.busy(`Scanning your database in more depth...`);
+      }
     }, 2000);
 
     const graphs = await Promise.all(schemas.map((s) => parseSchema(s, dbId)));
     const validGraphs = graphs.filter((g): g is NonNullable<typeof g> => Boolean(g));
     if (validGraphs.length == 0) {
-      ctx.log("No valid graphs found. The database is either empty or not supported yet. Visit https://migrant.sh for more information.");
+      if (ctx.appendToolCall) {
+        ctx.appendToolCall("No valid graphs found. The database is either empty or not supported yet.");
+      } else {
+        ctx.log("No valid graphs found. The database is either empty or not supported yet. Visit https://migrant.sh for more information.");
+      }
       return false; 
     }
     schemaGraphs.push(...validGraphs);
@@ -42,7 +54,11 @@ export async function startScan(dbId: string): Promise<boolean> {
     const schemaFingerprint = await getSchemaFingerprint(dbId);
 
     const diff: number = (Date.now() - startedAt) / 1000;
-    ctx.success(`Completed db scan in ${diff} seconds`);
+    if (ctx.appendToolCall) {
+      ctx.appendToolCall(`✓ Completed db scan in ${diff} seconds`);
+    } else {
+      ctx.success(`Completed db scan in ${diff} seconds`);
+    }
 
     await appContext.services.databaseConnectionService.updateDatabase(
       dbId,
