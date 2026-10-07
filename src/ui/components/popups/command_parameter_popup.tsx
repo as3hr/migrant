@@ -1,14 +1,13 @@
 /** @jsxImportSource @opentui/react */
-import type { JSX } from "react";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
 import { ConnectPopup } from "./connect_popup.tsx";
-import { ModelsPopup } from "./models_popup.tsx";
-import { SessionsPopup } from "./sessions_popup.tsx";
-import { InfoPopup } from "./info_popup.tsx";
 import { DisconnectPopup } from "./disconnect_popup.tsx";
+import { InfoPopup } from "./info_popup.tsx";
+import { ModelsPopup } from "./models_popup.tsx";
 import { RenameDbPopup } from "./rename_db_popup.tsx";
 import { RenameSessionPopup } from "./rename_session_popup.tsx";
+import { SessionsPopup } from "./sessions_popup.tsx";
 
 export type ParameterCommandType = "connect" | "sessions" | "models" | "info" | "disconnect" | "rename-db" | "rename";
 
@@ -33,18 +32,22 @@ export function CommandParameterPopup({
 }: CommandParameterPopupProps) {
   return (
     <box
-      style={{
-        flexDirection: "column",
-        border: true,
-        borderColor: theme.borderFocused,
-        backgroundColor: theme.bgCanvas,
-        paddingLeft: 1,
-        paddingRight: 1,
-        paddingTop: 1,
-        paddingBottom: 1,
-        marginBottom: 1,
-        width: "100%",
-      }}
+      style={
+        command === "models"
+          ? { width: "100%", height: "100%" }
+          : {
+              flexDirection: "column",
+              border: true,
+              borderColor: theme.borderFocused,
+              backgroundColor: theme.bgCanvas,
+              paddingLeft: 1,
+              paddingRight: 1,
+              paddingTop: 1,
+              paddingBottom: 1,
+              marginBottom: 1,
+              width: "100%",
+            }
+      }
     >
       {command === "connect" && (
         <ConnectPopup onSubmit={onSubmit} onClose={onClose} />

@@ -30,11 +30,8 @@ export const dbOverviewTool = tool({
             : appContext.workspace.databases;
 
         if (databases.length === 0) return { error: "No connected databases found. Connect a database using /connect." };
-        if (appContext.commandCtx?.appendToolCall) {
-            appContext.commandCtx.appendToolCall(`Querying ${databases.map(db => db.name).join(", ")}...`);
-        } else {
-            appContext.commandCtx?.log(`Querying ${databases.map(db => db.name).join(", ")}...`);
-        }
+        appContext.commandCtx?.log(`Querying ${databases.map(db => db.name).join(", ")}...`);
+
 
         const results = await Promise.allSettled(databases.map(db => getDatabaseContextForUserQuery(question, db)));
         const successful = results
@@ -66,7 +63,8 @@ export const reIndexCompleteDatabase = tool({
 });
 
 export const getAvailableDatabaseTool = tool({
-    description: "Get list of connected databases. Use this first to get the database IDs (dbId) required by other tools.",
+    description: `Get list of connected databases. Use this first to get the database IDs (dbId) required by other tools.
+    IMPORTANT: The returned 'id' and 'name' are internal Migrant system identifiers. Do NOT use them as actual PostgreSQL database names or schema prefixes in SQL queries.`,
     inputSchema: z.object({}),
     execute: () => {
         return appContext.workspace.databases.map(db => ({

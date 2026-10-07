@@ -4,6 +4,7 @@ import { tblChatSessions } from "./tbl_chat_sessions.ts";
 import { tblDatabases } from "./tbl_databases.ts";
 import { tblDocuments } from "./tbl_documents.ts";
 import { tblProvider } from "./tbl_provider.ts";
+import { tblSessionState } from "./tbl_session_state.ts";
 import { tblUserSession } from "./tbl_user_session.ts";
 
 export const sqlClient: Database = new Database('migrant.db');
@@ -15,6 +16,7 @@ export function initializeDatabase() {
     tblDatabases.initializeTblDatabases();
     tblUserSession.initializeTblUserSessions();
     tblDocuments.initializeTblDocuments();
+    tblSessionState.initializeTblSessionState();
 }
 
 export function resetDb() {
@@ -24,4 +26,5 @@ export function resetDb() {
     sqlClient.run(`DELETE FROM tbl_documents`);
     sqlClient.run(`DELETE FROM tbl_provider`);
     sqlClient.run(`DELETE FROM tbl_user_sessions`)
+    sqlClient.run(`DELETE FROM tbl_session_state`);
 }

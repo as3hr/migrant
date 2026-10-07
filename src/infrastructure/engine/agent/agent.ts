@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { streamText } from "ai";
 import type { CommandContext, DatabaseCollection } from "../../../domain/index.ts";
 import { appContext } from "../../../domain/index.ts";
+import { tblSessionState, type ISessionState } from "../../db/sqlite/tbl_session_state.ts";
 import { AGENT_SYSTEM_PROMPT } from "../prompts/agent_prompt.ts";
 import { tools } from "../tools/tools.ts";
 
@@ -17,7 +18,8 @@ export async function runAgent(query: string, ctx: CommandContext): Promise<void
         indexStatus: db.indexStatus,
     }));
 
-    const systemPrompt = buildSystemPromptWithContext(AGENT_SYSTEM_PROMPT, user, databases);
+    const sessionState = tblSessionState.getState(appContext.currentChatSessionId!);
+    const systemPrompt = buildSystemPromptWithContext(AGENT_SYSTEM_PROMPT, user, databases, sessionState);
 
     const userMessage = await appContext.services.memoryService.ensureActiveSession(query);
     if (userMessage && ctx.output) {
@@ -40,19 +42,19 @@ export async function runAgent(query: string, ctx: CommandContext): Promise<void
     let cumulativeText = "";
     let cumulativeReasoning = "";
 
+
     for (let step = 0; step < MAX_STEPS; step++) {
         const streamResult = streamText({
-            model: appContext.providerSdk(appContext.selectedModel.modelId),
+            model: appContext.providerSdk!(appContext.selectedModel.modelId!),
             system: systemPrompt,
             messages,
             tools,
             toolChoice: "auto",
-            maxOutputTokens: 4000,
+            maxOutputTokens: 2000,
             onEnd(result) {
                 finalResponse = result;
             },
-            onError(e) {
-            }
+            onError(_) { }
         });
 
         let isMalformed = false;
@@ -151,16 +153,25 @@ export async function runAgent(query: string, ctx: CommandContext): Promise<void
 function buildSystemPromptWithContext(
     basePrompt: string,
     user: User | null,
-    databases: Partial<DatabaseCollection>[]
+    databases: Partial<DatabaseCollection>[],
+    sessionState?: ISessionState
 ): string {
     const userEmail = user?.email || "Not logged in";
     const userName = user?.email ? user.email.split("@")[0] : "Developer";
-    const dbList = databases.length > 0 ? JSON.stringify(databases) : "None connected";
+    const dbList = databases.length > 0 ? JSON.stringify(databases.map((d) => {
+        return {
+            id: d.id,
+            name: d.name,
+        }
+    })) : "None connected";
+    const stateContext = sessionState ? `
+### What I Already Know This Session:
+${JSON.stringify(sessionState, null, 2)}` : "";
 
     return `${basePrompt.trim()}
-
 ### Active Environment Context:
 - Talking to User: ${userName} (${userEmail})
-- Connected Databases (${databases.length}): ${dbList}`;
+- Connected Databases (${databases.length}): ${dbList}${stateContext}
+`;
 }
 

@@ -43,7 +43,7 @@ export class ContextManager {
         }
         
         const modelId = appContext.selectedModel.modelId;
-        const maxHistoryTokenBudget = this.getHistoryTokenBudget(modelId);
+        const maxHistoryTokenBudget = this.getHistoryTokenBudget(modelId!);
         
         try {
             const dbMessages = tblChatMessage.getChatMessages(sessionId);

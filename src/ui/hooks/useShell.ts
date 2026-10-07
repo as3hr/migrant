@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { AskOptions } from "../../domain/index.ts";
+import { appContext, type AskOptions } from "../../domain/index.ts";
 import type { IChatSessionsModel } from "../../infrastructure/index.ts";
 import { emitEvent } from "../../utils/index.ts";
 import type { OutputItem } from "../components/output.tsx";
@@ -25,7 +25,7 @@ export interface UseShellReturn {
   databases: string[] | undefined;
   sessions: IChatSessionsModel[];
   currentSession: IChatSessionsModel | undefined;
-  activeModel: string;
+  activeModel: string | undefined;
   activePopup: ParameterCommandType | null;
   openPopup: (type: ParameterCommandType) => void;
   closePopup: () => void;
@@ -83,9 +83,10 @@ export function useShell(onExit: () => void): UseShellReturn {
     refreshStatus: workspaceStatus.refreshStatus,
     onCommandSubmitted: (commandName?: string) => {
       const stayInHeroCommands = ["connect", "disconnect", "rename-db", "rename", "new", "login", "logout"];
-      if (commandName && stayInHeroCommands.includes(commandName)) {
+      if ((commandName && stayInHeroCommands.includes(commandName)) || !appContext.providerSdk) {
         return;
       }
+
       setViewMode("chat");
     },
   });

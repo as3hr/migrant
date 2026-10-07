@@ -12,6 +12,7 @@ import {
 } from "./database_tools.ts";
 import { executeQueryTool } from "./query_tool.ts";
 import { semanticSearchTool } from "./search_tool.ts";
+import { updateSessionStateTool } from "./session_state.ts";
 
 export const tools: Record<string, any> = {
     dbOverviewTool: dbOverviewTool,
@@ -26,4 +27,5 @@ export const tools: Record<string, any> = {
     getEnumsTool: getEnumsTool,
     getSequencesTool: getSequencesTool,
     executeQueryTool: executeQueryTool,
+    updateSessionStateTool: updateSessionStateTool
 };

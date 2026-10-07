@@ -6,7 +6,7 @@ import { Shell } from "./shell.tsx";
 const renderer = await createCliRenderer({ exitOnCtrlC: false });
 
 function exit() {
-  renderer.stop();
+  renderer.destroy();
   process.exit(0);
 }
 

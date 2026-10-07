@@ -6,21 +6,18 @@ Migrant is an AI-powered engineering intelligence CLI designed to help you under
 
 ## Installation
 
-The easiest way to install Migrant is via our ultra-fast standalone binaries. No dependencies (like Node, Bun, or NPM) are required.
+The easiest way to install Migrant is via NPM. Migrant uses Bun under the hood.
 
-**macOS & Linux (Homebrew):**
+**Global Installation (Recommended):**
 ```bash
-brew install migrant-db/tap/migrant
+npm install -g migrant-cli
 ```
+*(Note: Migrant requires [Bun](https://bun.sh/) to execute correctly.)*
 
-**macOS & Linux (Direct Script):**
+**Run Without Installing:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/migrant-db/migrant/main/install.sh | bash
+bunx migrant-cli
 ```
-
-**Windows:**
-Download the `.exe` directly from the [GitHub Releases page](https://github.com/migrant-db/migrant/releases).
-*(Note: Windows SmartScreen may show a "Windows protected your PC" prompt because the executable is not digitally signed yet by a Microsoft developer account. Click "More info" and then "Run anyway" to bypass this and use the CLI.)*
 
 ---
 

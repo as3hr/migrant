@@ -6,12 +6,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun --watch src/cli.ts",
     "start": "bun run src/cli.ts",
-    "build": "bun build ./src/cli.ts --compile --outfile dist/migrant",
-    "build:test": "bun run build && echo '--- Smoke testing compiled binary ---' && ./dist/migrant help && echo '--- Build test passed ---'"
+    "build": "rm -rf dist && bun build ./src/cli.ts --target=bun --outdir=dist --minify --packages=external && mv dist/cli.js dist/migrant.js && chmod +x dist/migrant.js"
   },
   "bin": {
-    "migrant": "./src/cli.ts"
+    "migrant": "./dist/migrant.js"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",

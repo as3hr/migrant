@@ -35,8 +35,7 @@ export class CredentialStore {
       await deletePassword(SERVICE, key);
     }
     catch (error) {
-      console.error("Error setting credential:", error);
-      throw error;
+      // Ignore if not found
     }
   }
 }

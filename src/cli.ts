@@ -14,7 +14,6 @@ async function main() {
     const rawInput = args.join(" ").trim();
     const oneShotCtx: CommandContext = {
         log: (text) => process.stdout.write(`${text}\n`),
-        replaceLast: (text) => process.stdout.write(`\r\x1b[K${text}`),
         success: (text) => process.stdout.write(`\x1b[32m✓\x1b[0m ${text}\n`),
         error: (text) => process.stderr.write(`\x1b[31m✗\x1b[0m ${text}\n`),
         busy: (_label) => { },

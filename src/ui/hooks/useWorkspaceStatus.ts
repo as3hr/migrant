@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { appContext } from "../../domain/index.ts";
 import { supabase, type IChatSessionsModel } from "../../infrastructure/index.ts";
 import { emitEvent } from "../../utils/emitter.ts";
-import { SYS_DEFAULT_MODEL } from "../../utils/index.ts";
 import type { UseAuthReturn } from "./useAuth.ts";
 
 export interface UseWorkspaceStatusReturn {
@@ -10,7 +9,7 @@ export interface UseWorkspaceStatusReturn {
   databases: string[] | undefined;
   sessions: IChatSessionsModel[];
   currentSession: IChatSessionsModel | undefined;
-  activeModel: string;
+  activeModel: string | undefined;
   refreshStatus: () => Promise<void>;
 }
 
@@ -19,8 +18,8 @@ export function useWorkspaceStatus(auth: UseAuthReturn): UseWorkspaceStatusRetur
   const [databases, setDatabases] = useState<string[]>();
   const [sessions, setSessions] = useState<IChatSessionsModel[]>([]);
   const [currentSession, setCurrentSession] = useState<IChatSessionsModel>();
-  const [activeModel, setActiveModel] = useState<string>(
-    appContext.selectedModel?.modelId || SYS_DEFAULT_MODEL
+  const [activeModel, setActiveModel] = useState<string | undefined>(
+    appContext.selectedModel?.modelId
   );
 
   const refreshStatus = useCallback(async () => {

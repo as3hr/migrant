@@ -4,7 +4,15 @@ import { appContext } from "../../../domain/app_context.ts";
 import { ensureIndexFresh } from "../core/index_scan.ts";
 
 export const semanticSearchTool = tool({
-    description: "Semantic search for database schema and table definitions. Returns context for fuzzy or specific questions about the database.",
+    description: `YOUR PRIMARY TOOL for any schema question. Always try this first.
+    Returns indexed schema knowledge for connected databases.
+    
+    Call this when:
+    - User asks about specific tables, columns, types, constraints, relationships
+    - You need schema context to compare databases or plan a migration
+    - Any follow-up question in a conversation where databases were already analyzed
+    
+    Only skip this if the database hasn't been indexed yet this session (check "What I Already  Know").`,
     inputSchema: z.object({
         query: z.string().describe("The user's question about the database"),
         dbId: z.string().optional().describe("Specific database ID to query. If not provided, queries all connected databases"),

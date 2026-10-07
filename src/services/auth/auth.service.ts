@@ -4,6 +4,7 @@ import http from "node:http";
 import open from "open";
 import { appContext, type CommandContext } from "../../domain/index.ts";
 import { credentialStore, pool, resetDb, supabase, tblDatabases, tblUserSession } from "../../infrastructure/index.ts";
+import { tblProvider } from "../../infrastructure/db/sqlite/tbl_provider.ts";
 import { BASE_URL, emitEvent } from "../../utils/index.ts";
 
 export class AuthService {
@@ -214,6 +215,11 @@ export class AuthService {
 
     const connectionKeys =
       tblDatabases.getLocalDbsConnectionKeys(user.id);
+      
+    const activeProvider = tblProvider.getActiveProvider();
+    if (activeProvider && activeProvider.api_key_env) {
+      connectionKeys.push(activeProvider.api_key_env);
+    }
   
     await Promise.all(
       connectionKeys.map((key: string) => credentialStore.delete(key))

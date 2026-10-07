@@ -24,7 +24,7 @@ export function useHotkeys(options: UseHotkeysOptions): void {
 
     useKeyboard((key) => {
         if (app.renderer) {
-            if (key.ctrl && key.name === "c") {
+            if ((key.ctrl || key.meta) && key.name === "c") {
                 const container = app.renderer.getSelectionContainer();
                 if (container && container.hasSelection()) {
                     const text = container.getSelectedText();
@@ -34,10 +34,14 @@ export function useHotkeys(options: UseHotkeysOptions): void {
                     }
                     return;
                 }
-                if (options.isStreaming && options.onCancelStream) {
-                    options.onCancelStream();
-                } else if (options.onExit) {
-                    options.onExit();
+                
+                // Only exit or cancel stream on Ctrl+C, not Command+C (meta)
+                if (key.ctrl) {
+                    if (options.isStreaming && options.onCancelStream) {
+                        options.onCancelStream();
+                    } else if (options.onExit) {
+                        options.onExit();
+                    }
                 }
                 return;
             }

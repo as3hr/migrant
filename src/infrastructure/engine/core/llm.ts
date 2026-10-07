@@ -7,7 +7,7 @@ export class LlmService {
     async queryLlm(systemPrompt: string, messages: ModelMessage[], model?: string, onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>): Promise<string | null> {
         try {
             const { text } = await generateText({
-                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
+                model: appContext.providerSdk!(model ?? appContext.selectedModel.modelId!),
                 instructions: [
                     {
                         role: "system",
@@ -30,7 +30,7 @@ export class LlmService {
     async *streamLlm(systemPrompt: string, messages: ModelMessage[], model?: string, onEnd?: GenerateTextOnEndCallback<NoInfer<ToolSet>, NoInfer<Context>>) {
         try {
             const result = streamText({
-                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
+                model: appContext.providerSdk!(model ?? appContext.selectedModel.modelId!),
                 instructions: [
                     {
                         role: "system",
@@ -56,7 +56,7 @@ export class LlmService {
     async generateTitle(question: string, model?: string): Promise<string> {
         try {
             const { output } = await generateText({
-                model: appContext.providerSdk(model ?? appContext.selectedModel.modelId),
+                model: appContext.providerSdk!(model ?? appContext.selectedModel.modelId!),
                 tools: {
 
                 },

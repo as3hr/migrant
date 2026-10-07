@@ -72,6 +72,7 @@ export function useCommandExecutor({
     clear: clearOutputs,
     exit: onExit,
     busy: (label) => startRunning(label),
+    openPopup: (type: ParameterCommandType) => openPopup(type),
   });
 
   const executeInput = async (value: string) => {
@@ -80,6 +81,7 @@ export function useCommandExecutor({
     
     const ctx = createCommandContext();
     appContext.createCommandContext(ctx);
+
 
     try {
       if (parsed) {
@@ -97,6 +99,10 @@ export function useCommandExecutor({
       } else if (value === "clear") {
         ctx.clear();
       } else {
+        if (!appContext.providerSdk) {
+          ctx.openPopup?.("models");
+          return
+        }
         startRunning("Thinking");
         await answerQuestion(value, ctx);
         appendOutput({ type: "blank" });

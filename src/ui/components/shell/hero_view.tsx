@@ -3,10 +3,10 @@ import type { AskOptions } from "../../../domain/index.ts";
 import type { IChatSessionsModel } from "../../../infrastructure/index.ts";
 import { theme } from "../../theme.ts";
 import { HeroLogo } from "../hero/hero_logo.tsx";
+import { Output, type OutputItem } from "../output.tsx";
 import type { ParameterCommandType } from "../popups/index.ts";
 import { CommandParameterPopup } from "../popups/index.ts";
 import { Prompt } from "../prompt.tsx";
-import { Output, type OutputItem } from "../output.tsx";
 
 export interface HeroViewProps {
   dimensions: { width: number; height: number };
@@ -137,7 +137,7 @@ export function HeroView({
       </box>
 
       <box style={{ marginTop: 1, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <text style={{ fg: theme.success }}>{`${user ?? ""} - ${activeModel ?? ""}`}</text>
+        <text style={{ fg: theme.success }}>{`${user ?? ""} ${activeModel ? " - " + activeModel : ""}`}</text>
       </box>
     </box>
   );

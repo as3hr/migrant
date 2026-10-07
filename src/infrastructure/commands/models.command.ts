@@ -18,24 +18,47 @@ export const modelsCommand: CommandDefinition = {
   busyLabel: "Configuring Model...",
   requiresAuth: true,
   execute: async (args, ctx) => {
-    const parts = args.trim().split(/\s+/);
-    const selectedArg = parts[0] || "";
-    const passedApiKey = parts[1] || "";
+    const argsTrimmed = args.trim();
 
-    if (!selectedArg) {
+    if (!argsTrimmed) {
       ctx.log("Usage: /models or select from popup");
       return;
     }
 
-    let [providerIdStr, modelIdStr] = selectedArg.split(":");
-    if (!modelIdStr && providerIdStr) {
-      modelIdStr = providerIdStr;
-      const found = getModelById(modelIdStr);
-      if (found) {
-        for (const [pId, models] of Object.entries(PROVIDER_MODELS)) {
-          if (models.some((m) => m.id === modelIdStr)) {
-            providerIdStr = pId;
-            break;
+    let providerIdStr: string | undefined;
+    let modelIdStr: string | undefined;
+    let passedApiKey: string | undefined;
+    let selectedArg = argsTrimmed;
+
+    try {
+      const parsed = JSON.parse(argsTrimmed);
+      providerIdStr = parsed.providerId;
+      modelIdStr = parsed.modelId;
+      passedApiKey = parsed.apiKey;
+    } catch {
+      const parts = argsTrimmed.split(/\s+/);
+      selectedArg = parts[0] || "";
+      passedApiKey = parts[1] || "";
+
+      const colonIndex = selectedArg.indexOf(":");
+      if (colonIndex !== -1) {
+        providerIdStr = selectedArg.substring(0, colonIndex);
+        modelIdStr = selectedArg.substring(colonIndex + 1);
+      } else {
+        providerIdStr = undefined;
+        modelIdStr = selectedArg;
+      }
+
+      if (!modelIdStr && providerIdStr) {
+        modelIdStr = providerIdStr;
+        providerIdStr = undefined;
+        const found = getModelById(modelIdStr);
+        if (found) {
+          for (const [pId, models] of Object.entries(PROVIDER_MODELS)) {
+            if (models.some((m) => m.id === modelIdStr)) {
+              providerIdStr = pId;
+              break;
+            }
           }
         }
       }

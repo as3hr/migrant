@@ -9,14 +9,14 @@ export class DatabaseConnectionService {
         if (!user?.id) return null;
 
         const url = new URL(dbUrl);
-        const identity = `${url.hostname}:${url.port || "5432"}${url.pathname}`;
+        const identity = `${url.username}@${url.hostname}:${url.port || "5432"}${url.pathname}`;
         const dbId = createHash("sha256").update(identity).digest("hex").slice(0, 32);
 
         const connectionStringKey = `database-${dbId}`;
         const existingDb = appContext.workspace.databases.find((db) => db.id === dbId);
         let payLoad: DatabaseCollection = {
             id: dbId,
-            name: getDbName(dbUrl),
+            name: existingDb ? existingDb.name : getDbName(dbUrl),
             type: "postgres",
             connectionString: dbUrl,
             connectionStringKey: connectionStringKey,

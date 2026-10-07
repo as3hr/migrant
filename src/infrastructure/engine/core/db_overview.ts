@@ -80,13 +80,7 @@ export async function getDatabaseContextForUserQuery(userQuery: string, db: Data
                 ? buildRetrySystemPrompt(lastError, lastAttemptSql)
                 : METADATA_QUERY_SYSTEM_PROMPT;
 
-        if (attempt > 1) {
-            if (appContext.commandCtx?.appendToolCall) {
-                appContext.commandCtx.appendToolCall(`Analyzing another approach, ${attempt}/${MAX_RETRIES}`);
-            } else {
-                appContext.commandCtx?.log(`Analyzing another approach, ${attempt}/${MAX_RETRIES}`);
-            }
-        }
+        if (attempt > 1) appContext.commandCtx?.log(`Analyzing another approach, ${attempt}/${MAX_RETRIES}`);
 
         const result = await executeIntrospectionWorkflow(userQuery, systemPrompt, db.id);
 

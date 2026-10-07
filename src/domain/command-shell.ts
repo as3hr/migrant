@@ -1,4 +1,5 @@
 import type { OutputItem } from "../ui/components/output.tsx";
+import type { ParameterCommandType } from "../ui/components/popups/index.ts";
 
 export interface CommandDefinition {
     name: string;
@@ -32,6 +33,7 @@ export interface CommandDefinition {
     clear(): void;
     exit(): void;
     busy(label: string): void;
+    openPopup?(type: ParameterCommandType): void;
   }
   
   export class CommandRegistry {
