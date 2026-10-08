@@ -35,9 +35,6 @@ jobs:
       - name: Build for macOS (x64)
         run: bun build --compile --target=bun-darwin-x64 ./src/cli.ts --outfile=migrant-cli-macos-x64
 
-      - name: Build for Windows (x64)
-        run: bun build --compile --target=bun-windows-x64 ./src/cli.ts --outfile=migrant-cli-windows-x64.exe
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
