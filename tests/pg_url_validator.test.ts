@@ -14,7 +14,7 @@ describe("parseAndValidatePgUrl", () => {
   });
 
   test("should successfully parse a valid postgres:// URL with sslmode", () => {
-    const url = "postgres://postgres.loviktxrnsyuxozcpcvk:migrant-dev-987!@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require";
+    const url = "postgres://postgres.dsjasndjkansdk:nhdsoenmW1!@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres?sslmode=require";
     const result = parseAndValidatePgUrl(url);
 
     expect(result.isValid).toBe(true);

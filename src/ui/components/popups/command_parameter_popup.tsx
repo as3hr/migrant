@@ -37,15 +37,15 @@ export function CommandParameterPopup({
           ? { width: "100%", height: "100%" }
           : {
               flexDirection: "column",
-              border: true,
-              borderColor: theme.borderFocused,
-              backgroundColor: theme.bgCanvas,
-              paddingLeft: 1,
-              paddingRight: 1,
+              borderStyle: "rounded",
+              borderColor: theme.accent,
+              backgroundColor: theme.bgPopup,
+              paddingLeft: 2,
+              paddingRight: 2,
               paddingTop: 1,
               paddingBottom: 1,
               marginBottom: 1,
-              width: "50%",
+              width: 80,
             }
       }
     >

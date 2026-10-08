@@ -107,7 +107,7 @@ export function ModelsPopup({ onSubmit, onClose }: ModelsPopupProps) {
             paddingRight: 2,
             paddingTop: 1,
             paddingBottom: 1,
-            backgroundColor: theme.bgCanvas,
+            backgroundColor: theme.bgPopup,
           }}
         >
           <ApiKeyPopup
@@ -139,7 +139,7 @@ export function ModelsPopup({ onSubmit, onClose }: ModelsPopupProps) {
           paddingRight: 2,
           paddingTop: 1,
           paddingBottom: 1,
-          backgroundColor: theme.bgCanvas,
+          backgroundColor: theme.bgPopup,
         }}
       >
         <box style={{ marginBottom: 1, flexDirection: "row", justifyContent: "space-between" }}>

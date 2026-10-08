@@ -1,6 +1,7 @@
 export const theme = {
     // Pure Black Canvas Background
     bgCanvas: "#18181b",
+    bgPopup: "#27272a",        // Elevated Surface Background (Zinc 800)
 
     // Brand & Primary Accents (Emerald Green)
     brand: "#10b981",          // Vibrant Emerald Green (Migrant Primary)

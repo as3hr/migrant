@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import { useKeyboard } from "@opentui/react";
 import { useEffect, useState } from "react";
+import { theme } from "../../theme.ts";
 
 export interface SlashCommandItem {
   name: string;
@@ -133,15 +134,16 @@ export function AutocompletePopup({
     <box
       style={{
         flexDirection: "column",
-        border: true,
-        borderColor: "#3d7a5c",
-        paddingLeft: 1,
-        paddingRight: 1,
+        borderStyle: "rounded",
+        borderColor: theme.accent,
+        backgroundColor: theme.bgPopup,
+        paddingLeft: 2,
+        paddingRight: 2,
         marginBottom: 1,
       }}
     >
       <box style={{ marginBottom: 1 }}>
-        <text style={{ fg: "#5a5a5a" }}>
+        <text style={{ fg: theme.textSecondary }}>
           Use ↑/↓ to navigate, Tab to complete
         </text>
       </box>
@@ -151,14 +153,14 @@ export function AutocompletePopup({
         return (
           <box key={cmd.name} style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
             <box style={{ flexDirection: "row" }}>
-              <text style={{ fg: isSelected ? "#3d7a5c" : "#7a7a7a" }}>
+              <text style={{ fg: isSelected ? theme.brandLight : theme.textSecondary }}>
                 {isSelected ? `► /${cmd.name}` : `  /${cmd.name}`}
               </text>
               {cmd.argsHint ? (
-                <text style={{ fg: "#5a5a5a" }}>{` ${cmd.argsHint}`}</text>
+                <text style={{ fg: theme.textDim }}>{` ${cmd.argsHint}`}</text>
               ) : null}
             </box>
-            <text style={{ fg: isSelected ? "#e8e8e8" : "#5a5a5a" }}>{cmd.description}</text>
+            <text style={{ fg: isSelected ? theme.textPrimary : theme.textDim }}>{cmd.description}</text>
           </box>
         );
       })}
