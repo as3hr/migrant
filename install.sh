@@ -22,7 +22,6 @@ elif [ "$OS" = "linux" ]; then
     fi
 else
     echo "Unsupported OS: $OS"
-    echo "Please download the Windows executable manually from the GitHub Releases page."
     exit 1
 fi
 
