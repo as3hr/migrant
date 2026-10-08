@@ -82,10 +82,13 @@ export function useCommandExecutor({
     const ctx = createCommandContext();
     appContext.createCommandContext(ctx);
 
-
     try {
       if (parsed) {
         const command = appContext.commandRegistry.get(parsed.name);
+
+        if (command?.name == 'models' && !parsed.args) {
+          return;
+        }
 
         if (!command) {
           appendOutput({ type: "error", text: `Unknown command: /${parsed.name}` });

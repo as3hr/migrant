@@ -45,7 +45,7 @@ export function CommandParameterPopup({
               paddingTop: 1,
               paddingBottom: 1,
               marginBottom: 1,
-              width: "100%",
+              width: "50%",
             }
       }
     >

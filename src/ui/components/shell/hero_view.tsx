@@ -80,20 +80,13 @@ export function HeroView({
       </box>
 
       <box style={{ width: Math.min(80, dimensions.width - 4) }}>
-        {activePopup ? (
-          <CommandParameterPopup
-            command={activePopup}
-            onSubmit={onParameterSubmit}
-            onClose={onClosePopup}
-            databases={databases}
-            sessions={sessions}
-          />
-        ) : runKind === "form" ? (
+        {runKind === "form" ? (
           <Prompt
             value={input}
             onChange={onChangeInput}
             onSubmit={onSubmitInput}
             onTriggerPopup={onTriggerPopup}
+            isActive={activePopup == null}
             {...(runLabel !== undefined ? { label: runLabel } : {})}
             {...(formInputProps.placeholder !== undefined
               ? { placeholder: formInputProps.placeholder }
@@ -108,6 +101,7 @@ export function HeroView({
             onChange={onChangeInput}
             onSubmit={onSubmitInput}
             onTriggerPopup={onTriggerPopup}
+            isActive={activePopup == null}
             {...(user !== undefined ? { user } : {})}
             {...(databases !== undefined ? { databases } : {})}
           />
@@ -139,6 +133,18 @@ export function HeroView({
       <box style={{ marginTop: 1, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         <text style={{ fg: theme.success }}>{`${user ?? ""} ${activeModel ? " - " + activeModel : ""}`}</text>
       </box>
+
+      {activePopup != null && (
+        <box style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, justifyContent: "center", alignItems: "center" }}>
+          <CommandParameterPopup
+            command={activePopup}
+            onSubmit={onParameterSubmit}
+            onClose={onClosePopup}
+            databases={databases}
+            sessions={sessions}
+          />
+        </box>
+      )}
     </box>
   );
 }

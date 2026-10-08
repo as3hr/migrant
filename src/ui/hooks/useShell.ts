@@ -82,7 +82,7 @@ export function useShell(onExit: () => void): UseShellReturn {
     updateAssistantStream: chatOutputs.updateAssistantStream,
     refreshStatus: workspaceStatus.refreshStatus,
     onCommandSubmitted: (commandName?: string) => {
-      const stayInHeroCommands = ["connect", "disconnect", "rename-db", "rename", "new", "login", "logout"];
+      const stayInHeroCommands = ["connect", "disconnect", "rename-db", "rename", "new", "login", "logout", "models"];
       if ((commandName && stayInHeroCommands.includes(commandName)) || !appContext.providerSdk) {
         return;
       }

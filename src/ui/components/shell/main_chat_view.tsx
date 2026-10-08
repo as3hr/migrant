@@ -106,22 +106,13 @@ export function MainChatView({
         </box>
 
         <box style={{ width: mainWidth, flexShrink: 0, flexDirection: "column" }}>          
-          {activePopup != null ? (
-            <CommandParameterPopup
-              command={activePopup}
-              onSubmit={onParameterSubmit}
-              onClose={onClosePopup}
-              databases={databases}
-              sessions={sessions}
-              session={session}
-              activeModel={activeModel}
-            />
-          ) : runKind === "idle" ? (
+          {runKind === "idle" ? (
             <Prompt
               value={input}
               onChange={onChangeInput}
               onSubmit={onSubmitInput}
               onTriggerPopup={onTriggerPopup}
+              isActive={activePopup == null}
               {...(user !== undefined ? { user } : {})}
               {...(databases !== undefined ? { databases } : {})}
               />
@@ -131,6 +122,7 @@ export function MainChatView({
               onChange={onChangeInput}
               onSubmit={onSubmitInput}
               onTriggerPopup={onTriggerPopup}
+              isActive={activePopup == null}
               {...(runLabel !== undefined ? { label: runLabel } : {})}
               {...(formInputProps.placeholder !== undefined
                 ? { placeholder: formInputProps.placeholder }
@@ -148,6 +140,20 @@ export function MainChatView({
             </box>
           )}
         </box>
+
+        {activePopup != null && (
+          <box style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, justifyContent: "center", alignItems: "center" }}>
+            <CommandParameterPopup
+              command={activePopup}
+              onSubmit={onParameterSubmit}
+              onClose={onClosePopup}
+              databases={databases}
+              sessions={sessions}
+              session={session}
+              activeModel={activeModel}
+            />
+          </box>
+        )}
       </box>
 
       {!isCompact && (

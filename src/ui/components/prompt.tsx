@@ -18,6 +18,7 @@ export interface PromptProps {
 
   placeholder?: string;
   mask?: string;
+  isActive?: boolean;
 }
 
 const PARAM_COMMANDS: ParameterCommandType[] = ["connect", "sessions", "models", "info"];
@@ -40,6 +41,7 @@ export function Prompt(props: PromptProps) {
   }, [app.renderer]);
 
   useKeyboard(async (key) => {
+    if (props.isActive === false) return;
     if (key.ctrl && key.name === "v") {
       try {
         const result = await clipboard.read({ preferredTypes: ["text/plain"] });
@@ -113,7 +115,7 @@ export function Prompt(props: PromptProps) {
           style={{ flexGrow: 1 }}
           textColor={theme.textPrimary}
           value={props.value}
-          focused
+          focused={props.isActive ?? true}
           onInput={props.onChange}
           onSubmit={(val: any) => {
             const finalVal = typeof val === "string" ? val : props.value;
